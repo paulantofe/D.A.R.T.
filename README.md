@@ -1,5 +1,7 @@
 # WiFi_Rover
 
+Current Project Status: *in progress*
+
 The *WiFi Rover* is a **Dual-MCU robotic 2WD vehicle** designed for real-time teleoperation. It bridges the gap between embedded hardware engineering and web technologies, providing a **video-game-like experience** through live first-person view streaming and low-latency WASD keyboard controls directly from a web browser.
 
 ## Project Goal
@@ -8,6 +10,21 @@ Originally conceived as a university project, this repository represents a pursu
 * **Advanced Embedded Architecture**: Implementing a Master-Slave dual-microcontroller system (ESP32-CAM and STM32F407G-DISC1) to decouple high-bandwidth networks from deterministic hardware control.
 * **Mechanical & CAD Design**: Developing a fully custom 3D-printed chassis and body work using Fusion 360.
 * **Software Best Practices**: Writing modular C/C++ firmware and JavaScript web clients, complemented by UML documentation and proper Git version control.
+
+## Key Features
+
+* **Dual-MCU Architecture**: ESP32-CAM (Network & Video) + STM32F407G-DISC1 (Real-time Motor Control) providing minimal latency and fine control over speed.
+* **Defensive Web Client**: JS-level input filtering for conflicting commands (e.g. 'W' + 'S').
+* **Heartbeat Failsafe**: Real-time connection monitoring that forces motors to halt upon signal loss.
+* **Magnetic Quick-Release Bodywork**: Custom 3D-printed shell secured with neodymium magnets for instant hardware access and LED diagnostics
+
+## How to Run
+
+*(in progress)* 
+
+## Hardware Wiring
+
+*(in progress)*
 
 ## Architecture Diagram
 ```mermaid
