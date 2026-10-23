@@ -7,16 +7,17 @@ The *WiFi Rover* is a **Dual-MCU robotic 2WD vehicle** designed for real-time te
 ## Project Goal
 
 Originally conceived as a university project, this repository represents a pursuit of professional engineering standards. The main objective is to **design**, **document** and **implement** a robust, production-grade, prototype by focusing on:
-* **Advanced Embedded Architecture**: Implementing a Master-Slave dual-microcontroller system (ESP32-CAM and STM32F407G-DISC1) to decouple high-bandwidth networks from deterministic hardware control.
-* **Mechanical & CAD Design**: Developing a fully custom 3D-printed chassis and body work using Fusion 360.
-* **Software Best Practices**: Writing modular C/C++ firmware and JavaScript web clients, complemented by UML documentation and proper Git version control.
+* **Advanced Embedded Architecture:** Implementing a Master-Slave dual-microcontroller system (ESP32-CAM and STM32F407G-DISC1) to decouple high-bandwidth networks from deterministic hardware control.
+* **Mechanical & CAD Design:** Developing a fully custom 3D-printed chassis and body work using Fusion 360.
+* **Software Best Practices:** Writing modular C/C++ firmware and JavaScript web clients, complemented by UML documentation and proper Git version control.
 
 ## Key Features
 
-* **Dual-MCU Architecture**: ESP32-CAM (Network & Video) + STM32F407G-DISC1 (Real-time Motor Control) providing minimal latency and fine control over speed.
-* **Defensive Web Client**: JS-level input filtering for conflicting commands (e.g. 'W' + 'S').
-* **Heartbeat Failsafe**: Real-time connection monitoring that forces motors to halt upon signal loss.
-* **Magnetic Quick-Release Bodywork**: Custom 3D-printed shell secured with neodymium magnets for instant hardware access and LED diagnostics
+* **Dual-MCU Architecture:** ESP32-CAM (Network & Video) + STM32F407G-DISC1 (Real-time Motor Control) providing minimal latency and fine control over speed.
+* **Defensive Web Client:** JS-level input filtering for conflicting commands (e.g. 'W' + 'S').
+* **Heartbeat Failsafe:** Real-time connection monitoring that forces motors to halt upon signal loss.
+* **mDNS Discovery:** Plug-and-play network access via `http://rover.local`. eliminating the need for hardcoded IPs or Serial Monitor debugging.
+* **Magnetic Quick-Release Bodywork:** Custom 3D-printed shell secured with neodymium magnets for instant hardware access and LED diagnostics
 
 ## How to Run
 
@@ -60,11 +61,12 @@ sequenceDiagram
         User->>ESP: Provide new SSID and Password
     end
     Router-->>ESP: DHCP Assign IP Address
-    Note right of ESP: ESP32 prints IP <br> to Serial Monitor
+    ESP->>Router: Broadcast mDNS Name ("rover.local")
+    Note right of ESP: No Serial Monitor <br> needed for IP discovery.
 
     Note over User, DRV: Part 2: Loading UI & Video Stream
-    User->>Browser: Access ESP32 IP Address
-    Browser->>ESP: HTTP GET /
+    User->>Browser: Access http://rover.local
+    Browser->>ESP: mDNS Resolve IP & HTTP GET /
     ESP->>FS: Request HTML/CSS/JS
     FS-->>ESP: Return static files
     ESP-->>Browser: HTTP 200 OK (Render UI)
