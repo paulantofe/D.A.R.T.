@@ -57,7 +57,8 @@ sequenceDiagram
     Note over User, DRV: Part 1: Network Initialization
     ESP->>Router: Attempt connection to saved SSID
     alt Connection Failed
-        ESP->>User: Open "WiFiManager" Access Point
+        ESP->>ESP: Start Access Point Mode (Broadcast SSID)
+        User->>ESP: Connect to AP via Phone/PC 
         User->>ESP: Provide new SSID and Password
         ESP->>Router: Connect using new credentials
     end
@@ -77,7 +78,7 @@ sequenceDiagram
         ESP-->>Browser: Send MJPEG Frame
     end
 
-    Note over User, DRV: PART 3: User Input & Command Routing
+    Note over User, DRV: Part 3: User Input & Command Routing
     User->>Browser: Press key(s) (e.g. 'W' or 'W' + 'A')
     alt Conflicting Input (e.g. 'W' + 'S')
         Browser->>Browser: JS detects conflict & ignores (No Action)
@@ -93,6 +94,13 @@ sequenceDiagram
     STM->>STM: Parse 'Q' & set Forward-Left state
     STM->>DRV: Generate PWM & IN1/IN2 Logic
     DRV-->>User: Rover executes forward-left movement
+
+    loop Heartbeat & Failsafe
+        ESP->>STM: UART TX: Heartbeat Signal ('H')
+        alt Heartbeat Timeout (>500ms)
+            STM->>STM: Trigger Failsafe (PWM 0 Orange LED ON)
+            STM->>DRV: Halt Motors
+            DRV-->>User: Rover safely stops
 ```
 
 ## State Machine Diagram
