@@ -91,10 +91,10 @@ stateDiagram-v2
     Idle --> Moving : Valid Command Received (e.g. 'W')
     Moving --> Idle : Stop Command Received (e.g. Key Release)
 
-    Moving --> Failsafe : UART Timeout or WiFi Lost
-    Idle --> Failsafe : WiFi Lost
+    Moving --> Failsafe : Heartbeat Timeout (>500ms)
+    Idle --> Failsafe : Heartbeat Timeout (>500ms)
 
-    Failsafe --> Idle : Connection Restored (WiFi or UART)
+    Failsafe --> Idle : Heartbeat Restored (WiFi & UART OK)
     System_Fault --> [*] : Hardware Reboot (Power Cycle)
 
     note left of System_Fault
@@ -108,6 +108,7 @@ stateDiagram-v2
         FAILSAFE MODE:
         1. All motors STOP (PWM 0)
         2. Turn ON Failsafe LED (STM32 Orange LED)
-        Recovers to Idle when signal returns.
+        Recovers to Idle ONLY when Heartbeat 
+        confirms both WiFi and UART are active.
     end note
 ```
