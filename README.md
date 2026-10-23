@@ -59,6 +59,7 @@ sequenceDiagram
     alt Connection Failed
         ESP->>User: Open "WiFiManager" Access Point
         User->>ESP: Provide new SSID and Password
+        ESP->>Router: Connect using new credentials
     end
     Router-->>ESP: DHCP Assign IP Address
     ESP->>Router: Broadcast mDNS Name ("rover.local")
