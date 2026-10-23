@@ -101,6 +101,7 @@ sequenceDiagram
             STM->>STM: Trigger Failsafe (PWM 0 Orange LED ON)
             STM->>DRV: Halt Motors
             DRV-->>User: Rover safely stops
+        end
     end
 ```
 
