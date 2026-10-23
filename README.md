@@ -52,20 +52,25 @@ sequenceDiagram
     FS-->>ESP: Return static files
     ESP-->>Browser: HTTP 200 OK (Render UI)
     Browser->>ESP: HTTP GET /stream 
+    ESP-->>Browser: HTTP 200 OK (multipart/x-mixed-replace)
     loop Continuous Live Feed
         ESP-->>Browser: Send MJPEG Frame
     end
 
-    Note over User, DRV: PART 3: User Input & Command Routing (Example: Forward)
-    User->>Browser: Press 'W' Key
-    Browser->>ESP: HTTP POST /control (payload: 'W')
-    ESP-->>Browser: HTTP 200 OK
-    Note right of ESP: Other commands follow <br> the exact same flow
-    ESP->>STM: UART TX: Send Char 'W' 
+    Note over User, DRV: PART 3: User Input & Command Routing
+    User->>Browser: Press key(s) (e.g. 'W' or 'W' + 'A')
+    alt Conflicting Input (e.g. 'W' + 'S')
+        Browser->>Browser: JS detects conflict & ignores (No Action)
+    else Valid Input (e.g. 'W' + 'A')
+        Browser->>Browser: JS maps combination to a single char (e.g. 'W' or 'Q')
+        Browser->>ESP: HTTP POST /control (payload: 'Q')
+        ESP-->>Browser: HTTP 200 OK
+        Note right of ESP: Other single or combined commands <br> follow this exact same flow
+        ESP->>STM: UART TX: Send Char 'Q' 
+    end
 
     Note over User, DRV: Part 4: Logic Processing and Hardware Actuation
-    STM->>STM: Parse 'W' & set Forward state
+    STM->>STM: Parse 'Q' & set Forward-Left state
     STM->>DRV: Generate PWM & IN1/IN2 Logic
-    DRV-->>User: Rover executes forward movement
-
+    DRV-->>User: Rover executes forward-left movement
 ```
