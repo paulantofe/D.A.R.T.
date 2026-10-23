@@ -74,3 +74,40 @@ sequenceDiagram
     STM->>DRV: Generate PWM & IN1/IN2 Logic
     DRV-->>User: Rover executes forward-left movement
 ```
+
+## State Machine Diagram
+```mermaid
+stateDiagram-v2
+    [*] --> Initialization : Power On (Flip ON/OFF Switch)
+    
+    state Initialization {
+        direction LR
+        ESP_Boot(WiFi/FS) --> STM_Boot(UART/PWM)
+    }
+
+    Initialization --> Idle : Systems Ready & Connected
+    Initialization --> System_Fault : Init Failed (e.g. FS files not found)
+
+    Idle --> Moving : Valid Command Received (e.g. 'W')
+    Moving --> Idle : Stop Command Received (e.g. Key Release)
+
+    Moving --> Failsafe : UART Timeout or WiFi Lost
+    Idle --> Failsafe : WiFi Lost
+
+    Failsafe --> Idle : Connection Restored (WiFi or UART)
+    System_Fault --> [*] : Hardware Reboot (Power Cycle)
+
+    note left of System_Fault
+        CRITICAL ERROR:
+        1. Send error to Serial 
+        2. Blink STM32 Red LED rapidly
+        Requires manual Power Cycle.
+    end note
+
+    note right of Failsafe
+        FAILSAFE MODE:
+        1. All motors STOP (PWM 0)
+        2. Turn ON Failsafe LED (STM32 Orange LED)
+        Recovers to Idle when signal returns.
+    end note
+```
