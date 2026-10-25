@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>D.A.R.T Rover Dashboard</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>D.A.R.T. Rover Dashboard</h1>
+
+      <!-- Video Stream -->
+      <div class="video-container">
+        <img id="stream" alt="Live Stream" />
+      </div>
+
+      <!-- Control Panel -->
+      <div class="control-container">
+        <button id="btn-forward" class="ctrl-btn">W</button>
+        <div class="middle-row">
+          <button id="btn-left" class="ctrl-btn">A</button>
+          <button id="btn-backward" class="ctrl-btn">S</button>
+          <button id="btn-right" class="ctrl-btn">D</button>
+        </div>
+      </div>
+
+      <!-- Status Panel -->
+      <div class="status-container">
+        <!-- WiFi Status -->
+        <div class="status-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+          <span id="wifi-status">Disconnected</span>
+        </div>
+        
+        <!-- Battery Status -->
+        <div class="status-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect>
+            <line x1="22" y1="11" x2="22" y2="13"></line>
+          </svg>
+          <span id="battery-status">--V</span>
+        </div>
+
+        <!-- Command Status -->
+        <div class="status-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 16 16 12 12 8"></polyline>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span id="cmd-status">STOP</span>
+        </div>
+      </div>
+
+      <footer>
+        <p>&copy; D.A.R.T. Rover. Open-source project created by Antofe Paul</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
