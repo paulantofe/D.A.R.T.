@@ -95,10 +95,17 @@ sequenceDiagram
     STM->>DRV: Generate PWM & IN1/IN2 Logic
     DRV-->>User: Rover executes forward-left movement
 
-    loop Heartbeat & Failsafe
+    loop Heartbeat, Telemetry & Failsafe (Every 300ms)
+        Browser->>ESP: HTTP GET /status (Browser Heartbeat)
+        ESP-->>Browser: HTTP 200 JSON (Battery & WiFi info)
         ESP->>STM: UART TX: Heartbeat Signal ('H')
-        alt Heartbeat Timeout (>500ms)
-            STM->>STM: Trigger Failsafe (PWM 0 Orange LED ON)
+        
+        alt Browser Disconnected (>500ms without HTTP GET)
+            ESP->>STM: UART TX: Send Stop/Failsafe ('0')
+            STM->>STM: Trigger Network Failsafe (PWM 0)
+            STM->>DRV: Halt Motors
+        else ESP-STM UART Broken (>500ms without 'H')
+            STM->>STM: Trigger Hardware Failsafe (PWM 0, Orange LED ON)
             STM->>DRV: Halt Motors
             DRV-->>User: Rover safely stops
         end
