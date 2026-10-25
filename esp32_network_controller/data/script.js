@@ -15,6 +15,7 @@ const buttonMap = {
 
 let currentY = null;
 let currentX = null;
+let lastSentCmd = '';
 function updateCommand() {
   let cmd = '0';
   let label = 'STOP';
@@ -33,7 +34,26 @@ function updateCommand() {
   else if (left) { cmd = 'A'; label = 'Left'; }
   else if (right) { cmd = 'D'; label = 'Right'; }
 
-  cmdStatus.innerText = label;
+  if (cmd !== lastSentCmd) {
+    lastSentCmd = cmd;
+
+    cmdStatus.innerText = label;
+
+    fetch('/cmd', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `val=${cmd}`
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Not responding");
+        console.log(`Sent command: ${cmd}`);
+    })
+    .catch(error => {
+        console.log('Communication Error:', error);
+    });
+  }
 }
 
 function setKey(key, state) {
