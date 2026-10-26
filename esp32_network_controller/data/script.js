@@ -1,3 +1,4 @@
+/* ------------------ Stream Connection ------------------ */
 
 const streamImg = document.getElementById("stream");
 let isStreamRunning = false;
@@ -43,6 +44,11 @@ const keys = {
   s: false,
   d: false,
 };
+
+/* ------------------------------------------------------- */
+
+
+/* ------------------ User Input Parsing and Send Command ------------------ */
 
 const cmdStatus = document.getElementById("cmd-status");
 const buttonMap = {
@@ -151,3 +157,5 @@ document.addEventListener("keyup", (e) => {
     setKey(key, false);
   });
 });
+
+/* ------------------------------------------------------------------------- */
