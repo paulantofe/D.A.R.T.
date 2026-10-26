@@ -1,3 +1,42 @@
+
+const streamImg = document.getElementById("stream");
+let isStreamRunning = false;
+
+function tryConnectVideo() {
+  if (isStreamRunning) return;
+
+  const tempImg = new Image();
+
+  tempImg.onload = () => {
+    isStreamRunning = true;
+    streamImg.src = tempImg.src;
+    streamImg.alt = 'Live Stream';
+  };
+
+  tempImg.onerror = () => {
+    console.log('Waiting video signal...');
+    streamImg.alt = 'Video Offline';
+
+    setTimeout(() => {
+      tryConnectVideo();
+    }, 2000);
+  };
+
+  tempImg.src = "/stream?" + new Date().getTime();
+}
+
+streamImg.onerror = () => {
+  if (!isStreamRunning) return;
+  
+  isStreamRunning = false;
+  streamImg.removeAttribute('src');
+  tryConnectVideo();
+};
+
+window.onload = () => {
+  tryConnectVideo();
+};
+
 const keys = {
   w: false,
   a: false,
