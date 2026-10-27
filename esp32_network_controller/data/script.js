@@ -1,38 +1,35 @@
 /* ------------------ Stream Connection ------------------ */
-// This section ensures that the stream connection is secured.
-// The image loads in browser RAM and displays only when connected.
-// If there is no connection, browser tries to connect every two seconds.
+// This section manages the MJPEG video stream connection
+// The stream element stays transparent until the first valid frame arrives.
+// If the connection drops or fails, it retries every two seconds.
 
 const streamImg = document.getElementById('stream');
 let isStreamRunning = false;
+let streamRetryTimer = null;
 
 function tryConnectVideo() {
   if (isStreamRunning) { return; }
 
-  const tempImg = new Image();
-
-  tempImg.onload = () => {
-    isStreamRunning = true;
-    streamImg.src = tempImg.src;
-  };
-
-  tempImg.onerror = () => {
-    console.log('Waiting video signal...');
-
-    setTimeout(() => {
-      tryConnectVideo();
-    }, 2000);
-  };
-
-  tempImg.src = '/stream?' + new Date().getTime();
+  clearTimeout(streamRetryTimer);
+  streamImg.src = '/stream?' + Date.now();
 }
 
+streamImg.onload = () => {
+  isStreamRunning = true;
+  streamImg.classList.add('active');
+};
+
 streamImg.onerror = () => {
-  if (!isStreamRunning) { return; }
-  
   isStreamRunning = false;
-  streamImg.removeAttribute('src');
-  tryConnectVideo();
+  streamImg.classList.remove('active');
+  if (streamImg.hasAttribute('src')) {
+    streamImg.removeAttribute('src');
+  }
+
+  console.log('Waiting Video Signal...');
+  clearTimeout(streamRetryTimer);
+  
+  streamRetryTimer = setTimeout(tryConnectVideo, 2000);
 };
 
 window.onload = () => {
