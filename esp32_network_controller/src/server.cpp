@@ -6,6 +6,8 @@
 
 AsyncWebServer server(80);
 
+extern String rover_battery;
+
 esp_err_t Server_Init(void) {
     // Initialize LittleFS
     if (!LittleFS.begin(true)) {
@@ -65,6 +67,17 @@ esp_err_t Server_Init(void) {
         } else {
             request->send(400, "text/plain", "Missing Value");
         }
+    });
+
+    // Initialize /status Web Route
+    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+        int rssi = WiFi.RSSI();
+        String json = "{";
+        json += "\"battery\":\"" + rover_battery + "\",";
+        json += "\"rssi\":" + String(rssi);
+        json += "}";
+
+        request->send(200, "application/json", json);
     });
 
     return ESP_OK;
