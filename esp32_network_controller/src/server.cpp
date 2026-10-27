@@ -1,4 +1,5 @@
 #include "server.h"
+#include "esp_camera.h"
 #include <LittleFS.h>
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
@@ -149,10 +150,13 @@ esp_err_t Server_Init(void) {
 
     // Initialize /stream Web Route
     server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request) {
-        AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse;
+        AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse();
 
         request->send(response);
     });
+
+    server.begin();
+    Serial.println("[SERVER] Async Web Server Started on port 80.");
 
     return ESP_OK;
 }
