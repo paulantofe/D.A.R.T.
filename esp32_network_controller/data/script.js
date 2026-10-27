@@ -106,6 +106,7 @@ function updateCommand() {
     })
     .catch(error => {
         console.log('Communication Error:', error);
+        lastSentCmd = '';
     });
   }
 }
@@ -114,10 +115,10 @@ function setKey(key, state) {
   keys[key] = state;
 
   if (state) {
-    if ((key === 'w' || key === 's') && !currentY) currentY = key;
-    if ((key === 'a' || key === 'd') && !currentX) currentX = key;
+    if ((key === 'w' || key === 's') && !currentY) { currentY = key; }
+    if ((key === 'a' || key === 'd') && !currentX) { currentX = key; }
 
-    buttonMap[key].classList.add("pressed");
+    buttonMap[key].classList.add('pressed');
   } else {
     if (key === currentY) {
       currentY = keys.w ? 'w' : (keys.s ? 's' : null);
@@ -156,14 +157,11 @@ document.addEventListener('keyup', (e) => {
     setKey(key, true);
   });
 
-  btn.addEventListener('pointerup', (e) => {
-    e.preventDefault();
-    setKey(key, false);
-  });
-
-  btn.addEventListener('pointerleave', (e) => {
-    e.preventDefault();
-    setKey(key, false);
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((eventType) => {
+    btn.addEventListener(eventType, (e) => {
+      e.preventDefault();
+      if (keys[key]) { setKey(key, false); }
+    });
   });
 });
 
@@ -182,7 +180,10 @@ const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
 
 function updateStatus() {
-  fetch('/status')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort, 1500);
+  
+  fetch('/status', {signal: controller.signal})
   .then(response => {
     if (!response.ok) { throw new Error('Status Offline'); }
     return response.json();
@@ -204,11 +205,14 @@ function updateStatus() {
 
     cmdStatus.innerText = 'N/A'; 
     lastSentCmd = '';
+  })
+  .finally(() => {
+    clearTimeout(timeoutId);
+    setTimeout(updateStatus, 2000);
   });
 }
 
 updateStatus();
-setInterval(updateStatus, 2000);
 
 /* ------------------------------------------------------------------------ */
 
