@@ -1,8 +1,9 @@
-# WiFi_Rover
+# D.A.R.T. Rover
+**Dual Architecture Rover Technology**
 
 Current Project Status: *in progress*
 
-The *WiFi Rover* is a **Dual-MCU robotic 2WD vehicle** designed for real-time teleoperation. It bridges the gap between embedded hardware engineering and web technologies, providing a **video-game-like experience** through live first-person view streaming and low-latency WASD keyboard controls directly from a web browser.
+The *D.A.R.T. Rover* is a **Dual-MCU robotic 2WD vehicle** designed for real-time teleoperation. It bridges the gap between embedded hardware engineering and web technologies, providing a **video-game-like experience** through live first-person view streaming and low-latency WASD keyboard controls directly from a web browser.
 
 ## Project Goal
 
