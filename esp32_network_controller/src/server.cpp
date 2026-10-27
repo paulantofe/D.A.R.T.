@@ -8,6 +8,73 @@ AsyncWebServer server(80);
 
 extern String rover_battery;
 
+class AsyncJpegStreamResponse : public AsyncAbstractResponse {
+private:
+    camera_fb_t *fb;
+    size_t index;
+
+public:
+    AsyncJpegStreamResponse() {
+        _code = 200;
+        _contentType = "multipart/x-mixed-replace; boundary=frame";
+        _sendContentLength = false;
+        fb = NULL;
+        index = 0;
+    }
+
+    ~AsyncJpegStreamResponse() {
+        if (fb) esp_camera_fb_return(fb);
+    }
+
+    bool _sourceValid() const { return true; }
+
+    size_t _fillBuffer(uint8_t *buf, size_t maxLen) override {
+        size_t bytes_sent = 0;
+        
+        if (!fb) {
+            fb = esp_camera_fb_get();
+            if (!fb) {
+                Serial.println("[CAMERA] Frame capture failed.");
+                return 0; 
+            }
+            index = 0;
+            
+            char header[128];
+            size_t hlen = snprintf(header, sizeof(header), 
+                "\r\n--frame\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n", 
+                fb->len);
+                
+            if (maxLen > hlen) {
+                memcpy(buf, header, hlen);
+                buf += hlen;
+                maxLen -= hlen;
+                bytes_sent += hlen;
+            } else {
+                esp_camera_fb_return(fb);
+                fb = NULL;
+                return 0; 
+            }
+        }
+
+        size_t to_copy = fb->len - index;
+        if (to_copy > maxLen) {
+            to_copy = maxLen; 
+        }
+
+        memcpy(buf, fb->buf + index, to_copy);
+        index += to_copy;
+        bytes_sent += to_copy;
+
+        if (index == fb->len) {
+            esp_camera_fb_return(fb);
+            fb = NULL;
+        }
+        
+        return bytes_sent;
+    }
+       
+};
+
 esp_err_t Server_Init(void) {
     // Initialize LittleFS
     if (!LittleFS.begin(true)) {
@@ -78,6 +145,13 @@ esp_err_t Server_Init(void) {
         json += "}";
 
         request->send(200, "application/json", json);
+    });
+
+    // Initialize /stream Web Route
+    server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request) {
+        AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse;
+
+        request->send(response);
     });
 
     return ESP_OK;
