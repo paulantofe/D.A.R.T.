@@ -172,6 +172,10 @@ document.addEventListener('keyup', (e) => {
   });
 });
 
+window.addEventListener('blur', () => {
+  ['w', 'a', 's', 'd'].forEach(k => { if (keys[k]) setKey(k, false); });
+});
+
 /* ------------------------------------------------------------------------- */
 
 
