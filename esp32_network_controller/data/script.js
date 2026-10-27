@@ -50,6 +50,8 @@ const keys = {
 
 /* ------------------ User Input Parsing and Send Command ------------------ */
 
+let isConnected = false;
+
 const cmdStatus = document.getElementById("cmd-status");
 const buttonMap = {
   w: document.getElementById("btn-forward"),
@@ -62,6 +64,8 @@ let currentY = null;
 let currentX = null;
 let lastSentCmd = '';
 function updateCommand() {
+  if (!isConnected) { return; }
+  
   let cmd = '0';
   let label = 'STOP';
 
@@ -175,16 +179,22 @@ function updateStatus() {
     return response.json();
   })
   .then(data => {
+    isConnected = true;
     batStatus.innerText = data.battery;
     wifiStatus.innerText = data.rssi;
   })
   .catch(error => {
+    isConnected = false;
     console.log('Telemetry Error: ', error);
     batStatus.innerText = 'N/A';
     wifiStatus.innerText = 'Disconnected';
+
+    cmdStatus.innerText = 'N/A'; 
+    lastSentCmd = '';
   });
 }
 
+updateStatus();
 setInterval(updateStatus, 2000);
 
 /* ------------------------------------------------------------------------ */
