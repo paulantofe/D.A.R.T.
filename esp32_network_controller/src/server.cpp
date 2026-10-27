@@ -2,6 +2,9 @@
 #include <LittleFS.h>
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
+#include <ESPAsyncWebServer.h>
+
+AsyncWebServer server(80);
 
 esp_err_t Server_Init(void) {
     // Initialize LittleFS
@@ -35,6 +38,19 @@ esp_err_t Server_Init(void) {
     } else {
         Serial.println("[SERVER] mDNS active. Access http://dart.local");
     }
+
+    // Initialize Static UI Web Routes
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/index.html", "text/html");
+    });
+
+    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/style.css", "text/css");
+    });
+
+    server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, "/script.js", "application/javascript");
+    });
 
     return ESP_OK;
 }
