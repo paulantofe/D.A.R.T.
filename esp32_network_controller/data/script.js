@@ -159,3 +159,33 @@ document.addEventListener("keyup", (e) => {
 });
 
 /* ------------------------------------------------------------------------- */
+
+
+/* ------------------ Status Panel and Failsafe Hearbeat ------------------ */
+// This section requests JSON from esp32 to get battery and WiFi info, then updates the UI Status Panel accordingly.
+// This very request is also the heartbeat singal to test esp32-browser connection.
+
+const batStatus = document.getElementById('battery-status');
+const wifiStatus = document.getElementById('wifi-status');
+
+function updateStatus() {
+  fetch('/status')
+  .then(response => {
+    if (!response.ok) { throw new Error('Status Offline'); }
+    return response.json();
+  })
+  .then(data => {
+    batStatus.innerText = data.battery;
+    wifiStatus.innerText = data.rssi;
+  })
+  .catch(error => {
+    console.log('Telemetry Error: ', error);
+    batStatus.innerText = 'N/A';
+    wifiStatus.innerText = 'Disconnected';
+  });
+}
+
+setInterval(updateStatus, 2000);
+
+/* ------------------------------------------------------------------------ */
+
