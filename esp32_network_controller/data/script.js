@@ -189,9 +189,13 @@ function updateStatus() {
     return response.json();
   })
   .then(data => {
+    const wasOffline = !isConnected;
+
     isConnected = true;
     batStatus.innerText = data.battery;
     wifiStatus.innerText = data.rssi;
+
+    if (wasOffline) { updateCommand(); }
   })
   .catch(error => {
     isConnected = false;
