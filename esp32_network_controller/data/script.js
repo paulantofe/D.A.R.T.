@@ -14,12 +14,10 @@ function tryConnectVideo() {
   tempImg.onload = () => {
     isStreamRunning = true;
     streamImg.src = tempImg.src;
-    streamImg.alt = 'Live Stream';
   };
 
   tempImg.onerror = () => {
     console.log('Waiting video signal...');
-    streamImg.alt = 'Video Offline';
 
     setTimeout(() => {
       tryConnectVideo();
