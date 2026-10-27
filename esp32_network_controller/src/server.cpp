@@ -52,5 +52,20 @@ esp_err_t Server_Init(void) {
         request->send(LittleFS, "/script.js", "application/javascript");
     });
 
+    // Initialize /control Web Route
+    server.on("/control", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("val", true)) {
+            String command = request->getParam("val", true)->value();
+
+            if (command.length() > 0) {
+                Serial1.print(command[0]);
+            }
+
+            request->send(200, "text/plain", "OK");
+        } else {
+            request->send(400, "text/plain", "Missing Value");
+        }
+    });
+
     return ESP_OK;
 }
