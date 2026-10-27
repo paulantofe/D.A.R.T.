@@ -1,4 +1,7 @@
 /* ------------------ Stream Connection ------------------ */
+// This section ensures that the stream connection is secured.
+// The image loads in browser RAM and displays only when connected.
+// If there is no connection, browser tries to connect every two seconds.
 
 const streamImg = document.getElementById("stream");
 let isStreamRunning = false;
@@ -38,6 +41,20 @@ window.onload = () => {
   tryConnectVideo();
 };
 
+/* ------------------------------------------------------- */
+
+
+/* ------------------ User Input Parsing and Send Command ------------------ */
+// This section sanitizes user key input, maps it to one command and sends it to esp32 via POST method.
+// Conflicting Key Logic: - First Key Wins (e.g. 'W' first then 'S' -> 'W').
+//                        - Second Command Memory (e.g. 'W' hold first then 'S' hold -> 'W', followed by 'W' release -> 'S').
+// If there is no connection, there is no attempt to send command.
+
+// This variable is updated by "Status Panel and Failsafe Heartbeat" Section.
+let isConnected = false;
+
+const cmdStatus = document.getElementById("cmd-status");
+
 const keys = {
   w: false,
   a: false,
@@ -45,14 +62,6 @@ const keys = {
   d: false,
 };
 
-/* ------------------------------------------------------- */
-
-
-/* ------------------ User Input Parsing and Send Command ------------------ */
-
-let isConnected = false;
-
-const cmdStatus = document.getElementById("cmd-status");
 const buttonMap = {
   w: document.getElementById("btn-forward"),
   a: document.getElementById("btn-left"),
@@ -165,9 +174,9 @@ document.addEventListener("keyup", (e) => {
 /* ------------------------------------------------------------------------- */
 
 
-/* ------------------ Status Panel and Failsafe Hearbeat ------------------ */
-// This section requests JSON from esp32 to get battery and WiFi info, then updates the UI Status Panel accordingly.
-// This very request is also the heartbeat singal to test esp32-browser connection.
+/* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
+// This section requests JSON from esp32 every two seconds to get battery and WiFi info, then updates the UI Status Panel accordingly.
+// This very request is also the heartbeat signal to test esp32-browser connection.
 
 const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
