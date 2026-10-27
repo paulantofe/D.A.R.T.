@@ -3,11 +3,11 @@
 // The image loads in browser RAM and displays only when connected.
 // If there is no connection, browser tries to connect every two seconds.
 
-const streamImg = document.getElementById("stream");
+const streamImg = document.getElementById('stream');
 let isStreamRunning = false;
 
 function tryConnectVideo() {
-  if (isStreamRunning) return;
+  if (isStreamRunning) { return; }
 
   const tempImg = new Image();
 
@@ -26,11 +26,11 @@ function tryConnectVideo() {
     }, 2000);
   };
 
-  tempImg.src = "/stream?" + new Date().getTime();
+  tempImg.src = '/stream?' + new Date().getTime();
 }
 
 streamImg.onerror = () => {
-  if (!isStreamRunning) return;
+  if (!isStreamRunning) { return; }
   
   isStreamRunning = false;
   streamImg.removeAttribute('src');
@@ -53,7 +53,7 @@ window.onload = () => {
 // This variable is updated by "Status Panel and Failsafe Heartbeat" Section.
 let isConnected = false;
 
-const cmdStatus = document.getElementById("cmd-status");
+const cmdStatus = document.getElementById('cmd-status');
 
 const keys = {
   w: false,
@@ -63,15 +63,16 @@ const keys = {
 };
 
 const buttonMap = {
-  w: document.getElementById("btn-forward"),
-  a: document.getElementById("btn-left"),
-  s: document.getElementById("btn-backward"),
-  d: document.getElementById("btn-right"),
+  w: document.getElementById('btn-forward'),
+  a: document.getElementById('btn-left'),
+  s: document.getElementById('btn-backward'),
+  d: document.getElementById('btn-right'),
 };
 
 let currentY = null;
 let currentX = null;
 let lastSentCmd = '';
+
 function updateCommand() {
   if (!isConnected) { return; }
   
@@ -97,7 +98,7 @@ function updateCommand() {
 
     cmdStatus.innerText = label;
 
-    fetch('/cmd', {
+    fetch('/command', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -105,7 +106,7 @@ function updateCommand() {
         body: `val=${cmd}`
     })
     .then(response => {
-        if (!response.ok) throw new Error("Not responding");
+        if (!response.ok) { throw new Error('Not responding'); }
         console.log(`Sent command: ${cmd}`);
     })
     .catch(error => {
@@ -130,13 +131,13 @@ function setKey(key, state) {
       currentX = keys.a ? 'a' : (keys.d ? 'd' : null);
     }
 
-    buttonMap[key].classList.remove("pressed");
+    buttonMap[key].classList.remove('pressed');
   }
 
   updateCommand();
 }
 
-document.addEventListener("keydown", (e) => {
+document.addEventListener('keydown', (e) => {
   const key = e.key.toLowerCase();
 
   if (keys.hasOwnProperty(key) && !keys[key]) {
@@ -144,28 +145,28 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.addEventListener("keyup", (e) => {
-    const key = e.key.toLowerCase();
+document.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
 
-    if (keys.hasOwnProperty(key)) {
-      setKey(key, false);
-    }
+  if (keys.hasOwnProperty(key)) {
+    setKey(key, false);
+  }
 });
 
-["w", "a", "s", "d"].forEach((key) => {
+['w', 'a', 's', 'd'].forEach((key) => {
   const btn = buttonMap[key];
 
-  btn.addEventListener("pointerdown", (e) => {
+  btn.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     setKey(key, true);
   });
 
-  btn.addEventListener("pointerup", (e) => {
+  btn.addEventListener('pointerup', (e) => {
     e.preventDefault();
     setKey(key, false);
   });
 
-  btn.addEventListener("pointerleave", (e) => {
+  btn.addEventListener('pointerleave', (e) => {
     e.preventDefault();
     setKey(key, false);
   });
