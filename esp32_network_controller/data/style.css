@@ -41,6 +41,10 @@ h1 {
   font-weight: bold;
 }
 
+.video-container:has(#stream.active)::before {
+  display: none;
+}
+
 #stream {
   width: 100%;
   max-width: 640px;
