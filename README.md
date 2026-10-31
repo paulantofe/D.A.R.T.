@@ -17,6 +17,7 @@ Originally conceived as a university project, this repository represents a pursu
 * **Dual-MCU Architecture:** ESP32-CAM (Network & Video) + STM32F407G-DISC1 (Real-time Motor Control) providing minimal latency and fine control over speed.
 * **Defensive Web Client:** JS-level input filtering for conflicting commands (e.g. 'W' + 'S').
 * **Heartbeat Failsafe:** Real-time connection monitoring that forces motors to halt upon signal loss.
+* **Security**: Only one driver at the time is permitted and it's automatically disconnected after 2 seconds of no status request (no GET /status performed by browser)
 * **mDNS Discovery:** Plug-and-play network access via `http://rover.local`. eliminating the need for hardcoded IPs or Serial Monitor debugging.
 * **Magnetic Quick-Release Bodywork:** Custom 3D-printed shell secured with neodymium magnets for instant hardware access and LED diagnostics
 
