@@ -173,11 +173,12 @@ window.addEventListener('blur', () => {
 
 
 /* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
-// This section requests JSON from esp32 every two seconds to get battery and WiFi info, then updates the UI Status Panel accordingly.
+// This section requests JSON from esp32 every two seconds to get battery, WiFi and mode info, then updates the UI Status Panel accordingly.
 // This very request is also the heartbeat signal to test esp32-browser connection.
 
 const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
+const modeStatus = document.getElementById('mode-status');
 
 function updateStatus() {
   const controller = new AbortController();
@@ -194,6 +195,7 @@ function updateStatus() {
     isConnected = true;
     batStatus.innerText = data.battery;
     wifiStatus.innerText = data.rssi;
+    modeStatus.innerText = data.mode;
 
     if (wasOffline) { updateCommand(); }
   })
@@ -202,6 +204,7 @@ function updateStatus() {
     console.log('Telemetry Error: ', error);
     batStatus.innerText = 'N/A';
     wifiStatus.innerText = 'Disconnected';
+    modeStatus.innerText = 'N/A';
 
     cmdStatus.innerText = 'N/A'; 
     lastSentCmd = '0';
