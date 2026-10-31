@@ -162,15 +162,21 @@ esp_err_t Server_Init(void) {
     // Initialize /status Web Route
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         IPAddress request_ip = request->client()->remoteIP();
+        String mode;
 
         if (has_active_client && active_client_ip == request_ip) {
             last_command_time = millis();
+            mode = "Driver";
         }
-
+        else {
+            mode = "Spectator";
+        }
+        
         int rssi = WiFi.RSSI();
         String json = "{";
         json += "\"battery\":\"" + rover_battery + "\",";
-        json += "\"rssi\":" + String(rssi);
+        json += "\"rssi\":" + String(rssi) + ",";
+        json += "\"mode\":\"" + mode + "\"";
         json += "}";
 
         request->send(200, "application/json", json);
