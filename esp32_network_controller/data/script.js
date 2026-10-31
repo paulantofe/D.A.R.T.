@@ -66,7 +66,7 @@ const buttonMap = {
 
 let currentY = null;
 let currentX = null;
-let lastSentCmd = '';
+let lastSentCmd = '0';
 
 function updateCommand() {
   if (!isConnected) { return; }
@@ -204,7 +204,7 @@ function updateStatus() {
     wifiStatus.innerText = 'Disconnected';
 
     cmdStatus.innerText = 'N/A'; 
-    lastSentCmd = '';
+    lastSentCmd = '0';
   })
   .finally(() => {
     clearTimeout(timeoutId);
