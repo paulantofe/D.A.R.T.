@@ -1,5 +1,6 @@
 #include "server.h"
 #include "esp_camera.h"
+#include <WiFi.h>
 #include <LittleFS.h>
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
@@ -8,6 +9,10 @@
 AsyncWebServer server(80);
 
 extern String rover_battery;
+
+unsigned long last_command_time = 0;
+bool has_active_client = false;
+IPAddress active_client_ip;
 
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
 private:
@@ -124,6 +129,21 @@ esp_err_t Server_Init(void) {
 
     // Initialize /control Web Route
     server.on("/control", HTTP_POST, [](AsyncWebServerRequest *request) {
+        IPAddress request_ip = request->client()->remoteIP();
+
+        if (has_active_client && request_ip != active_client_ip) {
+            Serial.println("[SECURITY] Forbidden Acces. Rover is controlled by someone else");
+            request->send(403, "text/plain", "Forbidden - Rover is busy");
+            return;
+        }
+
+        if (!has_active_client) {
+            has_active_client = true;
+            active_client_ip = request_ip;
+            Serial.print("[SERVER] New driver Connected: ");
+            Serial.println(active_client_ip);
+        }
+        
         if (request->hasParam("val", true)) {
             String command = request->getParam("val", true)->value();
 
