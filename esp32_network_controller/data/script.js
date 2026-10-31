@@ -91,8 +91,6 @@ function updateCommand() {
   if (cmd !== lastSentCmd) {
     lastSentCmd = cmd;
 
-    cmdStatus.innerText = label;
-
     fetch('/control', {
         method: 'POST',
         headers: {
@@ -102,11 +100,13 @@ function updateCommand() {
     })
     .then(response => {
         if (!response.ok) { throw new Error('Not responding'); }
+        cmdStatus.innerText = label;
         console.log(`Sent command: ${cmd}`);
     })
     .catch(error => {
         console.log('Communication Error:', error);
-        lastSentCmd = '';
+        lastSentCmd = '0';
+        cmdStatus.innerText = 'N/A';
     });
   }
 }
@@ -182,7 +182,7 @@ const modeStatus = document.getElementById('mode-status');
 
 function updateStatus() {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort, 1500);
+  const timeoutId = setTimeout(() => controller.abort(), 1500);
   
   fetch('/status', {signal: controller.signal})
   .then(response => {
@@ -197,6 +197,19 @@ function updateStatus() {
     wifiStatus.innerText = data.rssi;
     modeStatus.innerText = data.mode;
 
+    if (data.mode === 'Driver') {
+      if (cmdStatus.innerText === 'N/A') { 
+        cmdStatus.innerText = 'STOP'; 
+      }
+
+      modeStatus.classList.remove('spectator');
+      modeStatus.classList.add('driver');
+    }
+    else {
+      cmdStatus.innerText = 'N/A';
+      modeStatus.classList.remove('driver');
+      modeStatus.classList.add('spectator');
+    }
     if (wasOffline) { updateCommand(); }
   })
   .catch(error => {
@@ -205,6 +218,8 @@ function updateStatus() {
     batStatus.innerText = 'N/A';
     wifiStatus.innerText = 'Disconnected';
     modeStatus.innerText = 'N/A';
+
+    modeStatus.classList.remove('driver', 'spectator');
 
     cmdStatus.innerText = 'N/A'; 
     lastSentCmd = '0';
