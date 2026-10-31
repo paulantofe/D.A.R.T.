@@ -10,8 +10,8 @@ AsyncWebServer server(80);
 
 extern String rover_battery;
 
-unsigned long last_command_time = 0;
-bool has_active_client = false;
+volatile unsigned long last_command_time = 0;
+volatile bool has_active_client = false;
 IPAddress active_client_ip;
 
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
@@ -136,6 +136,8 @@ esp_err_t Server_Init(void) {
             request->send(403, "text/plain", "Forbidden - Rover is busy");
             return;
         }
+
+        last_command_time = millis();
 
         if (!has_active_client) {
             has_active_client = true;

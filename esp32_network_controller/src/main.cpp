@@ -4,8 +4,8 @@
 
 String rover_battery = "N/A";
 
-extern unsigned long last_command_time;
-extern bool has_active_client;
+extern volatile unsigned long last_command_time;
+extern volatile bool has_active_client;
 
 void setup() {
     Serial.begin(115200);
