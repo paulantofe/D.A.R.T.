@@ -133,7 +133,14 @@ h1 {
   color: #ffffff;
 }
 
+#mode-status.driver {
+  color: #00ffcc;
+  font-weight: bold;
+}
 
+#mode-status.spectator {
+  color: #a0a0a0;
+}
 
 footer {
   margin-top: 50px;
