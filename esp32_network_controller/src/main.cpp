@@ -37,7 +37,7 @@ void loop() {
             // Let other browser become driver and stop rover
             has_active_client = false;
             Serial.println("[SERVER] Driver disconnected (Timeout elapsed)");
-            Serial1.print('0');
+            Serial1.print('F');
         }
     }   
 
