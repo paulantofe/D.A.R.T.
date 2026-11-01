@@ -147,30 +147,30 @@ stateDiagram-v2
     }
 
     Initialization --> Idle : Systems Ready & Connected
-    Initialization --> System_Fault : Init Failed (Camera/Server Error)
+    Initialization --> System_Fault : Init Failed <br> (Camera/Server Error)
 
-    Idle --> Moving : Valid Command Received (e.g. 'W')
-    Moving --> Idle : Stop Command Received (e.g. Key Release)
+    Idle --> Moving : Valid Command Received <br> (e.g. 'W')
+    Moving --> Idle : Stop Command Received <br> (e.g. Key Release)
 
-    Moving --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
-    Idle --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
+    Moving --> Failsafe : Heartbeat Timeout <br>  (>500ms UART >2500ms WiFi)
+    Idle --> Failsafe : Heartbeat Timeout <br>  (>500ms UART >2500ms WiFi)
 
     Failsafe --> Idle : Heartbeat Restored <br> (WiFi & UART OK)
     System_Fault --> [*] : Hardware Reboot (Power Cycle)
 
     note left of System_Fault
         CRITICAL ERROR:
-        1. Send 'X' to STM32
-        2. Freeze ESP32 Execution
-        3. Turn ON STM32 Red LED
-        Requires manual Power Cycle.
+        1. Send 'X'  <br> to STM32
+        2. Freeze ESP32  <br> Execution
+        3. Turn ON STM32 <br>  Red LED
+        Requires manual  <br> Power Cycle.
     end note
 
     note right of Failsafe
         FAILSAFE MODE:
-        1. All motors STOP (PWM 0)
-        2. Turn ON Failsafe LED (STM32 Orange LED)
-        Recovers to Idle ONLY when Heartbeat 
-        confirms both WiFi and UART are active.
+        1. All motors <br> STOP (PWM 0)
+        2. Turn ON  <br> Failsafe LED  <br> (STM32 Orange LED)
+        Recovers to Idle  <br> ONLY when Heartbeat 
+        confirms both  <br> WiFi and UART are active.
     end note
 ```
