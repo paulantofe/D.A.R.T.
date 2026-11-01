@@ -1,3 +1,10 @@
+/**
+ * @file     server.cpp
+ * @brief    Source file for server support.
+ * 
+ * @details  This file provides Server_Init API implementation.
+ */
+
 #include "server.h"
 #include "esp_camera.h"
 #include <WiFi.h>
@@ -8,12 +15,16 @@
 
 AsyncWebServer server(80);
 
+// Information provided by stm32, fetched in main.cpp.
+// N/A until the first package is sent
 extern String rover_battery;
 
+// Variables for auto-disconnect on inactivity and one-driver-only logic
 volatile uint32_t last_command_time = 0;
 volatile bool has_active_client = false;
 IPAddress active_client_ip;
 
+// Response class for camera live stream GET request
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
 private:
     camera_fb_t *fb;
@@ -81,6 +92,7 @@ public:
        
 };
 
+// Initialization API implementation
 esp_err_t Server_Init(void) {
     // Initialize LittleFS
     if (!LittleFS.begin(true)) {
