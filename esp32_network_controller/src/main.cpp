@@ -10,16 +10,28 @@
 #include "server.h"
 #include "camera.h"
 
+/* -------------- Hardware Defines -------------- */
+
+#define UART_TX_PIN    14
+#define UART_RX_PIN    15
+
+/* ---------------------------------------------- */
+
+
 /* -------------- Global Variables Initialization -------------- */
 
 String rover_battery = "N/A";
 volatile uint32_t last_command_time = 0;
 volatile bool has_active_client = false;
 
+static uint32_t last_uart_heartbeat = 0;
+
 /* ------------------------------------------------------------- */
 
 void setup() {
     Serial.begin(115200);
+
+    Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
 
     if (Camera_Init() != ESP_OK) {
         Serial.println("Camera Init Failed");
@@ -31,8 +43,10 @@ void setup() {
 }
 
 void loop() {
-    // Check for inactivity or WiFi lost
-    if (millis() - last_command_time > 2500) {
+    uint32_t current_time = millis();
+    
+    // Network Failsafe: no /status GET request
+    if (current_time - last_command_time > 2500) {
         if (has_active_client) {
             // Let other browser become driver and trigger Failsafe
             has_active_client = false;
@@ -40,6 +54,12 @@ void loop() {
             Serial1.print('F');
         }
     }   
+
+    // Hardware Failsafe: send Heartbeat signal 'H' to stm32
+    if (current_time - last_uart_heartbeat > 200) {
+        last_uart_heartbeat = current_time;
+        Serial1.print('H');
+    }
 
     delay(50);
 }
