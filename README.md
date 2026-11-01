@@ -143,7 +143,7 @@ stateDiagram-v2
     
     state Initialization {
         direction LR
-        ESP_Boot <br> (WiFi/Server) --> STM_Boot <br> (UART/PWM)
+        ESP_Boot --> STM_Boot
     }
 
     Initialization --> Idle : Systems Ready & Connected
