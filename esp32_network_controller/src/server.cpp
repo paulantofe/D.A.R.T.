@@ -7,6 +7,7 @@
 
 #include "server.h"
 #include "esp_camera.h"
+#include "globals.h"
 #include <WiFi.h>
 #include <LittleFS.h>
 #include <WiFiManager.h>
@@ -15,13 +16,6 @@
 
 AsyncWebServer server(80);
 
-// Information provided by stm32, fetched in main.cpp.
-// N/A until the first package is sent
-extern String rover_battery;
-
-// Variables for auto-disconnect on inactivity and one-driver-only logic
-volatile uint32_t last_command_time = 0;
-volatile bool has_active_client = false;
 IPAddress active_client_ip;
 
 // Response class for camera live stream GET request
