@@ -64,6 +64,15 @@ sequenceDiagram
     participant STM as STM32F407G-DISC1
     participant DRV as Motor Driver L298N
 
+    Note over User, DRV: Part 0: System Boot & Hardware Check
+    ESP->>ESP: Run ESP_Boot() (Init Camera & Server)
+    alt Initialization Failed
+        ESP->>STM: UART TX: Send System Fault ('X')
+        STM->>STM: Trigger System_Fault (Red LED ON, PWM 0)
+        STM->>DRV: Halt Motors
+        ESP->>ESP: Freeze Execution (Error_Handler)
+    end
+
     Note over User, DRV: Part 1: Network Initialization
     ESP->>Router: Attempt connection to saved SSID
     alt Connection Failed
