@@ -65,6 +65,47 @@ void ESP_Boot(void) {
 /* --------------------------------------- */
 
 
+/* -------------- Tasks -------------- */
+
+/**
+ * @brief  Monitor WiFi client status and triggers 'F' Failsafe on timeout
+ */
+void Task_Network_Failsafe(uint32_t current_time) {
+    if (current_time - last_command_time > 2500) {
+        if (has_active_client) {
+            // Let other browser become driver and trigger Failsafe
+            has_active_client = false;
+            Serial.println("[SERVER] Driver disconnected (Timeout elapsed)");
+            Serial1.print('F');
+        }
+    }   
+}
+
+/**
+ * @brief  Send 'H' Heartbeat to stm32 every 200ms to maintain UART link
+ */
+void Task_Hardware_Failsafe(uint32_t current_time) {
+    if (current_time - last_uart_heartbeat > 200) {
+        last_uart_heartbeat = current_time;
+        Serial1.print('H');
+    }
+}
+
+/**
+ * @brief  Asynchronously read incoming UART messages from stm32
+ */
+void Task_Proccess_UART_RX(void) {
+    if (Serial1.available()) {
+        String msg = Serial1.readStringUntil('\n');
+        msg.trim();
+
+        if (msg.startsWith("B")) { rover_battery = msg.substring(1); }
+    }
+}
+
+/* ----------------------------------- */
+
+
 void setup() {
     Serial.begin(115200);
 
@@ -76,30 +117,10 @@ void setup() {
 
 void loop() {
     uint32_t current_time = millis();
-    
-    // Network Failsafe: no /status GET request
-    if (current_time - last_command_time > 2500) {
-        if (has_active_client) {
-            // Let other browser become driver and trigger Failsafe
-            has_active_client = false;
-            Serial.println("[SERVER] Driver disconnected (Timeout elapsed)");
-            Serial1.print('F');
-        }
-    }   
 
-    // Hardware Failsafe: send Heartbeat signal 'H' to stm32
-    if (current_time - last_uart_heartbeat > 200) {
-        last_uart_heartbeat = current_time;
-        Serial1.print('H');
-    }
-
-    // Read Battery from stm32
-    if (Serial1.available()) {
-        String msg = Serial1.readStringUntil('\n');
-        msg.trim();
-
-        if (msg.startsWith("B")) { rover_battery = msg.substring(1); }
-    }
+    Task_Network_Failsafe(current_time);
+    Task_Hardware_Failsafe(current_time);
+    Task_Proccess_UART_RX();
 
     delay(50);
 }
