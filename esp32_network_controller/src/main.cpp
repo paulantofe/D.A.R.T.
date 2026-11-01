@@ -28,18 +28,40 @@ static uint32_t last_uart_heartbeat = 0;
 
 /* ------------------------------------------------------------- */
 
+
+/* -------------- Functions -------------- */
+
+void Error_Handler(void) {
+    while (true) { delay(100); }
+}
+
+void ESP_Boot(void) {
+    if (Camera_Init() != ESP_OK) {
+        Serial.println("[CAMERA] Initialization failed. Triggering System_Fault.");
+        Serial1.print('X');
+        Serial1.flush();
+        Error_Handler();
+    }
+
+    if (Server_Init() != ESP_OK) {
+        Serial.println("[SERVER] Initialization failed. Triggering System_Fault.");
+        Serial1.print('X');
+        Serial1.flush();
+        Error_Handler();
+    }
+
+    Serial.println("[SYSTEM] System booted successfully. Ready to use.");
+}
+
+/* --------------------------------------- */
+
+
 void setup() {
     Serial.begin(115200);
 
     Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
 
-    if (Camera_Init() != ESP_OK) {
-        Serial.println("Camera Init Failed");
-    }
-
-    if (Server_Init() != ESP_OK) {
-        Serial.println("Server Init failed");
-    }
+    ESP_Boot();
 }
 
 void loop() {
