@@ -94,7 +94,7 @@ void Task_Hardware_Failsafe(uint32_t current_time) {
 /**
  * @brief  Asynchronously read incoming UART messages from stm32
  */
-void Task_Proccess_UART_RX(void) {
+void Task_Process_UART_RX(void) {
     if (Serial1.available()) {
         String msg = Serial1.readStringUntil('\n');
         msg.trim();
@@ -120,7 +120,7 @@ void loop() {
 
     Task_Network_Failsafe(current_time);
     Task_Hardware_Failsafe(current_time);
-    Task_Proccess_UART_RX();
+    Task_Process_UART_RX();
 
     delay(50);
 }
