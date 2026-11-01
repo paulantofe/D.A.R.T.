@@ -73,7 +73,7 @@ sequenceDiagram
         ESP->>Router: Connect using new credentials
     end
     Router-->>ESP: DHCP Assign IP Address
-    ESP->>Router: Broadcast mDNS Name ("rover.local")
+    ESP->>Router: Broadcast mDNS Name ("dart.local")
     Note right of ESP: No Serial Monitor <br> needed for IP discovery.
 
     Note over User, DRV: Part 2: Loading UI & Video Stream
