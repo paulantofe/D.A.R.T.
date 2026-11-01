@@ -31,10 +31,10 @@ void setup() {
 }
 
 void loop() {
-    // Check driver browser inactivity
+    // Check for inactivity or WiFi lost
     if (millis() - last_command_time > 2500) {
         if (has_active_client) {
-            // Let other browser become driver and stop rover
+            // Let other browser become driver and trigger Failsafe
             has_active_client = false;
             Serial.println("[SERVER] Driver disconnected (Timeout elapsed)");
             Serial1.print('F');
