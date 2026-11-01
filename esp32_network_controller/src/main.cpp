@@ -3,6 +3,8 @@
  * @brief    Main project source file.
  * 
  * @details  This file initializes server and camera module. If any of these two fails, it triggers System_Fault state.
+ *           It also manages the Network Failsafe (Triggers Failsafe state on browser timeout or connection lost) and
+ *           hardware Failsafe (sends 'H' signal every 200ms to test uart connection)
  */
 
 #include <Arduino.h>
@@ -31,10 +33,17 @@ static uint32_t last_uart_heartbeat = 0;
 
 /* -------------- Functions -------------- */
 
+/**
+ * @brief Handle errors by freezing the board
+ */
 void Error_Handler(void) {
     while (true) { delay(100); }
 }
 
+/**
+ * @brief    Boot the ESP32-CAM Board
+ * @details  Initialize Camera and Server module and trigger System_Fault state upon fail
+ */
 void ESP_Boot(void) {
     if (Camera_Init() != ESP_OK) {
         Serial.println("[CAMERA] Initialization failed. Triggering System_Fault.");
