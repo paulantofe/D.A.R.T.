@@ -139,11 +139,11 @@ sequenceDiagram
 ## State Machine Diagram
 ```mermaid
 stateDiagram-v2
-    [*] --> Initialization : Power On (Flip ON/OFF Switch)
+    [*] --> Initialization : Power On <br> (Flip ON/OFF Switch)
     
     state Initialization {
         direction LR
-        ESP_Boot(WiFi/FS) --> STM_Boot(UART/PWM)
+        ESP_Boot <br> (WiFi/Server) --> STM_Boot <br> (UART/PWM)
     }
 
     Initialization --> Idle : Systems Ready & Connected
@@ -152,11 +152,11 @@ stateDiagram-v2
     Idle --> Moving : Valid Command Received <br> (e.g. 'W')
     Moving --> Idle : Stop Command Received <br> (e.g. Key Release)
 
-    Moving --> Failsafe : Heartbeat Timeout <br>  (>500ms UART >2500ms WiFi)
-    Idle --> Failsafe : Heartbeat Timeout <br>  (>500ms UART >2500ms WiFi)
+    Moving --> Failsafe : Heartbeat Timeout <br>  (>500ms UART <br>  >2500ms WiFi)
+    Idle --> Failsafe : Heartbeat Timeout <br>  (>500ms UART <br>  >2500ms WiFi)
 
     Failsafe --> Idle : Heartbeat Restored <br> (WiFi & UART OK)
-    System_Fault --> [*] : Hardware Reboot (Power Cycle)
+    System_Fault --> [*] : Hardware Reboot <br> (Power Cycle)
 
     note left of System_Fault
         CRITICAL ERROR:
@@ -169,8 +169,8 @@ stateDiagram-v2
     note right of Failsafe
         FAILSAFE MODE:
         1. All motors <br> STOP (PWM 0)
-        2. Turn ON  <br> Failsafe LED  <br> (STM32 Orange LED)
-        Recovers to Idle  <br> ONLY when Heartbeat 
-        confirms both  <br> WiFi and UART are active.
+        2. Turn ON  <br> Failsafe LED  <br> (STM32 Orange <br>  LED)
+        Recovers to Idle  <br> ONLY when <br>  Heartbeat 
+        confirms both  <br> WiFi and UART <br>  are active.
     end note
 ```
