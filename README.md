@@ -33,15 +33,23 @@ Originally conceived as a university project, this repository represents a pursu
 ```mermaid
 flowchart LR
     BAT[7.4V Li-ion 18650]-->|7.4V|BUCK[5V Regulator LM2596]
-    BUCK-->|5V|ESP[ESP32-CAM]
-    BUCK-->|5V|STM[STM32F407G-DISC1]
+    BUCK-->|5V|ESP[ESP32-CAM <br> Web Server]
+    BUCK-->|5V|STM[STM32F407G-DISC1 <br> PID Motor Controller]
     BAT-->|7.4V|DRV[Motor Driver L298N]
 
-    DRV===>|High Current|M1((DC Motor 1))
-    DRV===>|High Current|M2((DC Motor 2))
+    DRV==>|High Current|M1((DC Motor 1))
+    DRV==>|High Current|M2((DC Motor 2))
 
-    ESP-.->|UART Communication|STM
-    STM-.->|PWM|DRV
+    ESP-.->|UART: Target Speed|STM
+    STM-.->|PWM & Dir|DRV
+
+    M1-.->|Mechanical Rotation|E1[Encoder 1]
+    E1-.->|Pulses Ch A/B <br> PID Feedback|STM
+    M2-.->|Mechanical Rotation|E2[Encoder 2]
+    E2-.->|Pulses Ch A/B <br> PID Feedback|STM
+
+    STM-->|3.3V|E1
+    STM-->|3.3V|E2
 ```
 
 ## Sequence Diagram
