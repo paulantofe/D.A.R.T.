@@ -69,6 +69,7 @@ void setup() {
     Serial.begin(115200);
 
     Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
+    Serial1.setTimeout(10);
 
     ESP_Boot();
 }
@@ -90,6 +91,14 @@ void loop() {
     if (current_time - last_uart_heartbeat > 200) {
         last_uart_heartbeat = current_time;
         Serial1.print('H');
+    }
+
+    // Read Battery from stm32
+    if (Serial1.available()) {
+        String msg = Serial1.readStringUntil('\n');
+        msg.trim();
+
+        if (msg.startsWith("B")) { rover_battery = msg.substring(1); }
     }
 
     delay(50);
