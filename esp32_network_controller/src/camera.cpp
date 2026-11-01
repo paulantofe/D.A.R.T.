@@ -67,11 +67,13 @@ esp_err_t Camera_Init(void) {
     if (psramFound()) {
         config.frame_size   = FRAMESIZE_VGA; 
         config.jpeg_quality = 12;            
-        config.fb_count     = 2;             
+        config.fb_count     = 2;
+        Serial.println("[CAMERA] PSRAM found. Using it for better quality");             
     } else {
         config.frame_size   = FRAMESIZE_CIF; 
         config.jpeg_quality = 12;
         config.fb_count     = 1;
+        Serial.println("[CAMERA] PSRAM not found. Lower quality");
     }
 
     esp_err_t err = esp_camera_init(&config);
@@ -82,7 +84,7 @@ esp_err_t Camera_Init(void) {
 
     sensor_t * s = esp_camera_sensor_get();
 
-    // s->set_vflip(s, 1);   // Vertical Flip
+    s->set_vflip(s, 1);   // Vertical Flip
     // s->set_hmirror(s, 1); // Orizontal Flip
 
     Serial.println("[CAMERA] OV3660 Initialized Successfully.");
