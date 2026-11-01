@@ -147,21 +147,22 @@ stateDiagram-v2
     }
 
     Initialization --> Idle : Systems Ready & Connected
-    Initialization --> System_Fault : Init Failed (e.g. FS files not found)
+    Initialization --> System_Fault : Init Failed (Camera/Server Error)
 
     Idle --> Moving : Valid Command Received (e.g. 'W')
     Moving --> Idle : Stop Command Received (e.g. Key Release)
 
-    Moving --> Failsafe : Heartbeat Timeout (>500ms)
-    Idle --> Failsafe : Heartbeat Timeout (>500ms)
+    Moving --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
+    Idle --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
 
     Failsafe --> Idle : Heartbeat Restored (WiFi & UART OK)
     System_Fault --> [*] : Hardware Reboot (Power Cycle)
 
     note left of System_Fault
         CRITICAL ERROR:
-        1. Send error to Serial 
-        2. Blink STM32 Red LED rapidly
+        1. Send 'X' to STM32
+        2. Freeze ESP32 Execution
+        3. Turn ON STM32 Red LED
         Requires manual Power Cycle.
     end note
 
