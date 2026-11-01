@@ -155,7 +155,7 @@ stateDiagram-v2
     Moving --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
     Idle --> Failsafe : Heartbeat Timeout (>500ms UART <br> >2500ms WiFi)
 
-    Failsafe --> Idle : Heartbeat Restored (WiFi & UART OK)
+    Failsafe --> Idle : Heartbeat Restored <br> (WiFi & UART OK)
     System_Fault --> [*] : Hardware Reboot (Power Cycle)
 
     note left of System_Fault
