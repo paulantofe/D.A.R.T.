@@ -64,7 +64,7 @@ sequenceDiagram
     participant STM as STM32F407G-DISC1
     participant DRV as Motor Driver L298N
 
-    Note over ESP, DRV: Part 0: System Boot & Hardware Check
+    Note over User, DRV: Part 0: System Boot & Hardware Check
     ESP->>ESP: Run ESP_Boot() (Init Camera & Server)
     alt Initialization Failed
         ESP->>STM: UART TX: Send System Fault ('X')
