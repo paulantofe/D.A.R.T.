@@ -10,7 +10,7 @@ AsyncWebServer server(80);
 
 extern String rover_battery;
 
-volatile unsigned long last_command_time = 0;
+volatile uint32_t last_command_time = 0;
 volatile bool has_active_client = false;
 IPAddress active_client_ip;
 
@@ -172,7 +172,7 @@ esp_err_t Server_Init(void) {
             mode = "Spectator";
         }
         
-        int rssi = WiFi.RSSI();
+        int8_t rssi = WiFi.RSSI();
         String json = "{";
         json += "\"battery\":\"" + rover_battery + "\",";
         json += "\"rssi\":" + String(rssi) + ",";

@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <Arduino.h>
+#include <stdint.h>
 #include "esp_camera.h" 
 
 /**

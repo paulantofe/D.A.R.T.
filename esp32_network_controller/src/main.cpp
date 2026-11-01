@@ -1,11 +1,11 @@
 #include <Arduino.h>
+#include "globals.h"
 #include "server.h"
 #include "camera.h"
 
 String rover_battery = "N/A";
-
-extern volatile unsigned long last_command_time;
-extern volatile bool has_active_client;
+volatile uint32_t last_command_time = 0;
+volatile bool has_active_client = false;
 
 void setup() {
     Serial.begin(115200);
