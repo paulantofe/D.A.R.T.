@@ -7,6 +7,11 @@ extern "C" {
 
 #include "stm32f4xx_hal.h"
 
+/**
+ * @brief  Handle errors by freezing the board and disabling interrupts
+ */
+void Error_Handler(void);
+
 #ifdef __cplusplus
 }
 #endif
