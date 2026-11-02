@@ -22,6 +22,11 @@ void Error_Handler(void);
  */
 void SystemClock_Config(void);
 
+/**
+ * @brief Configure the USART1 Peripheral
+ */
+void UART_Config(void);
+
 #ifdef __cplusplus
 }
 #endif
