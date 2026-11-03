@@ -138,5 +138,24 @@ void TIM2_Config(void) {
 }
 
 void TIM5_Config(void) {
+	TIM_Encoder_InitTypeDef sConfig = { 0 };
 
+	htim5.Instance = TIM5;
+	htim5.Init.Prescaler = 0;
+	htim5.Init.Period = 0xFFFFFFFF;
+	htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+
+	sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+    sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+	sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+	sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+	sConfig.IC1Filter = 10;
+	sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+	sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+	sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+	sConfig.IC2Filter = 10;
+
+	if (HAL_TIM_Encoder_Init(&htim5, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
 }
