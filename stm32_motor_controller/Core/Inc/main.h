@@ -8,7 +8,11 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 
 /**
- * @brief Handle errors by freezing the board and disabling interrupts.
+ * @brief   System Fault State.
+ *
+ * @details Freeze the system, disable all interrupts and blink the Red LED.
+ *
+ * @note    Software blocking delay is used because SysTick/HAL_Delay might be broken.
  */
 void Error_Handler(void);
 
