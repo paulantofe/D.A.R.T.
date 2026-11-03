@@ -4,6 +4,8 @@ UART_HandleTypeDef huart1;
 
 TIM_HandleTypeDef htim6;
 
+TIM_HandleTypeDef htim3;
+
 int main(void) {
 	HAL_Init();
 
@@ -73,6 +75,29 @@ void TIM6_Config(void) {
 	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
 	if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void TIM3_Config(void) {
+	TIM_OC_InitTypeDef tim3PWM_Config = { 0 };
+
+	htim3.Instance = TIM3;
+	htim3.Init.Prescaler = 0;
+	htim3.Init.Period = 4200 - 1;
+	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+	if (HAL_TIM_PWM_Init(&htim3) != HAL_OK) {
+		Error_Handler();
+	}
+
+	tim3PWM_Config.OCMode = TIM_OCMODE_PWM1;
+	tim3PWM_Config.OCPolarity = TIM_OCPOLARITY_HIGH;
+	tim3PWM_Config.Pulse = 0;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &tim3PWM_Config, TIM_CHANNEL_1) != HAL_OK) {
+		Error_Handler();
+	}
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &tim3PWM_Config, TIM_CHANNEL_2) != HAL_OK) {
 		Error_Handler();
 	}
 }

@@ -31,3 +31,19 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
 		HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 4, 0);
 	}
 }
+
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM3) {
+		__HAL_RCC_TIM3_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+
+		GPIO_InitTypeDef tim3_ch = { 0 };
+		tim3_ch.Mode = GPIO_MODE_AF_PP;
+		tim3_ch.Alternate = GPIO_AF2_TIM3;
+		tim3_ch.Pull = GPIO_NOPULL;
+		tim3_ch.Speed = GPIO_SPEED_FAST;
+		tim3_ch.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+
+		HAL_GPIO_Init(GPIOA, &tim3_ch);
+	}
+}

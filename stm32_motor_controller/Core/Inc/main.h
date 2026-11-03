@@ -30,11 +30,19 @@ void SystemClock_Config(void);
 void UART_Config(void);
 
 /**
- * @brief   Configure the TIM6 Peripheral
+ * @brief   Configure the TIM6 Peripheral.
  *
  * @details Generate a 10ms (100Hz) time-base interrupt for the PID control loop.
  */
 void TIM6_Config(void);
+
+/**
+ * @brief   Configure the TIM3 Peripheral.
+ *
+ * @details Generate a 20kHz PWM signal (4200 steps resolution) on
+ *          Channel 1 (Left Motor) and Channel 2 (Right Motor).
+ */
+void TIM3_Config(void);
 
 #ifdef __cplusplus
 }
