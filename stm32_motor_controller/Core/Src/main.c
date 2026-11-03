@@ -52,6 +52,19 @@ void SystemClock_Config(void) {
 	}
 }
 
+void LED_Config(void) {
+	GPIO_InitTypeDef led = { 0 };
+
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+
+	led.Mode = GPIO_MODE_OUTPUT_PP;
+	led.Pull = GPIO_NOPULL;
+	led.Speed = GPIO_SPEED_MEDIUM;
+	led.Pin = GPIO_PIN_13 | GPIO_PIN_14;
+
+	HAL_GPIO_Init(GPIOD, &led);
+}
+
 void UART_Config(void) {
 	huart1.Instance = USART1;
 	huart1.Init.BaudRate = 115200;

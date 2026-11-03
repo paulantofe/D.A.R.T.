@@ -23,9 +23,19 @@ void Error_Handler(void);
 void SystemClock_Config(void);
 
 /**
+ * @brief   Configure the on-board Status LEDs.
+ *
+ * @details Red LED indicates System_Fault state
+ *          Orange LED indicates Fail_Safe State
+ *          Instance: GPIOD | PD13 (Orange) | PD14 (Red)
+ */
+void LED_Config(void);
+
+/**
  * @brief   Configure the USART1 Peripheral.
  *
  * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master).
+ *          Instance: USART1 | TX: PA9 | RX: PA10 | Baud: 115200.
  */
 void UART_Config(void);
 
@@ -33,6 +43,7 @@ void UART_Config(void);
  * @brief   Configure the TIM6 Peripheral.
  *
  * @details Generate a 10ms (100Hz) time-base interrupt for the PID control loop.
+ *          Instance: TIM6.
  */
 void TIM6_Config(void);
 
@@ -41,6 +52,7 @@ void TIM6_Config(void);
  *
  * @details Generate a 20kHz PWM signal (4200 steps resolution) on
  *          Channel 1 (Left Motor) and Channel 2 (Right Motor).
+ *          Instance: TIM3 | CH1: PA6 | CH2: PA7
  */
 void TIM3_Config(void);
 
@@ -48,4 +60,4 @@ void TIM3_Config(void);
 }
 #endif
 
-#endif /* __MAIN_H */
+#endif
