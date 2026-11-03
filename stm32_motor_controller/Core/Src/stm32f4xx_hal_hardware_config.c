@@ -8,6 +8,15 @@ void STM_Boot() {
 	// for later...
 }
 
+void Error_Handler(void) {
+	__disable_irq();
+
+	while (1) {
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		for (volatile uint32_t i = 0; i < 2000000; i++) { __NOP(); }
+	}
+}
+
 void SystemClock_Config(void) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
