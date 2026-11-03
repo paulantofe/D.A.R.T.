@@ -1,11 +1,18 @@
-#ifndef __MAIN_H
-#define __MAIN_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
+#define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
+
+extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim3;
+
+/**
+ * @brief   Boot the STM32F407G-DISC1 Board.
+ *
+ * @details Initialize the necessary peripherals and trigger System_Fault state upon fail.
+ */
+void STM_Boot(void);
 
 /**
  * @brief   System Fault State.
@@ -59,9 +66,5 @@ void TIM6_Config(void);
  *          Instance: TIM3 | CH1: PA6 | CH2: PA7
  */
 void TIM3_Config(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
