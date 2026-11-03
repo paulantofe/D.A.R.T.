@@ -4,7 +4,7 @@ UART_HandleTypeDef huart1;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim3;
 
-void STM_Boot() {
+void STM_Boot(void) {
 	// for later...
 }
 
