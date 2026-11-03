@@ -22,3 +22,12 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
 		HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
 	}
 }
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM6) {
+		__HAL_RCC_TIM6_CLK_ENABLE();
+
+		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+		HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 4, 0);
+	}
+}

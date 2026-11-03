@@ -8,7 +8,7 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 
 /**
- * @brief Handle errors by freezing the board and disabling interrupts
+ * @brief Handle errors by freezing the board and disabling interrupts.
  */
 void Error_Handler(void);
 
@@ -23,11 +23,18 @@ void Error_Handler(void);
 void SystemClock_Config(void);
 
 /**
- * @brief   Configure the USART1 Peripheral
+ * @brief   Configure the USART1 Peripheral.
  *
- * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master)
+ * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master).
  */
 void UART_Config(void);
+
+/**
+ * @brief   Configure the TIM6 Peripheral
+ *
+ * @details Generate a 10ms (100Hz) time-base interrupt for the PID control loop.
+ */
+void TIM6_Config(void);
 
 #ifdef __cplusplus
 }

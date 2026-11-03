@@ -2,6 +2,8 @@
 
 UART_HandleTypeDef huart1;
 
+TIM_HandleTypeDef htim6;
+
 int main(void) {
 	HAL_Init();
 
@@ -59,6 +61,18 @@ void UART_Config(void) {
 	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
 
 	if (HAL_UART_Init(&huart1) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void TIM6_Config(void) {
+	htim6.Instance = TIM6;
+	htim6.Init.Prescaler = 8400 - 1;
+	htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim6.Init.Period = 100 - 1;
+	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+
+	if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
 		Error_Handler();
 	}
 }
