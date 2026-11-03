@@ -23,7 +23,9 @@ void Error_Handler(void);
 void SystemClock_Config(void);
 
 /**
- * @brief Configure the USART1 Peripheral
+ * @brief   Configure the USART1 Peripheral
+ *
+ * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master)
  */
 void UART_Config(void);
 
