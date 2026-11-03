@@ -6,6 +6,8 @@
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim5;
 
 /**
  * @brief   Boot the STM32F407G-DISC1 Board.
@@ -58,5 +60,19 @@ void TIM6_Config(void);
  *          Instance: TIM3 | CH1: PA6 | CH2: PA7
  */
 void TIM3_Config(void);
+
+/**
+ * @brief   Configure the TIM2 Peripheral.
+ * @details Set up TIM2 (32-bit) in Hardware Encoder Mode (X4 resolution)
+ *          to track position and speed for the Left Motor.
+ */
+void TIM2_Config(void);
+
+/**
+ * @brief   Configure the TIM5 Peripheral.
+ * @details Set up TIM5 (32-bit) in Hardware Encoder Mode (X4 resolution)
+ *          to track position and speed for the Right Motor.
+ */
+void TIM5_Config(void);
 
 #endif

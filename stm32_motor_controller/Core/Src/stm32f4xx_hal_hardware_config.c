@@ -3,6 +3,8 @@
 UART_HandleTypeDef huart1;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim5;
 
 void STM_Boot(void) {
 	// for later...
@@ -110,4 +112,31 @@ void TIM3_Config(void) {
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &tim3PWM_Config, TIM_CHANNEL_2) != HAL_OK) {
 		Error_Handler();
 	}
+}
+
+void TIM2_Config(void) {
+	TIM_Encoder_InitTypeDef sConfig = { 0 };
+
+	htim2.Instance = TIM2;
+	htim2.Init.Prescaler = 0;
+	htim2.Init.Period = 0xFFFFFFFF;
+	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+
+	sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+	sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+	sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+	sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+	sConfig.IC1Filter = 10;
+	sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+	sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+	sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+	sConfig.IC2Filter = 10;
+
+	if (HAL_TIM_Encoder_Init(&htim2, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void TIM5_Config(void) {
+
 }
