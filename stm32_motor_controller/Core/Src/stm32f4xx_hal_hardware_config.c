@@ -38,9 +38,9 @@ void STM_Boot(void) {
 	uint8_t rx_buffer = 0;
 	while (rx_buffer != 'K') {
 		uint8_t tx_msg = 'R';
-		HAL_UART_Transmit(&huart, &tx_msg, 1, 10);
+		HAL_UART_Transmit(&huart1, &tx_msg, 1, 10);
 
-		HAL_UART_Receive(&huart, &rx_buffer, 1, 10);
+		HAL_UART_Receive(&huart1, &rx_buffer, 1, 10);
 
 		HAL_Delay(100);
 	}
