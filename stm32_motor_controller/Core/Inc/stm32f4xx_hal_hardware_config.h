@@ -29,6 +29,7 @@ extern ADC_HandleTypeDef hadc1;
 /**
  * @brief   Boot the STM32F407G-DISC1 Board.
  * @details Initialize the necessary peripherals and trigger System_Fault state upon fail.
+ *          Wait for ESP32 to boot before going into thread mode.
  */
 void STM_Boot(void);
 
