@@ -5,6 +5,7 @@ TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
+ADC_HandleTypeDef hadc1;
 
 void STM_Boot(void) {
 	// for later...
@@ -158,4 +159,34 @@ void TIM5_Config(void) {
 	if (HAL_TIM_Encoder_Init(&htim5, &sConfig) != HAL_OK) {
 		Error_Handler();
 	}
+}
+
+void ADC1_Config(void) {
+	ADC_ChannelConfTypeDef sConfig = { 0 };
+
+	hadc1.Instance = ADC1;
+	hadc1.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
+	hadc1.Init.Resolution = ADC_RESOLUTION12b;
+	hadc1.Init.ScanConvMode = DISABLE;
+	hadc1.Init.ContinuousConvMode = DISABLE;
+	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc1.Init.NbrOfConversion = 1;
+	hadc1.Init.DMAContinuousRequests = DISABLE;
+	hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+
+	if (HAL_ADC_Init(&hadc1) != HAL_OK) {
+		Error_Handler();
+	}
+
+	sConfig.Channel = ADC_CHANNEL_10;
+	sConfig.Rank = 1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+
 }

@@ -83,3 +83,17 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
 
 	}
 }
+
+void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
+	if (hadc->Instance == ADC1) {
+		__HAL_RCC_ADC1_CLK_ENABLE();
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+
+		GPIO_InitTypeDef adc_ch = { 0 };
+		adc_ch.Mode = GPIO_MODE_ANALOG;
+		adc_ch.Pull = GPIO_NOPULL;
+		adc_ch.Pin = GPIO_PIN_0;
+
+		HAL_GPIO_Init(GPIOC, &adc_ch);
+	}
+}

@@ -8,6 +8,7 @@ extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
+extern ADC_HandleTypeDef hadc1;
 
 /**
  * @brief   Boot the STM32F407G-DISC1 Board.
@@ -74,5 +75,11 @@ void TIM2_Config(void);
  *          to track position and speed for the Right Motor.
  */
 void TIM5_Config(void);
+
+/**
+ * @brief   Configure the ADC1 Peripheral.
+ * @details The ADC1 peripheral is configured to read battery voltage
+ */
+void ADC1_Config(void);
 
 #endif
