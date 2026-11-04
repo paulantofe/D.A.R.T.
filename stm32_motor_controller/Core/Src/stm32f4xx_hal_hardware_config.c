@@ -222,7 +222,7 @@ void ADC1_Config(void) {
 		Error_Handler();
 	}
 
-	sConfig.Channel = ADC_CHANNEL_10;
+	sConfig.Channel = ADC_CHANNEL_3;
 	sConfig.Rank = 1;
 	sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
 

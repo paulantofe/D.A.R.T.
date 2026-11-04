@@ -100,8 +100,7 @@ void TIM5_Config(void);
 /**
  * @brief   Configure the ADC1 Peripheral.
  * @details The ADC1 peripheral is configured to read battery voltage.
- *          Instance: ADC1 | CH10: PA0
- */
+ *          Instance: ADC1 | CH3: PA3 */
 void ADC1_Config(void);
 
 /* --------------------------------------------------------- */
