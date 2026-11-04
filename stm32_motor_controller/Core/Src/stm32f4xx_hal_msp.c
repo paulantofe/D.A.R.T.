@@ -49,3 +49,37 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim) {
 		HAL_GPIO_Init(GPIOA, &tim3_ch);
 	}
 }
+
+void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM2) {
+		__HAL_RCC_TIM2_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+
+		GPIO_InitTypeDef tim2_ch = { 0 };
+		tim2_ch.Mode = GPIO_MODE_AF_PP;
+		tim2_ch.Alternate = GPIO_AF1_TIM2;
+		tim2_ch.Pull = GPIO_NOPULL;
+		tim2_ch.Speed = GPIO_SPEED_FAST;
+
+		tim2_ch.Pin = GPIO_PIN_15;
+		HAL_GPIO_Init(GPIOA, &tim2_ch);
+
+		tim2_ch.Pin = GPIO_PIN_3;
+        HAL_GPIO_Init(GPIOB, &tim2_ch);
+	}
+	else if (htim->Instance == TIM5) {
+		__HAL_RCC_TIM5_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+
+		GPIO_InitTypeDef tim5_ch = { 0 };
+		tim5_ch.Mode = GPIO_MODE_AF_PP;
+		tim5_ch.Alternate = GPIO_AF2_TIM5;
+		tim5_ch.Pull = GPIO_NOPULL;
+		tim5_ch.Speed = GPIO_SPEED_FAST;
+		tim5_ch.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+
+		HAL_GPIO_Init(GPIOA, &tim5_ch);
+
+	}
+}
