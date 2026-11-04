@@ -7,6 +7,7 @@
  *           and the motor encoders.
  */
 
+#include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
 
 int main(void) {

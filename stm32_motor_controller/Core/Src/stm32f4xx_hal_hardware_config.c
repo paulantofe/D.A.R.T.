@@ -23,7 +23,27 @@ ADC_HandleTypeDef hadc1;
 /* -------------- Hardware Configuration APIs -------------- */
 
 void STM_Boot(void) {
-	// for later...
+	// Configure Hardware
+	HAL_Init();
+	LED_Config();
+	SystemClock_Config();
+	UART_Config();
+	TIM6_Config();
+	TIM3_Config();
+	TIM2_Config();
+	TIM5_Config();
+	ADC1_Config();
+
+	// Wait for ESP32 to boot (Handshake)
+	uint8_t rx_buffer = 0;
+	while (rx_buffer != 'K') {
+		uint8_t tx_msg = 'R';
+		HAL_UART_Transmit(&huart, &tx_msg, 1, 10);
+
+		HAL_UART_Receive(&huart, &rx_buffer, 1, 10);
+
+		HAL_Delay(100);
+	}
 }
 
 void Error_Handler(void) {
