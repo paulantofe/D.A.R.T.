@@ -35,6 +35,7 @@ void STM_Boot(void) {
 	ADC1_Config();
 
 	// Wait for ESP32 to boot (Handshake)
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
 	uint8_t rx_buffer = 0;
 	while (rx_buffer != 'K') {
 		uint8_t tx_msg = 'R';
@@ -44,10 +45,15 @@ void STM_Boot(void) {
 
 		HAL_Delay(100);
 	}
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
 }
 
 void Error_Handler(void) {
 	__disable_irq();
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_15, GPIO_PIN_RESET);
 
 	while (1) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
@@ -95,7 +101,7 @@ void LED_Config(void) {
 	led.Mode = GPIO_MODE_OUTPUT_PP;
 	led.Pull = GPIO_NOPULL;
 	led.Speed = GPIO_SPEED_MEDIUM;
-	led.Pin = GPIO_PIN_13 | GPIO_PIN_14;
+	led.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
 
 	HAL_GPIO_Init(GPIOD, &led);
 }

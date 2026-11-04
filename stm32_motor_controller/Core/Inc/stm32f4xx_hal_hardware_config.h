@@ -51,7 +51,9 @@ void SystemClock_Config(void);
 
 /**
  * @brief   Configure the on-board Status LEDs.
- * @details Red LED indicates System_Fault state.
+ * @details Green LED indicates that the system is up (ESP and STM boot successfully).
+ *          Blue LED indicates that STM32 is ready and waiting for ESP32 to boot (sends OK - "K").
+ *          Red LED indicates System_Fault state (STM32 / ESP32).
  *          Orange LED indicates Fail_Safe State.
  *          Instance: GPIOD | PD13 (Orange) | PD14 (Red)
  */
