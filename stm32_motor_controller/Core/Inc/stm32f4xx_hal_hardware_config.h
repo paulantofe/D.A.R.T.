@@ -12,7 +12,7 @@
 
 /* -------------- Peripheral Handle Structures -------------- */
 // Note: Any file including this header file will have access to the
-// handle structures (needed for HAL APIs).
+//       handle structures (needed for HAL APIs).
 
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
@@ -22,6 +22,16 @@ extern TIM_HandleTypeDef htim5;
 extern ADC_HandleTypeDef hadc1;
 
 /* ---------------------------------------------------------- */
+
+
+/* -------------- Pin Definition Macros -------------- */
+
+#define GREEN_LED       GPIO_PIN_12
+#define ORANGE_LED      GPIO_PIN_13
+#define RED_LED         GPIO_PIN_14
+#define BLUE_LED        GPIO_PIN_15
+
+/* --------------------------------------------------- */
 
 
 /* -------------- Hardware Configuration APIs -------------- */
