@@ -62,7 +62,7 @@ void LED_Config(void);
 /**
  * @brief   Configure the USART1 Peripheral.
  * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master).
- *          Instance: USART1 | TX: PA9 | RX: PA10 | Baud: 115200.
+ *          Instance: USART1 | TX: PB6 | RX: PB7 | Baud: 115200.
  */
 void UART_Config(void);
 
