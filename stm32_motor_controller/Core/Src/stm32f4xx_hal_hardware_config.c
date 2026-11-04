@@ -1,4 +1,14 @@
+/**
+ * @file     stm32f4xx_hal_hardware_config.c
+ * @brief    Hardware Configuration source file.
+ *
+ * @details  This file implements the high-level peripheral configuration.
+ */
+
 #include "stm32f4xx_hal_hardware_config.h"
+
+
+/* -------------- Peripheral Handle Structures -------------- */
 
 UART_HandleTypeDef huart1;
 TIM_HandleTypeDef htim6;
@@ -6,6 +16,11 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
 ADC_HandleTypeDef hadc1;
+
+/* ---------------------------------------------------------- */
+
+
+/* -------------- Hardware Configuration APIs -------------- */
 
 void STM_Boot(void) {
 	// for later...
@@ -190,3 +205,5 @@ void ADC1_Config(void) {
 	}
 
 }
+
+/* --------------------------------------------------------- */

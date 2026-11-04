@@ -1,3 +1,11 @@
+/**
+ * @file     stm32f4xx_hal_msp.c
+ * @brief    MSP Config source file.
+ *
+ * @details  This file implements the MSP APIs called by HAL Initialization APIs by configuring
+ *           the low-level hardware (Clocks, GPIO Pins, NVIC IRQ Enable / Priority Set).
+ */
+
 #include "stm32f4xx_hal.h"
 
 void HAL_MspInit(void) {

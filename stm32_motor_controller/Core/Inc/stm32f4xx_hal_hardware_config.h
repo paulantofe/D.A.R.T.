@@ -1,7 +1,18 @@
+/**
+ * @file     stm32f4xx_hal_hardware_config.h
+ * @brief    Hardware Configuration header file.
+ *
+ * @details  This file declares the high-level peripheral configuration APIs.
+ */
+
 #ifndef INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
+
+/* -------------- Peripheral Handle Structures -------------- */
+// Note: Any file including this header file will have access to the
+// handle structures (needed for HAL APIs).
 
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
@@ -9,6 +20,11 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
 extern ADC_HandleTypeDef hadc1;
+
+/* ---------------------------------------------------------- */
+
+
+/* -------------- Hardware Configuration APIs -------------- */
 
 /**
  * @brief   Boot the STM32F407G-DISC1 Board.
@@ -34,8 +50,8 @@ void SystemClock_Config(void);
 
 /**
  * @brief   Configure the on-board Status LEDs.
- * @details Red LED indicates System_Fault state
- *          Orange LED indicates Fail_Safe State
+ * @details Red LED indicates System_Fault state.
+ *          Orange LED indicates Fail_Safe State.
  *          Instance: GPIOD | PD13 (Orange) | PD14 (Red)
  */
 void LED_Config(void);
@@ -66,6 +82,7 @@ void TIM3_Config(void);
  * @brief   Configure the TIM2 Peripheral.
  * @details Set up TIM2 (32-bit) in Hardware Encoder Mode (X4 resolution)
  *          to track position and speed for the Left Motor.
+ *          Instance: TIM2 | CH1: PA15 | CH2: PB3
  */
 void TIM2_Config(void);
 
@@ -73,13 +90,17 @@ void TIM2_Config(void);
  * @brief   Configure the TIM5 Peripheral.
  * @details Set up TIM5 (32-bit) in Hardware Encoder Mode (X4 resolution)
  *          to track position and speed for the Right Motor.
+ *          Instance: TIM2 | CH1: PA0 | CH2: PA1
  */
 void TIM5_Config(void);
 
 /**
  * @brief   Configure the ADC1 Peripheral.
- * @details The ADC1 peripheral is configured to read battery voltage
+ * @details The ADC1 peripheral is configured to read battery voltage.
+ *          Instance: ADC1 | CH10: PA0
  */
 void ADC1_Config(void);
+
+/* --------------------------------------------------------- */
 
 #endif
