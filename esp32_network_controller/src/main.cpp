@@ -69,6 +69,7 @@ void ESP_Boot(void) {
     const uint32_t handshake_started = millis();
     bool handshake_ok = false;
 
+    Serial.println("[SYSTEM] Waiting STM32 connection...");
     while (!handshake_ok && millis() - handshake_started < HANDSHAKE_TIMEOUT_MS) {
         if (Serial1.available() && Serial1.read() == 'R') {
             Serial1.write('K');
@@ -79,7 +80,8 @@ void ESP_Boot(void) {
     }
 
     if (!handshake_ok) {
-        Serial.println("[SYSTEM] STM32 handshake timed out.");
+        Serial.println("[SYSTEM] STM32 handshake timed out. Entering System Fault");
+        Error_Handler();
     }
 
     Serial.println("[SYSTEM] System booted successfully. Ready to use.");
