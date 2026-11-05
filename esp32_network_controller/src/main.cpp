@@ -39,6 +39,8 @@ constexpr uint32_t HANDSHAKE_TIMEOUT_MS = 5000;
  * @brief Handle errors by freezing the board
  */
 void Error_Handler(void) {
+    Server_Stop();
+    
     while (true) { delay(100); }
 }
 

@@ -203,7 +203,7 @@ esp_err_t Server_Init(void) {
 
 void Server_Stop(void) {
     server.end();
-    WiFi.disconnect();
-    WiFi.mode(WIFI_OFF);
     MDNS.end();
+    WiFi.disconnect(true, true);
+    WiFi.mode(WIFI_OFF);
 }
