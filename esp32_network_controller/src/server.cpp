@@ -200,3 +200,10 @@ esp_err_t Server_Init(void) {
 
     return ESP_OK;
 }
+
+void Server_Stop(void) {
+    server.end();
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    MDNS.end();
+}

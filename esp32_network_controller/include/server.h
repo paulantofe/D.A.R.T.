@@ -32,4 +32,9 @@
  */
 esp_err_t Server_Init(void);
 
+/**
+ * @brief  Stop esp32 web server and WiFi
+ */
+void Server_Stop(void);
+
 #endif
