@@ -28,6 +28,8 @@ volatile bool has_active_client = false;
 
 static uint32_t last_uart_heartbeat = 0;
 
+constexpr uint32_t HANDSHAKE_TIMEOUT_MS = 5000;
+
 /* ------------------------------------------------------------- */
 
 
@@ -45,6 +47,11 @@ void Error_Handler(void) {
  * @details  Initialize Camera and Server module and trigger System_Fault state upon fail
  */
 void ESP_Boot(void) {
+    Serial.begin(115200);
+
+    Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
+    Serial1.setTimeout(10);
+    
     if (Camera_Init() != ESP_OK) {
         Serial.println("[CAMERA] Initialization failed. Triggering System_Fault.");
         Serial1.print('X');
@@ -57,6 +64,22 @@ void ESP_Boot(void) {
         Serial1.print('X');
         Serial1.flush();
         Error_Handler();
+    }
+
+    const uint32_t handshake_started = millis();
+    bool handshake_ok = false;
+
+    while (!handshake_ok && millis() - handshake_started < HANDSHAKE_TIMEOUT_MS) {
+        if (Serial1.available() && Serial1.read() == 'R') {
+            Serial1.write('K');
+            handshake_ok = true;
+        }
+
+        if (!handshake_ok) { delay(1); }
+    }
+
+    if (!handshake_ok) {
+        Serial.println("[SYSTEM] STM32 handshake timed out.");
     }
 
     Serial.println("[SYSTEM] System booted successfully. Ready to use.");
@@ -107,11 +130,6 @@ void Task_Process_UART_RX(void) {
 
 
 void setup() {
-    Serial.begin(115200);
-
-    Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
-    Serial1.setTimeout(10);
-
     ESP_Boot();
 }
 
