@@ -2,9 +2,9 @@
  * @file     main.c
  * @brief    Main project source file.
  *
- * @details  This file initializes used peripherals. If any of these fails, it triggers System_Fault state.
- *           It also acts as a PID regulator, generates PWM signal for motors, reads battery voltage level
- *           and the motor encoders.
+ * @details  This file initializes the configured peripherals and enters the main loop.
+ *           The PID control, motor actuation, battery sampling, and encoder processing
+ *           runtime is not yet implemented.
  */
 
 #include "stm32f4xx_hal.h"
@@ -17,6 +17,5 @@ int main(void) {
 
 	}
 }
-
 
 

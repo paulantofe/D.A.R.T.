@@ -15,10 +15,10 @@ Originally conceived as a university project, this repository represents a pursu
 ## Key Features
 
 * **Dual-MCU Architecture:** ESP32-CAM (Network & Video) + STM32F407G-DISC1 (Real-time Motor Control) providing minimal latency and fine control over speed.
-* **Defensive Web Client:** JS-level input filtering for conflicting commands (e.g. 'W' + 'S').
+* **Defensive Web Client:** First-key-wins handling for opposing inputs on the same axis. A second held key is remembered and takes over when the first key is released (e.g. hold 'W', then 'S', then release 'W' to switch to 'S').
 * **Heartbeat Failsafe:** Real-time connection monitoring that forces motors to halt upon signal loss.
-* **Security**: Only one driver at the time is permitted and it's automatically disconnected after 2 seconds of no status request (no GET /status performed by browser)
-* **mDNS Discovery:** Plug-and-play network access via `http://rover.local`. eliminating the need for hardcoded IPs or Serial Monitor debugging.
+* **Security**: Only one driver at a time is permitted, and the driver is automatically disconnected after 2.5 seconds without a request (`GET /status` or `POST /control`).
+* **mDNS Discovery:** Plug-and-play network access via `http://dart.local`, eliminating the need for hardcoded IPs or Serial Monitor debugging.
 * **Magnetic Quick-Release Bodywork:** Custom 3D-printed shell secured with neodymium magnets for instant hardware access and LED diagnostics
 
 ## How to Run
@@ -86,7 +86,7 @@ sequenceDiagram
     Note right of ESP: No Serial Monitor <br> needed for IP discovery.
 
     Note over User, DRV: Part 2: Loading UI & Video Stream
-    User->>Browser: Access http://rover.local
+    User->>Browser: Access http://dart.local
     Browser->>ESP: mDNS Resolve IP & HTTP GET /
     ESP->>FS: Request HTML/CSS/JS
     FS-->>ESP: Return static files
@@ -99,8 +99,10 @@ sequenceDiagram
 
     Note over User, DRV: Part 3: User Input & Command Routing
     User->>Browser: Press key(s) (e.g. 'W' or 'W' + 'A')
-    alt Conflicting Input (e.g. 'W' + 'S')
-        Browser->>Browser: JS detects conflict & ignores (No Action)
+    alt Opposing inputs on the same axis (e.g. hold 'W', then 'S')
+        Browser->>Browser: Keep first key active and remember the second
+        User->>Browser: Release 'W'
+        Browser->>Browser: Activate remembered 'S'
     else Valid Input (e.g. 'W' + 'A')
         Browser->>Browser: JS maps combination to a single char (e.g. 'W' or 'Q')
         Browser->>ESP: HTTP POST /control (payload: 'Q')
@@ -118,7 +120,7 @@ sequenceDiagram
         Browser->>ESP: HTTP GET /status (Browser Heartbeat)
         ESP-->>Browser: HTTP 200 JSON (Battery, WiFi & Mode info)
         
-        alt Browser Disconnected (>2500ms without HTTP GET)
+        alt Driver inactive (>2500ms without GET /status or POST /control)
             ESP->>STM: UART TX: Send Failsafe ('F')
             STM->>STM: Trigger Network Failsafe (PWM 0, Orange LED ON)
             STM->>DRV: Halt Motors

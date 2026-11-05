@@ -78,14 +78,14 @@ void UART_Config(void);
 
 /**
  * @brief   Configure the TIM6 Peripheral.
- * @details Generate a 10ms (100Hz) time-base interrupt for the PID control loop.
+ * @details Configure a 10ms (100Hz) time base intended for the PID control loop.
  *          Instance: TIM6.
  */
 void TIM6_Config(void);
 
 /**
  * @brief   Configure the TIM3 Peripheral.
- * @details Generate a 20kHz PWM signal (4200 steps resolution) on
+ * @details Configure PWM for a 20kHz signal (4200 steps resolution) on
  *          Channel 1 (Left Motor) and Channel 2 (Right Motor).
  *          Instance: TIM3 | CH1: PA6 | CH2: PA7
  */
@@ -93,23 +93,23 @@ void TIM3_Config(void);
 
 /**
  * @brief   Configure the TIM2 Peripheral.
- * @details Set up TIM2 (32-bit) in Hardware Encoder Mode (X4 resolution)
- *          to track position and speed for the Left Motor.
+ * @details Configure TIM2 (32-bit) in hardware encoder mode (X4 resolution)
+ *          for the Left Motor position and speed feedback.
  *          Instance: TIM2 | CH1: PA15 | CH2: PB3
  */
 void TIM2_Config(void);
 
 /**
  * @brief   Configure the TIM5 Peripheral.
- * @details Set up TIM5 (32-bit) in Hardware Encoder Mode (X4 resolution)
- *          to track position and speed for the Right Motor.
- *          Instance: TIM2 | CH1: PA0 | CH2: PA1
+ * @details Configure TIM5 (32-bit) in hardware encoder mode (X4 resolution)
+ *          for the Right Motor position and speed feedback.
+ *          Instance: TIM5 | CH1: PA0 | CH2: PA1
  */
 void TIM5_Config(void);
 
 /**
  * @brief   Configure the ADC1 Peripheral.
- * @details The ADC1 peripheral is configured to read battery voltage.
+ * @details Configure ADC1 for battery-voltage sampling.
  *          Instance: ADC1 | CH3: PA3 */
 void ADC1_Config(void);
 
