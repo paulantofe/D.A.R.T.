@@ -3,101 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1118" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
-    <title>D.A.R.T. Rover Dashboard</title>
+    <title>D.A.R.T. Rover Control</title>
   </head>
   <body>
-    <div class="container">
-      <h1>D.A.R.T. Rover Dashboard</h1>
+    <main class="dashboard">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="D.A.R.T. Rover dashboard">
+          <span class="brand-mark" aria-hidden="true">D</span>
+          <span class="brand-copy">
+            <span class="eyebrow">FIELD CONTROL</span>
+            <span class="brand-name">D.A.R.T. <span>ROVER</span></span>
+          </span>
+        </a>
 
-      <!-- Video Stream -->
-      <div class="video-container">
-        <img id="stream" />
+        <div class="mode-pill">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="mode-label">CONTROL MODE</span>
+          <strong id="mode-status" class="spectator">--</strong>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <div class="main-column">
+          <section class="panel camera-panel" aria-labelledby="camera-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">CAMERA</p>
+                <h1 id="camera-title">Live feed</h1>
+              </div>
+              <div id="stream-status" class="stream-indicator" role="status" aria-live="polite">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span>Connecting</span>
+              </div>
+            </div>
+
+            <div class="video-container">
+              <img id="stream" alt="Live rover camera feed" />
+            </div>
+
+            <div class="camera-caption">
+              <span><span class="caption-dot" aria-hidden="true"></span> MJPEG STREAM</span>
+            </div>
+          </section>
+
+          <section class="panel telemetry-panel" aria-labelledby="telemetry-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">SYSTEM STATUS</p>
+                <h2 id="telemetry-title">Telemetry</h2>
+              </div>
+            </div>
+
+            <div class="status-container">
+              <div class="status-item">
+                <span class="status-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M2 8.8a15 15 0 0 1 20 0M5.5 12.4a9.8 9.8 0 0 1 13 0M9 16a4.5 4.5 0 0 1 6 0M12 20h.01" />
+                  </svg>
+                </span>
+                <span class="status-label">Wi-Fi signal</span>
+                <span id="wifi-status" class="status-value">--</span>
+              </div>
+
+              <div class="status-divider" aria-hidden="true"></div>
+
+              <div class="status-item">
+                <span class="status-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="7" width="17" height="10" rx="2" />
+                    <path d="M21 10v4M7 10v4" />
+                  </svg>
+                </span>
+                <span class="status-label">Battery</span>
+                <span id="battery-status" class="status-value">--</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel control-panel" aria-labelledby="control-title">
+          <div class="section-heading">
+            <div>
+              <h2 id="control-title">Drive control</h2>
+            </div>
+            <span class="control-badge">WASD</span>
+          </div>
+
+          <p class="control-hint">Hold a direction to move. Release to stop.</p>
+
+          <div class="dpad" aria-label="Rover movement controls">
+            <button id="btn-forward" class="ctrl-btn up" aria-label="Drive forward (W)">
+              <span class="arrow" aria-hidden="true">↑</span><span class="key-hint">W</span>
+            </button>
+            <button id="btn-left" class="ctrl-btn left" aria-label="Turn left (A)">
+              <span class="arrow" aria-hidden="true">←</span><span class="key-hint">A</span>
+            </button>
+            <button id="btn-backward" class="ctrl-btn down" aria-label="Drive backward (S)">
+              <span class="arrow" aria-hidden="true">↓</span><span class="key-hint">S</span>
+            </button>
+            <button id="btn-right" class="ctrl-btn right" aria-label="Turn right (D)">
+              <span class="arrow" aria-hidden="true">→</span><span class="key-hint">D</span>
+            </button>
+          </div>
+
+          <div class="command-readout">
+            <span class="readout-label">CURRENT COMMAND</span>
+            <strong id="cmd-status">STOP</strong>
+          </div>
+
+          <p class="control-footnote">Keyboard or touch controls</p>
+        </aside>
       </div>
 
-      <!-- Control Panel -->
-      <div class="control-container">
-        <button id="btn-forward" class="ctrl-btn">W</button>
-        <div class="middle-row">
-          <button id="btn-left" class="ctrl-btn">A</button>
-          <button id="btn-backward" class="ctrl-btn">S</button>
-          <button id="btn-right" class="ctrl-btn">D</button>
-        </div>
-      </div>
-
-      <!-- Status Panel -->
-      <div class="status-container">
-        <!-- WiFi Status -->
-        <div class="status-item">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-            <line x1="12" y1="20" x2="12.01" y2="20"></line>
-          </svg>
-          <span id="wifi-status"></span>
-        </div>
-
-        <!-- Battery Status -->
-        <div class="status-item">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect>
-            <line x1="22" y1="11" x2="22" y2="13"></line>
-          </svg>
-          <span id="battery-status"></span>
-        </div>
-
-        <!-- Command Status -->
-        <div class="status-item">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 16 16 12 12 8"></polyline>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          <span id="cmd-status">STOP</span>
-        </div>
-      </div>
-
-      <!-- Mode Panel -->
-      <div class="mode-container">
-        Mode Status: <span id="mode-status"></span>
-      </div>
-
-      <footer>
-        <p>&copy; D.A.R.T. Rover. Open-source project created by Antofe Paul</p>
+      <footer class="page-footer">
+        <span>D.A.R.T. ROVER</span>
+        <span>OPEN-SOURCE FIELD SYSTEM</span>
       </footer>
-    </div>
+    </main>
 
     <script src="script.js"></script>
   </body>

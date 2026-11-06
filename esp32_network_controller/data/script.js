@@ -4,6 +4,8 @@
 // If the connection drops or fails, it retries every two seconds.
 
 const streamImg = document.getElementById('stream');
+const streamStatus = document.getElementById('stream-status');
+const videoContainer = document.querySelector('.video-container');
 let isStreamRunning = false;
 let streamRetryTimer = null;
 
@@ -17,11 +19,17 @@ function tryConnectVideo() {
 streamImg.onload = () => {
   isStreamRunning = true;
   streamImg.classList.add('active');
+  videoContainer.classList.add('stream-active');
+  streamStatus.classList.add('live');
+  streamStatus.lastElementChild.textContent = 'Live';
 };
 
 streamImg.onerror = () => {
   isStreamRunning = false;
   streamImg.classList.remove('active');
+  videoContainer.classList.remove('stream-active');
+  streamStatus.classList.remove('live');
+  streamStatus.lastElementChild.textContent = 'Reconnecting';
   if (streamImg.hasAttribute('src')) {
     streamImg.removeAttribute('src');
   }
