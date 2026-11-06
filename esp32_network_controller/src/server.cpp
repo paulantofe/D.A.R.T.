@@ -46,7 +46,7 @@ public:
             fb = esp_camera_fb_get();
             if (!fb) {
                 Serial.println("[CAMERA] Frame capture failed.");
-                return 0; 
+                return RESPONSE_TRY_AGAIN;
             }
             index = 0;
             

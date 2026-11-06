@@ -34,7 +34,7 @@
 
 // Initialization API implementation
 esp_err_t Camera_Init(void) {
-    camera_config_t config;
+    camera_config_t config = {};
     
     config.ledc_channel = LEDC_CHANNEL_0;
     config.ledc_timer   = LEDC_TIMER_0;
@@ -66,13 +66,15 @@ esp_err_t Camera_Init(void) {
 
     if (psramFound()) {
         config.frame_size   = FRAMESIZE_VGA; 
-        config.jpeg_quality = 12;            
+        config.jpeg_quality = 20;            
         config.fb_count     = 2;
+        config.fb_location  = CAMERA_FB_IN_PSRAM;
         Serial.println("[CAMERA] PSRAM found. Using it for better quality");             
     } else {
         config.frame_size   = FRAMESIZE_CIF; 
-        config.jpeg_quality = 12;
+        config.jpeg_quality = 18;
         config.fb_count     = 1;
+        config.fb_location  = CAMERA_FB_IN_DRAM;
         Serial.println("[CAMERA] PSRAM not found. Lower quality");
     }
 
