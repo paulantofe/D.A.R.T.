@@ -191,6 +191,7 @@ window.addEventListener('blur', () => {
 const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
 const modeStatus = document.getElementById('mode-status');
+const hardwareStatus = document.getElementById('hardware-status');
 
 function updateStatus() {
   const controller = new AbortController();
@@ -208,6 +209,14 @@ function updateStatus() {
     batStatus.innerText = data.battery;
     wifiStatus.innerText = data.rssi;
     modeStatus.innerText = data.mode;
+    const hardwareKnown = data.stm32_link_known === true;
+    const hardwareOnline = data.stm32_link_ok === true;
+    hardwareStatus.innerText = !hardwareKnown
+      ? 'CHECKING'
+      : (hardwareOnline ? 'ONLINE' : 'LINK LOST');
+    hardwareStatus.classList.toggle('online', hardwareOnline);
+    hardwareStatus.classList.toggle('offline', hardwareKnown && !hardwareOnline);
+    hardwareStatus.classList.toggle('checking', !hardwareKnown);
 
     if (data.mode === 'Driver') {
       if (cmdStatus.innerText === 'N/A') { 
@@ -230,6 +239,9 @@ function updateStatus() {
     batStatus.innerText = 'N/A';
     wifiStatus.innerText = 'Disconnected';
     modeStatus.innerText = 'N/A';
+    hardwareStatus.innerText = 'UNKNOWN';
+    hardwareStatus.classList.remove('online', 'offline');
+    hardwareStatus.classList.add('checking');
 
     modeStatus.classList.remove('driver', 'spectator');
 
@@ -238,7 +250,7 @@ function updateStatus() {
   })
   .finally(() => {
     clearTimeout(timeoutId);
-    setTimeout(updateStatus, 2000);
+    setTimeout(updateStatus, 250);
   });
 }
 

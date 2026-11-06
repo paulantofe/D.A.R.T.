@@ -352,6 +352,38 @@ p {
   background: var(--line);
 }
 
+.hardware-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.hardware-label,
+.hardware-state {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+
+.hardware-label {
+  color: var(--muted);
+}
+
+.hardware-state {
+  color: var(--red);
+}
+
+.hardware-state.checking {
+  color: var(--amber);
+}
+
+.hardware-state.online {
+  color: var(--mint-bright);
+}
+
 .control-panel {
   position: sticky;
   top: 20px;

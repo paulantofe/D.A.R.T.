@@ -182,7 +182,12 @@ esp_err_t Server_Init(void) {
         String json = "{";
         json += "\"battery\":\"" + rover_battery + "\",";
         json += "\"rssi\":" + String(rssi) + ",";
-        json += "\"mode\":\"" + mode + "\"";
+        json += "\"mode\":\"" + mode + "\",";
+        json += "\"stm32_link_known\":";
+        json += stm32_link_status_known ? "true" : "false";
+        json += ",";
+        json += "\"stm32_link_ok\":";
+        json += stm32_link_ok ? "true" : "false";
         json += "}";
 
         request->send(200, "application/json", json);

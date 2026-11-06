@@ -25,10 +25,22 @@
 String rover_battery = "N/A";
 volatile uint32_t last_command_time = 0;
 volatile bool has_active_client = false;
+volatile bool stm32_link_ok = false;
+volatile bool stm32_link_status_known = false;
 
 static uint32_t last_uart_heartbeat = 0;
+static uint32_t first_uart_heartbeat = 0;
+static uint32_t last_uart_acknowledgment = 0;
+static bool has_uart_acknowledgment = false;
+static uint8_t uart_acknowledgment_streak = 0;
+static bool has_sent_uart_heartbeat = false;
+static char uart_rx_line[32];
+static size_t uart_rx_line_length = 0;
+static bool uart_rx_discarding_line = false;
 
 constexpr uint32_t HANDSHAKE_TIMEOUT_MS = 5000;
+constexpr uint32_t UART_HEARTBEAT_INTERVAL_MS = 50;
+constexpr uint32_t UART_ACK_TIMEOUT_MS = 100;
 
 /* ------------------------------------------------------------- */
 
@@ -52,7 +64,6 @@ void ESP_Boot(void) {
     Serial.begin(115200);
 
     Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
-    Serial1.setTimeout(10);
     
     if (Camera_Init() != ESP_OK) {
         Serial.println("[CAMERA] Initialization failed. Triggering System_Fault.");
@@ -109,24 +120,90 @@ void Task_Network_Failsafe(uint32_t current_time) {
 }
 
 /**
- * @brief  Send 'H' Heartbeat to stm32 every 200ms to maintain UART link
+ * @brief  Send 'H' heartbeats and monitor STM32 acknowledgments
  */
 void Task_Hardware_Failsafe(uint32_t current_time) {
-    if (current_time - last_uart_heartbeat > 200) {
+    if (current_time - last_uart_heartbeat >= UART_HEARTBEAT_INTERVAL_MS) {
         last_uart_heartbeat = current_time;
-        Serial1.print('H');
+        if (!has_sent_uart_heartbeat) {
+            first_uart_heartbeat = current_time;
+            has_sent_uart_heartbeat = true;
+        }
+        Serial1.write('H');
+    }
+
+    const bool acknowledgment_recent = has_uart_acknowledgment &&
+        current_time - last_uart_acknowledgment <= UART_ACK_TIMEOUT_MS;
+    if (!acknowledgment_recent) {
+        uart_acknowledgment_streak = 0;
+    }
+
+    if (has_sent_uart_heartbeat &&
+        current_time - first_uart_heartbeat > UART_ACK_TIMEOUT_MS) {
+        stm32_link_status_known = true;
+    }
+
+    const bool link_ok = acknowledgment_recent && uart_acknowledgment_streak >= 3;
+    if (link_ok) {
+        stm32_link_status_known = true;
+    }
+
+    if (link_ok != stm32_link_ok) {
+        stm32_link_ok = link_ok;
+        if (stm32_link_status_known) {
+            Serial.println(link_ok
+                ? "[SYSTEM] STM32 UART link restored."
+                : "[SYSTEM] STM32 UART link lost.");
+        }
     }
 }
 
 /**
- * @brief  Asynchronously read incoming UART messages from stm32
+ * @brief  Process UART acknowledgments and battery messages without blocking
  */
 void Task_Process_UART_RX(void) {
-    if (Serial1.available()) {
-        String msg = Serial1.readStringUntil('\n');
-        msg.trim();
+    while (Serial1.available() > 0) {
+        const int incoming = Serial1.read();
+        if (incoming < 0) { break; }
 
-        if (msg.startsWith("B")) { rover_battery = msg.substring(1); }
+        const char byte = static_cast<char>(incoming);
+        if (byte == 'K') {
+            if (!has_sent_uart_heartbeat) { continue; }
+
+            const uint32_t acknowledgment_time = millis();
+            if (!has_uart_acknowledgment ||
+                acknowledgment_time - last_uart_acknowledgment > UART_ACK_TIMEOUT_MS) {
+                uart_acknowledgment_streak = 0;
+            }
+            if (uart_acknowledgment_streak < 3) {
+                ++uart_acknowledgment_streak;
+            }
+            last_uart_acknowledgment = acknowledgment_time;
+            has_uart_acknowledgment = true;
+            continue;
+        }
+
+        if (byte == '\r') { continue; }
+        if (byte == '\n') {
+            if (!uart_rx_discarding_line && uart_rx_line_length > 1 &&
+                uart_rx_line[0] == 'B') {
+                uart_rx_line[uart_rx_line_length] = '\0';
+                rover_battery = String(&uart_rx_line[1]);
+            }
+            uart_rx_line_length = 0;
+            uart_rx_discarding_line = false;
+            continue;
+        }
+
+        if (uart_rx_discarding_line) { continue; }
+        if (uart_rx_line_length == 0 && byte != 'B') { continue; }
+
+        if (uart_rx_line_length < sizeof(uart_rx_line) - 1) {
+            uart_rx_line[uart_rx_line_length++] = byte;
+        } else {
+            uart_rx_line_length = 0;
+            uart_rx_discarding_line = true;
+        }
     }
 }
 
@@ -138,11 +215,11 @@ void setup() {
 }
 
 void loop() {
+    Task_Process_UART_RX();
     uint32_t current_time = millis();
 
     Task_Network_Failsafe(current_time);
     Task_Hardware_Failsafe(current_time);
-    Task_Process_UART_RX();
 
     delay(50);
 }
