@@ -181,6 +181,15 @@ window.addEventListener('blur', () => {
   ['w', 'a', 's', 'd'].forEach(k => { if (keys[k]) setKey(k, false); });
 });
 
+function clearHeldControls() {
+  Object.keys(keys).forEach((key) => {
+    keys[key] = false;
+    buttonMap[key].classList.remove('pressed');
+  });
+  currentY = null;
+  currentX = null;
+}
+
 /* ------------------------------------------------------------------------- */
 
 
@@ -192,6 +201,9 @@ const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
 const modeStatus = document.getElementById('mode-status');
 const hardwareStatus = document.getElementById('hardware-status');
+const STATUS_POLL_INTERVAL_MS = 1000;
+const STATUS_FAILURE_THRESHOLD = 2;
+let consecutiveStatusFailures = 0;
 
 function updateStatus() {
   const controller = new AbortController();
@@ -205,9 +217,10 @@ function updateStatus() {
   .then(data => {
     const wasOffline = !isConnected;
 
+    consecutiveStatusFailures = 0;
     isConnected = true;
     batStatus.innerText = data.battery;
-    wifiStatus.innerText = data.rssi;
+    wifiStatus.innerText = `${data.rssi} dBm`;
     modeStatus.innerText = data.mode;
     const hardwareKnown = data.stm32_link_known === true;
     const hardwareOnline = data.stm32_link_ok === true;
@@ -234,23 +247,28 @@ function updateStatus() {
     if (wasOffline) { updateCommand(); }
   })
   .catch(error => {
-    isConnected = false;
-    console.log('Telemetry Error: ', error);
-    batStatus.innerText = 'N/A';
-    wifiStatus.innerText = 'Disconnected';
-    modeStatus.innerText = 'N/A';
-    hardwareStatus.innerText = 'UNKNOWN';
-    hardwareStatus.classList.remove('online', 'offline');
-    hardwareStatus.classList.add('checking');
+    consecutiveStatusFailures += 1;
+    if (consecutiveStatusFailures >= STATUS_FAILURE_THRESHOLD) {
+      if (consecutiveStatusFailures === STATUS_FAILURE_THRESHOLD) {
+        console.warn('Rover status endpoint is not responding:', error);
+      }
 
-    modeStatus.classList.remove('driver', 'spectator');
-
-    cmdStatus.innerText = 'N/A'; 
-    lastSentCmd = '0';
+      isConnected = false;
+      clearHeldControls();
+      batStatus.innerText = 'N/A';
+      wifiStatus.innerText = 'No response';
+      modeStatus.innerText = 'N/A';
+      hardwareStatus.innerText = 'UNKNOWN';
+      hardwareStatus.classList.remove('online', 'offline');
+      hardwareStatus.classList.add('checking');
+      modeStatus.classList.remove('driver', 'spectator');
+      cmdStatus.innerText = 'N/A';
+      lastSentCmd = '0';
+    }
   })
   .finally(() => {
     clearTimeout(timeoutId);
-    setTimeout(updateStatus, 250);
+    setTimeout(updateStatus, STATUS_POLL_INTERVAL_MS);
   });
 }
 
