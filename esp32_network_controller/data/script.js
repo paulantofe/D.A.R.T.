@@ -72,6 +72,10 @@ const buttonMap = {
   d: document.getElementById('btn-right'),
 };
 
+document.querySelector('.dpad').addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+});
+
 let currentY = null;
 let currentX = null;
 let lastSentCmd = '0';
