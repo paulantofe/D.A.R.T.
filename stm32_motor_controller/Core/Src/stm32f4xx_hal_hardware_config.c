@@ -61,7 +61,7 @@ void Error_Handler(void) {
 	}
 }
 
-void Failsafe_Handler() {
+void Failsafe_Handler(void) {
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
 

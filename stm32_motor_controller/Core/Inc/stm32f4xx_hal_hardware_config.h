@@ -64,7 +64,7 @@ void Error_Handler(void);
 /**
  * @brief Failsafe state.
  */
-void Failsafe_Handler();
+void Failsafe_Handler(void);
 
 /**
  * @brief   Configure system clock to maximum speed.
