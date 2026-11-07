@@ -34,6 +34,17 @@ extern ADC_HandleTypeDef hadc1;
 /* --------------------------------------------------- */
 
 
+/**
+ * @defgroup FS_Trigger        Failsafe state trigger event
+ * @{
+ */
+typedef enum {
+	ESP_Sent_F,
+	ESP_Link_Lost
+} FS_Trigger_t;
+/** @} */
+
+
 /* -------------- Hardware Configuration APIs -------------- */
 
 /**
@@ -49,6 +60,11 @@ void STM_Boot(void);
  * @note    Software blocking delay is used because SysTick/HAL_Delay might be broken.
  */
 void Error_Handler(void);
+
+/**
+ * @brief Failsafe state.
+ */
+void Failsafe_Handler();
 
 /**
  * @brief   Configure system clock to maximum speed.
