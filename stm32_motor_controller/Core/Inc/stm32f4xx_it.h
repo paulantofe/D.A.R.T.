@@ -15,6 +15,8 @@ extern "C" {
 
 void SysTick_Handler(void);
 
+void USART1_IRQHandler(void);
+
 #ifdef __cplusplus
 }
 #endif
