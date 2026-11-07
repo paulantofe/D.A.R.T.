@@ -199,6 +199,7 @@ function clearHeldControls() {
 
 const batStatus = document.getElementById('battery-status');
 const wifiStatus = document.getElementById('wifi-status');
+const streamClientsStatus = document.getElementById('stream-clients-status');
 const modeStatus = document.getElementById('mode-status');
 const hardwareStatus = document.getElementById('hardware-status');
 const STATUS_POLL_INTERVAL_MS = 1000;
@@ -221,6 +222,7 @@ function updateStatus() {
     isConnected = true;
     batStatus.innerText = data.battery;
     wifiStatus.innerText = `${data.rssi} dBm`;
+    streamClientsStatus.innerText = data.stream_clients;
     modeStatus.innerText = data.mode;
     const hardwareKnown = data.stm32_link_known === true;
     const hardwareOnline = data.stm32_link_ok === true;
@@ -257,6 +259,7 @@ function updateStatus() {
       clearHeldControls();
       batStatus.innerText = 'N/A';
       wifiStatus.innerText = 'No response';
+      streamClientsStatus.innerText = 'N/A';
       modeStatus.innerText = 'N/A';
       hardwareStatus.innerText = 'UNKNOWN';
       hardwareStatus.classList.remove('online', 'offline');

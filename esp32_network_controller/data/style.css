@@ -300,13 +300,14 @@ p {
 
 .status-container {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 16px;
 }
 
 .status-item {
   display: grid;
+  min-width: 0;
   grid-template-columns: 32px 1fr;
   align-items: center;
   column-gap: 10px;
@@ -344,12 +345,6 @@ p {
   font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-
-.status-divider {
-  width: 1px;
-  height: 34px;
-  background: var(--line);
 }
 
 .hardware-link {
@@ -581,13 +576,20 @@ p {
   }
 
   .status-item {
-    grid-template-columns: 28px 1fr;
-    column-gap: 7px;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    row-gap: 6px;
+    text-align: center;
   }
 
   .status-icon {
     width: 28px;
     height: 28px;
+    grid-row: auto;
+  }
+
+  .status-value {
+    margin-top: 0;
   }
 
   .page-footer {

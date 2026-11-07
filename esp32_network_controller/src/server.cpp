@@ -17,6 +17,29 @@
 AsyncWebServer server(80);
 
 IPAddress active_client_ip;
+uint32_t active_stream_clients = 0;
+portMUX_TYPE active_stream_clients_mux = portMUX_INITIALIZER_UNLOCKED;
+
+uint32_t GetActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    const uint32_t count = active_stream_clients;
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+    return count;
+}
+
+void IncrementActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    ++active_stream_clients;
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+}
+
+void DecrementActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    if (active_stream_clients > 0) {
+        --active_stream_clients;
+    }
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+}
 
 // Response class for camera live stream GET request
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
@@ -31,10 +54,12 @@ public:
         _sendContentLength = false;
         fb = NULL;
         index = 0;
+        IncrementActiveStreamClients();
     }
 
     ~AsyncJpegStreamResponse() {
         if (fb) esp_camera_fb_return(fb);
+        DecrementActiveStreamClients();
     }
 
     bool _sourceValid() const { return true; }
@@ -188,6 +213,8 @@ esp_err_t Server_Init(void) {
         json += ",";
         json += "\"stm32_link_ok\":";
         json += stm32_link_ok ? "true" : "false";
+        json += ",";
+        json += "\"stream_clients\":" + String(GetActiveStreamClients());
         json += "}";
 
         request->send(200, "application/json", json);
@@ -196,7 +223,6 @@ esp_err_t Server_Init(void) {
     // Initialize /stream Web Route
     server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse();
-
         request->send(response);
     });
 
