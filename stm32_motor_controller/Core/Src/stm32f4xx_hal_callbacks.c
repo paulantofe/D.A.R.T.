@@ -8,7 +8,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	const uint8_t head = rx_head;
 	const uint8_t next = (uint8_t) (head + 1U) % RX_BUFFER_CAPACITY;
 
-	if (next = rx_tail) {
+	if (next == rx_tail) {
 		rx_overrun = 1U;
 	} else {
 		rx_buffer[head] = received;
