@@ -15,7 +15,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		rx_head = next;
 	}
 
-	if (HAL_UART_Receive_IT(&huart1, &rx_byte, 1) != HAL_OK) {
+	if (HAL_UART_Receive_IT(huart, &rx_byte, 1U) != HAL_OK) {
 		rx_error = 1U;
 	}
 }

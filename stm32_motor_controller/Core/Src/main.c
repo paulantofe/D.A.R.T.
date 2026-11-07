@@ -9,12 +9,18 @@
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "globals.h"
+#include "app.h"
 
 int main(void) {
 	STM_Boot();
 
-	while (1) {
+	if (HAL_UART_Receive_IT(&huart1, &rx_byte, 1) != HAL_OK) {
+		Error_Handler();
+	}
 
+	while (1) {
+		Task_Process_UART_RX();
 	}
 }
 
