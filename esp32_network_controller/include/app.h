@@ -9,6 +9,7 @@
 #include <Arduino.h>
 
 void ESP_Boot(void);
+void Error_Hanlder(void);
 void Task_Network_Failsafe(uint32_t current_time);
 void Task_Hardware_Failsafe(uint32_t current_time);
 void Task_Process_UART_RX(void);
