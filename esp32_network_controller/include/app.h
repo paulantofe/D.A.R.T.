@@ -42,6 +42,13 @@ typedef enum {
 
 /* ------------------ Application APIs ------------------ */
 
+/**
+ * @brief    Initialize the ESP32 application.
+ * @details  Initializes the debug serial port, STM32 serial link, camera,
+ *           and web server in dependency order.
+ * @note     Camera or server initialization failure enters the terminal
+ *           SystemFault state.
+ */
 void ESP_Boot(void);
 
 /**
@@ -75,6 +82,13 @@ void LinkHandshake_ProcessByte(const char received, const uint32_t now);
  */
 void LinkHandshake_CheckTimeout(const uint32_t now);
 
+/**
+ * @brief    Update the application state from the link state.
+ * @details  Transitions an offline or failed-safe application to Idle when
+ *           the STM32 link is online, and forces Idle or Moving into
+ *           FailSafe when the link is lost.
+ * @note     SystemFault is terminal and is not changed by this function.
+ */
 void SystemState_Update();
 
 /**
