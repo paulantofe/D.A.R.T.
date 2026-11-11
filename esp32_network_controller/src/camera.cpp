@@ -80,14 +80,18 @@ esp_err_t Camera_Init(void) {
 
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK) {
-        Serial.printf("[Camera] Failed to initialize hardware. Error: 0x%x\n", err);
+        Serial.printf("[CAMERA] Failed to initialize hardware. Error: 0x%x\n", err);
         return err;
     }
 
-    sensor_t * s = esp_camera_sensor_get();
+    sensor_t *sensor = esp_camera_sensor_get();
+    if (sensor == nullptr) {
+        Serial.println("[CAMERA] Sensor handle unavailable.");
+        return ESP_FAIL;
+    }
 
-    s->set_vflip(s, 1);   // Vertical Flip
-    // s->set_hmirror(s, 1); // Orizontal Flip
+    sensor->set_vflip(sensor, 1);   // Vertical Flip
+    // sensor->set_hmirror(s, 1); // Orizontal Flip
 
     Serial.println("[CAMERA] OV3660 Initialized Successfully.");
     return ESP_OK;

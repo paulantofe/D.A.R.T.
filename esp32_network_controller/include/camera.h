@@ -13,9 +13,9 @@
 #include "esp_camera.h" 
 
 /**
- * @brief  Initialize camera module of the esp32-cam board
- * @retval ESP_OK   Camera initialized successfully
- * @retval ESP_FAIL Camera initialization failed
+ * @brief    Initialize the camera module of the ESP32-CAM board.
+ * @retval   ESP_OK  Camera initialized successfully.
+ * @retval   Other   An ESP error code returned by the camera driver.
  */
 esp_err_t Camera_Init(void);
 
