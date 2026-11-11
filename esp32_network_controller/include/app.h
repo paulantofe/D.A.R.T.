@@ -42,6 +42,8 @@ typedef enum {
 
 /* ------------------ Application APIs ------------------ */
 
+void ESP_Boot(void);
+
 /**
  * @brief    Enter the terminal system-fault state.
  * @details  Sets the application state to SystemFault and repeatedly
@@ -72,6 +74,8 @@ void LinkHandshake_ProcessByte(const char received, const uint32_t now);
  *                     validation.
  */
 void LinkHandshake_CheckTimeout(const uint32_t now);
+
+void SystemState_Update();
 
 /**
  * @brief    Process bytes received over the STM32 serial link.

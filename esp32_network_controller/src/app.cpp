@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "app.h"
 #include "globals.h"
+#include "camera.h"
+#include "server.h"
 
 /* ------------------ System Fault Handler ------------------ */
 
@@ -17,7 +19,51 @@ void SystemFault_Enter(void) {
     }    
 }
 
+void SystemState_Update(void) {
+    if (system_state == System_State_t::SystemFault) {
+        return;
+    }
+
+    if (link_state == Link_State_t::LINK_ONLINE) {
+        if (system_state == System_State_t::Offline ||
+            system_state == System_State_t::FailSafe) {
+            system_state = System_State_t::Idle;
+        }
+
+        return;
+    }
+
+    if (link_state != Link_State_t::LINK_ONLINE &&
+        (system_state == System_State_t::Idle ||
+         system_state == System_State_t::Moving)) {
+        system_state = System_State_t::FailSafe;
+    }
+}
+
 /* ---------------------------------------------------------- */
+
+
+/* ------------------ Boot Handler ------------------*/
+
+#define UART_RX_PIN     14
+#define UART_TX_PIN     15
+
+void ESP_Boot(void) {
+    Serial.begin(115200);
+    Serial1.begin(115200, SERIAL_8N1, UART_RX_PIN, UART_TX_PIN);
+
+    if (Camera_Init() != ESP_OK) {
+        SystemFault_Enter();
+    }
+
+    if (Server_Init() != ESP_OK) {
+        SystemFault_Enter();
+    }
+
+    Serial.println("[SYSTEM] ESP32 initialization successful. Waiting for STM32...");
+}
+
+/* --------------------------------------------------*/
 
 
 /* ------------------ Handshake Handler ------------------ */
