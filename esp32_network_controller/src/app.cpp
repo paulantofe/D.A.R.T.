@@ -27,24 +27,3 @@ volatile bool stm32_link_status_known = false;
 void ESP_Boot(void) {
     
 }
-
-/**
- * @brief Monitor WiFi client status and trigger failsafe on command timeout.
- */
-void Task_Network_Failsafe(uint32_t current_time) {
-    
-}
-
-/**
- * @brief Send UART heartbeats and monitor STM32 acknowledgments.
- */
-void Task_Hardware_Failsafe(uint32_t current_time) {
-    
-}
-
-/**
- * @brief Process UART acknowledgments and battery messages without blocking.
- */
-void Task_Process_UART_RX(void) {
-    
-}
