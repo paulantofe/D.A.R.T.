@@ -7,12 +7,8 @@
 #define GLOBALS_H
 
 #include <Arduino.h>
+#include "app.h"
 
-// Battery level info 
-extern String rover_battery;
-
-// One-driver-only logic and auto-disconnet variables
-extern volatile uint32_t last_command_time;
-extern volatile bool has_active_client;
+extern volatile System_State_t system_state;
 
 #endif
