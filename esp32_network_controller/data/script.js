@@ -5,50 +5,42 @@
 
 /* ------------------ Stream Connection ------------------ */
 
-// This section manages the MJPEG video stream connection
-// The stream element stays transparent until the first valid frame arrives.
-// If the connection drops or fails, it retries every two seconds.
-
-const streamImg = document.getElementById('stream');
+const stream = document.getElementById('stream');
 const streamStatus = document.getElementById('stream-status');
 const videoContainer = document.querySelector('.video-container');
-let isStreamRunning = false;
-let streamRetryTimer = null;
 
-function tryConnectVideo() {
-  if (isStreamRunning) { return; }
+let retryStreamTimer = null;
+let streamConnected = false;
 
-  clearTimeout(streamRetryTimer);
-  streamImg.src = '/stream?' + Date.now();
+function tryConnectStream() {
+  clearTimeout(retryStreamTimer);
+  stream.setAttribute('src', `/stream?${Date.now()}`);
 }
 
-streamImg.onload = () => {
-  isStreamRunning = true;
-  streamImg.classList.add('active');
+stream.addEventListener('load', () => {
+  streamConnected = true;
+  stream.classList.add('active');
   videoContainer.classList.add('stream-active');
   streamStatus.classList.add('live');
   streamStatus.lastElementChild.textContent = 'Live';
-};
+});
 
-streamImg.onerror = () => {
-  isStreamRunning = false;
-  streamImg.classList.remove('active');
+stream.addEventListener('error', () => {
+  stream.classList.remove('active');
   videoContainer.classList.remove('stream-active');
   streamStatus.classList.remove('live');
-  streamStatus.lastElementChild.textContent = 'Reconnecting';
-  if (streamImg.hasAttribute('src')) {
-    streamImg.removeAttribute('src');
-  }
 
-  console.log('Waiting Video Signal...');
-  clearTimeout(streamRetryTimer);
-  
-  streamRetryTimer = setTimeout(tryConnectVideo, 2000);
-};
+  streamStatus.lastElementChild.textContent =
+    streamConnected ? 'Reconnecting' : 'N/A';
 
-window.onload = () => {
-  tryConnectVideo();
-};
+  stream.removeAttribute('src');
+
+  retryStreamTimer = setTimeout(tryConnectStream, 2000);
+});
+
+window.addEventListener('load', () => {
+  tryConnectStream();
+});
 
 /* ------------------------------------------------------- */
 
