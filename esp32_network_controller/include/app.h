@@ -68,8 +68,8 @@ void SystemFault_Enter(void);
 /**
  * @brief    Process one received STM32 handshake byte.
  * @details  Counts timed 'R' messages and changes the link state to
- *           LINK_ONLINE after the required sequence. Sends the heartbeat
- *           frame and current driver state when the handshake is established.
+ *           LINK_ONLINE after the required sequence. Sends the current driver
+ *           state in response to each runtime heartbeat.
  * @param    received  Byte received from the STM32 over Serial1.
  * @param    now       Current millisecond timestamp used for interval
  *                     validation.

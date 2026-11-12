@@ -126,7 +126,6 @@ void LinkHandshake_ProcessByte(const uint8_t received, const uint32_t now) {
             return;
         }
 
-        Serial1.write(SP_UART_HEARTBEAT);
         Serial1.write(has_active_client
                           ? SP_DRIVER_CONNECTED
                           : SP_DRIVER_DISCONNECTED);
