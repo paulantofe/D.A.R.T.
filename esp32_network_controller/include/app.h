@@ -1,3 +1,8 @@
+/**
+ * @file     app.h
+ * @brief    ESP32 application state and runtime API declarations.
+ */
+
 #ifndef APP_H
 #define APP_H
 
@@ -37,7 +42,7 @@ typedef enum {
     LINK_ONLINE
 } Link_State_t;
 
-/* --------------------------------------------------------------- */
+/* -------------------------------------------------------------- */
 
 
 /* ------------------ Application APIs ------------------ */
@@ -91,6 +96,11 @@ void LinkHandshake_CheckTimeout(const uint32_t now);
  */
 void SystemState_Update(void);
 
+/**
+ * @brief    Release the active driver after a status heartbeat timeout.
+ * @details  Clears the active driver identity when no status request has
+ *           been received within DRIVER_TIMEOUT_MS.
+ */
 void Check_DriverConnection(void);
 
 /**
@@ -101,8 +111,14 @@ void Check_DriverConnection(void);
  */
 void Serial1_Process(void);
 
+/**
+ * @brief    Return the current application state as a JSON-friendly string.
+ */
 String Get_SystemState_String(void);
 
+/**
+ * @brief    Return the current STM32 link state as a JSON-friendly string.
+ */
 String Get_LinkState_String(void);
 
 /* ------------------------------------------------------ */

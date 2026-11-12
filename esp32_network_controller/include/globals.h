@@ -10,16 +10,26 @@
 #include "app.h"
 #include <stdint.h>
 
+/* ------------------ Shared Application State ------------------ */
+
+/** Current high-level ESP32 application state. */
 extern volatile System_State_t system_state;
 
+/** Current ESP32-to-STM32 UART link state. */
 extern volatile Link_State_t link_state;
 
-// Percent value
+/** Battery charge percentage, or "N/A" when it is unavailable. */
 extern String battery_level;
 
+/** True when a driver currently owns control of the rover. */
 extern bool has_active_client;
+
+/** IP address of the current driver. */
 extern IPAddress active_client_ip;
 
+/** Timestamp of the current driver's most recent /status request. */
 extern volatile uint32_t last_status_request;
+
+/* -------------------------------------------------------------- */
 
 #endif

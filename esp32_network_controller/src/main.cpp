@@ -1,11 +1,23 @@
+/**
+ * @file     main.cpp
+ * @brief    ESP32 application entry point.
+ */
+
 #include <Arduino.h>
 #include "app.h"
+
+/* ------------------ Shared Application State ------------------ */
 
 volatile System_State_t system_state = System_State_t::Offline;
 
 volatile Link_State_t link_state = Link_State_t::LINK_OFFLINE;
 
-extern String battery_level = "N/A";
+String battery_level = "N/A";
+
+/* -------------------------------------------------------------- */
+
+
+/* ------------------ Arduino Runtime ------------------ */
 
 void setup() {
     ESP_Boot();
@@ -20,3 +32,5 @@ void loop() {
 
     delay(1);
 }
+
+/* ----------------------------------------------------- */

@@ -16,13 +16,23 @@
 
 AsyncWebServer server(80);
 
+/* ------------------ Driver State ------------------ */
+
 bool has_active_client = false;
 IPAddress active_client_ip = { 0, 0, 0, 0 };
+
+/* -------------------------------------------------- */
+
+
+/* ------------------ Stream Client Tracking ------------------ */
 
 uint32_t active_stream_clients = 0;
 portMUX_TYPE active_stream_clients_mux =
     portMUX_INITIALIZER_UNLOCKED;
 
+/**
+ * @brief    Return the number of active MJPEG stream connections.
+ */
 uint32_t GetActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     const uint32_t count = active_stream_clients;
@@ -30,12 +40,18 @@ uint32_t GetActiveStreamClients(void) {
     return count;
 }
 
+/**
+ * @brief    Increment the active MJPEG stream connection count.
+ */
 void IncrementActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     ++active_stream_clients;
     portEXIT_CRITICAL(&active_stream_clients_mux);
 }
 
+/**
+ * @brief    Decrement the active MJPEG stream connection count.
+ */
 void DecrementActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     if (active_stream_clients > 0) {
@@ -44,7 +60,16 @@ void DecrementActiveStreamClients(void) {
     portEXIT_CRITICAL(&active_stream_clients_mux);
 }
 
-// Response class for camera live stream GET request
+/* ------------------------------------------------------------ */
+
+
+/* ------------------ Camera Stream Response ------------------ */
+
+/**
+ * @brief    Asynchronous multipart response for the camera MJPEG stream.
+ * @details  Captures camera frames on demand and releases each frame after
+ *           its contents have been sent.
+ */
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
 private:
     camera_fb_t *fb;
@@ -114,16 +139,20 @@ public:
        
 };
 
-// Initialization API implementation
+/* ------------------------------------------------------------ */
+
+
+/* ------------------ Server Initialization ------------------ */
+
 esp_err_t Server_Init(void) {
-    // Initialize LittleFS
+    /* Initialize LittleFS. */
     if (!LittleFS.begin(true)) {
         Serial.println("[SERVER] Critical Error: LittleFS failed.");
         return ESP_FAIL;
     }
     Serial.println("[SERVER] LittleFS initialized successfully.");
 
-    // Initialize WiFiManager
+    /* Initialize WiFiManager. */
     WiFiManager wm;
     wm.setDebugOutput(false);
     wm.setConfigPortalTimeout(180);
@@ -140,15 +169,14 @@ esp_err_t Server_Init(void) {
     Serial.print("[SERVER] IP Address: ");
     Serial.println(WiFi.localIP());
 
-    // Initialize mDNS
-    // Domain name: "dart.local"
+    /* Initialize mDNS as dart.local. */
     if (!MDNS.begin("dart")) {
         Serial.println("[SERVER] Error initializing mDNS.");
     } else {
         Serial.println("[SERVER] mDNS active. Access http://dart.local");
     }
 
-    // Initialize Static UI Web Routes
+    /* Initialize static UI web routes. */
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(LittleFS, "/index.html", "text/html");
     });
@@ -161,7 +189,7 @@ esp_err_t Server_Init(void) {
         request->send(LittleFS, "/script.js", "application/javascript");
     });
 
-    // Initialize /control Web Route
+    /* Initialize the /control web route. */
     server.on("/control", HTTP_POST, [](AsyncWebServerRequest *request) {
         IPAddress request_ip = request->client()->remoteIP();
 
@@ -191,7 +219,7 @@ esp_err_t Server_Init(void) {
         }
     });
 
-    // Initialize /status Web Route
+    /* Initialize the /status web route. */
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         const IPAddress request_ip = request->client()->remoteIP();
 
@@ -215,7 +243,7 @@ esp_err_t Server_Init(void) {
         request->send(200, "application/json", json);
     });
 
-    // Initialize /stream Web Route
+    /* Initialize the /stream web route. */
     server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request) {
         AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse();
         request->send(response);
@@ -227,9 +255,16 @@ esp_err_t Server_Init(void) {
     return ESP_OK;
 }
 
+/* ----------------------------------------------------------- */
+
+
+/* ------------------ Server Shutdown ------------------ */
+
 void Server_Stop(void) {
     server.end();
     MDNS.end();
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_OFF);
 }
+
+/* ----------------------------------------------------- */

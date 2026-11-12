@@ -1,3 +1,8 @@
+/**
+ * @file     app.cpp
+ * @brief    ESP32 application runtime implementation.
+ */
+
 #include <Arduino.h>
 #include "app.h"
 #include "globals.h"
@@ -51,7 +56,7 @@ String Get_SystemState_String(void) {
 /* ---------------------------------------------------------- */
 
 
-/* ------------------ Boot Handler ------------------*/
+/* ------------------ Boot Handler ------------------ */
 
 #define UART_RX_PIN     14
 #define UART_TX_PIN     15
@@ -71,7 +76,7 @@ void ESP_Boot(void) {
     Serial.println("[SYSTEM] ESP32 initialization successful. Waiting for STM32...");
 }
 
-/* --------------------------------------------------*/
+/* -------------------------------------------------- */
 
 
 /* ------------------ Handshake Handler ------------------ */
@@ -141,15 +146,17 @@ void Serial1_Process(void) {
             LinkHandshake_ProcessByte(received, now);
         } 
         else if (received == 'B') {
-            // battery reception
-            // for later
+            // Battery data reception is not implemented yet.
         }
     }
 
     LinkHandshake_CheckTimeout(millis());
 }
 
-/* ------------------------------------------------------- */
+/* ----------------------------------------------------- */
+
+
+/* ------------------ Driver Connection Handler ------------------ */
 
 #define DRIVER_TIMEOUT_MS      2000U
 
@@ -165,3 +172,5 @@ void Check_DriverConnection(void) {
         }
     }
 }
+
+/* --------------------------------------------------------------- */

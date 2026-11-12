@@ -2,7 +2,8 @@
  * @file     camera.cpp
  * @brief    Source file for OV3660 camera module.
  * 
- * @details  This file provides Camera_Init API implementation, as well as camera pins definitions for the AI-Thinker ESP32 board.
+ * @details  This file provides the Camera_Init implementation and camera pin
+ *           definitions for the AI-Thinker ESP32-CAM board.
  */
 
 #include "camera.h"
@@ -32,7 +33,9 @@
 #define LED_GPIO_NUM   4
 /** @} */
 
-// Initialization API implementation
+/* ------------------ Camera Initialization ------------------ */
+
+/** Configure and initialize the camera sensor. */
 esp_err_t Camera_Init(void) {
     camera_config_t config = {};
     
@@ -91,8 +94,10 @@ esp_err_t Camera_Init(void) {
     }
 
     sensor->set_vflip(sensor, 1);   // Vertical Flip
-    // sensor->set_hmirror(s, 1); // Orizontal Flip
+    // sensor->set_hmirror(sensor, 1); // Horizontal flip
 
     Serial.println("[CAMERA] OV3660 Initialized Successfully.");
     return ESP_OK;
 }
+
+/* ----------------------------------------------------------- */

@@ -1,4 +1,10 @@
+/**
+ * @file     script.js
+ * @brief    Browser controls and status dashboard logic for the ESP32 server.
+ */
+
 /* ------------------ Stream Connection ------------------ */
+
 // This section manages the MJPEG video stream connection
 // The stream element stays transparent until the first valid frame arrives.
 // If the connection drops or fails, it retries every two seconds.
@@ -48,6 +54,7 @@ window.onload = () => {
 
 
 /* ------------------ User Input Parsing and Send Command ------------------ */
+
 // This section sanitizes user key input, maps it to one command and sends it to esp32 via POST method.
 // Conflicting Key Logic: - First Key Wins (e.g. 'W' first then 'S' -> 'W').
 //                        - Second Command Memory (e.g. 'W' hold first then 'S' hold -> 'W', followed by 'W' release -> 'S').
@@ -194,7 +201,8 @@ function clearHeldControls() {
 
 
 /* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
-// This section requests JSON from esp32 every two seconds to get battery, WiFi and mode info, then updates the UI Status Panel accordingly.
+
+// This section requests JSON from the ESP32 every second to get battery, WiFi and mode info, then updates the UI Status Panel accordingly.
 // This very request is also the heartbeat signal to test esp32-browser connection.
 
 const batStatus = document.getElementById('battery-status');
@@ -277,5 +285,4 @@ function updateStatus() {
 
 updateStatus();
 
-/* ------------------------------------------------------------------------ */
-
+/* ------------------------------------------------------------------------- */

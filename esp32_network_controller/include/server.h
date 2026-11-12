@@ -2,19 +2,19 @@
  * @file     server.h
  * @brief    Header file for server support.
  * 
- * @details  This file provides Server_Init API which configures the ESP32 Server for Rover Control Web Client supporting:
- *              - /stream web route for live stream from on-board camera
- *              - /control web route for live rover control
- *              - /status web route for status JSON packages containing battery, wifi and mode status,
- *           as well as WiFi connection:
- *              - mDNS for easy access on http://dart.local
- *              - easy rover wifi configuration via Access Point.
+ * @details  This file provides the API for the ESP32 web server, including:
+ *              - /stream for the camera MJPEG stream
+ *              - /control for rover control commands
+ *              - /status for battery, Wi-Fi, link, mode, and stream-client data
+ *              - mDNS access through http://dart.local
+ *              - Wi-Fi configuration through the WiFiManager access point
  * 
- * @note     The server is configured to connect to the last known WiFi. Only after it fails, it enables AP mode to configure the 
- *           new WiFi connection, giving a 3 minute window before restarting.
- *           The server accepts only one driver (Web Browser controlling the rover). Any other client is automatically in spectator
- *           mode (can see the live stream and status, but not control). Driver auto-disconnect is triggered after 2.5 seconds with
- *           no browser request.
+ * @note     The server first attempts to connect to the last known Wi-Fi
+ *           network. If that fails, it enables an access point for 3 minutes
+ *           before restarting.
+ * @note     Only one client may control the rover at a time. Other clients
+ *           remain spectators. The driver is released after 2 seconds without
+ *           a /status request.
  *           
  */
 
@@ -26,14 +26,14 @@
 #include "esp_camera.h" 
 
 /**
- * @brief  Initialize esp32 web server
+ * @brief  Initialize the ESP32 web server.
  * @retval ESP_OK   Server initialized successfully
  * @retval ESP_FAIL Server initialization failed
  */
 esp_err_t Server_Init(void);
 
 /**
- * @brief  Stop esp32 web server and WiFi
+ * @brief  Stop the ESP32 web server and Wi-Fi.
  */
 void Server_Stop(void);
 
