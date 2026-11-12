@@ -116,16 +116,20 @@ void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
 
     if (r_count >= REQUIRED_R_COUNT) {
         link_state = Link_State_t::LINK_ONLINE;
-        Serial1.write(SP_UART_HEARTBEAT);
-        Serial1.write(has_active_client
-                          ? SP_DRIVER_CONNECTED
-                          : SP_DRIVER_DISCONNECTED);
 
         if (boot_handshake) {
             boot_handshake = false;
 
+           Serial1.write(SP_ESP32_BOOT_READY);
+
             Serial.println("[SYSTEM] STM32 Connected. UART Link is online.");
+            return;
         }
+
+        Serial1.write(SP_UART_HEARTBEAT);
+        Serial1.write(has_active_client
+                          ? SP_DRIVER_CONNECTED
+                          : SP_DRIVER_DISCONNECTED);
     }
 }
 
