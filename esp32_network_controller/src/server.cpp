@@ -18,6 +18,9 @@ AsyncWebServer server(80);
 
 /* ------------------ Driver State ------------------ */
 
+// Driver state is accessed by the web-server callbacks and the main loop.
+// The project currently assumes these accesses do not overlap.
+
 bool has_active_client = false;
 IPAddress active_client_ip = { 0, 0, 0, 0 };
 
