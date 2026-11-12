@@ -213,6 +213,11 @@ esp_err_t Server_Init(void) {
 
     /* Initialize the /control web route. */
     server.on("/control", HTTP_POST, [](AsyncWebServerRequest *request) {
+        if (link_state != Link_State_t::LINK_ONLINE) {
+            request->send(503, "text/plain", "Service Unavailable");
+            return;
+        }
+        
         IPAddress request_ip = request->client()->remoteIP();
 
         if (has_active_client && request_ip != active_client_ip) {
