@@ -11,7 +11,7 @@
 
 /* ------------------ System Fault Handler ------------------ */
 
-#define SEND_X_FREQ_MS    50U
+static constexpr uint32_t SEND_X_FREQ_MS = 50U;
 
 void SystemFault_Enter(void) {
     system_state = System_State_t::SystemFault;
@@ -58,8 +58,8 @@ String Get_SystemState_String(void) {
 
 /* ------------------ Boot Handler ------------------ */
 
-#define UART_RX_PIN     14
-#define UART_TX_PIN     15
+static constexpr int8_t UART_RX_PIN = 14;
+static constexpr int8_t UART_TX_PIN = 15;
 
 void ESP_Boot(void) {
     Serial.begin(115200);
@@ -81,8 +81,8 @@ void ESP_Boot(void) {
 
 /* ------------------ Handshake Handler ------------------ */
 
-#define REQUIRED_R_COUNT       3U
-#define R_INTERVAL_TIMEOUT_MS  100U
+static constexpr uint8_t REQUIRED_R_COUNT = 3U;
+static constexpr uint32_t R_INTERVAL_TIMEOUT_MS = 100U;
 
 static uint8_t r_count;
 static uint32_t last_r_time;
@@ -151,31 +151,31 @@ String Get_LinkState_String(void) {
 /* ------------------ Battery Handler ------------------ */
 
 /** Minimum 2S battery-pack voltage used for percentage conversion. */
-#define BATTERY_MIN_VOLTAGE         6.0f
+static constexpr float BATTERY_MIN_VOLTAGE = 6.0f;
 
 /** Maximum 2S battery-pack voltage used for percentage conversion. */
-#define BATTERY_MAX_VOLTAGE         8.4f
+static constexpr float BATTERY_MAX_VOLTAGE = 8.4f;
 
 /** Maximum interval between bytes in one battery frame. */
-#define BATTERY_FRAME_TIMEOUT_MS    100U
+static constexpr uint32_t BATTERY_FRAME_TIMEOUT_MS = 100U;
 
 /** Maximum number of characters in the voltage payload. */
-#define BATTERY_BUFFER_MAX_LEN      4U
+static constexpr uint8_t BATTERY_BUFFER_MAX_LEN = 4U;
 
 /** Accumulated voltage payload between B and the terminating newline. */
-String received_battery_buffer = "";
+static String received_battery_buffer = "";
 
 /** Indicates that the current battery frame has received its newline. */
-bool battery_reception_done = false;
+static bool battery_reception_done = false;
 
 /** Indicates that Serial1 is currently receiving a battery frame. */
-bool receiving_battery_frame = false;
+static bool receiving_battery_frame = false;
 
 /** Timestamp of the most recently received battery-frame byte. */
-volatile uint32_t last_battery_byte = 0;
+static volatile uint32_t last_battery_byte = 0;
 
 /** Number of voltage-payload characters received in the current frame. */
-uint8_t buffer_length = 0;
+static uint8_t buffer_length = 0;
 
 /**
  * @brief    Store one byte from the current battery frame.
@@ -289,7 +289,7 @@ void Serial1_Process(void) {
 
 /* ------------------ Driver Connection Handler ------------------ */
 
-#define DRIVER_TIMEOUT_MS      2000U
+static constexpr uint32_t DRIVER_TIMEOUT_MS = 2000U;
 
 volatile uint32_t last_status_request = 0;
 

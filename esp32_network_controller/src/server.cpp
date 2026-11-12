@@ -14,7 +14,7 @@
 #include <ESPmDNS.h>
 #include <ESPAsyncWebServer.h>
 
-AsyncWebServer server(80);
+static AsyncWebServer server(80);
 
 /* ------------------ Driver State ------------------ */
 
@@ -29,14 +29,14 @@ IPAddress active_client_ip = { 0, 0, 0, 0 };
 
 /* ------------------ Stream Client Tracking ------------------ */
 
-uint32_t active_stream_clients = 0;
-portMUX_TYPE active_stream_clients_mux =
+static uint32_t active_stream_clients = 0;
+static portMUX_TYPE active_stream_clients_mux =
     portMUX_INITIALIZER_UNLOCKED;
 
 /**
  * @brief    Return the number of active MJPEG stream connections.
  */
-uint32_t GetActiveStreamClients(void) {
+static uint32_t GetActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     const uint32_t count = active_stream_clients;
     portEXIT_CRITICAL(&active_stream_clients_mux);
@@ -46,7 +46,7 @@ uint32_t GetActiveStreamClients(void) {
 /**
  * @brief    Increment the active MJPEG stream connection count.
  */
-void IncrementActiveStreamClients(void) {
+static void IncrementActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     ++active_stream_clients;
     portEXIT_CRITICAL(&active_stream_clients_mux);
@@ -55,7 +55,7 @@ void IncrementActiveStreamClients(void) {
 /**
  * @brief    Decrement the active MJPEG stream connection count.
  */
-void DecrementActiveStreamClients(void) {
+static void DecrementActiveStreamClients(void) {
     portENTER_CRITICAL(&active_stream_clients_mux);
     if (active_stream_clients > 0) {
         --active_stream_clients;
