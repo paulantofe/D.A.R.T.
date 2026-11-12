@@ -121,6 +121,8 @@ String Get_SystemState_String(void);
  */
 String Get_LinkState_String(void);
 
+void Battery_ProcessFrame(const char received);
+
 /* ------------------------------------------------------ */
 
 #endif

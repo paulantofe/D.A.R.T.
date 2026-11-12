@@ -143,16 +143,99 @@ String Get_LinkState_String(void) {
 
 /* ------------------ Serial1 Handler ------------------ */
 
+#define BATTERY_MIN_VOLTAGE         6.0f
+#define BATTERY_MAX_VOLTAGE         8.4f
+#define FRAME_TIMEOUT_MS            100U
+#define BATTERY_BUFFER_MAX_LEN      4U
+
+String received_battery_buffer = "";
+bool battery_reception_done = false;
+bool receiving_battery_frame = false;
+volatile uint32_t last_battery_byte = 0;
+uint8_t buffer_length = 0;
+
+void Battery_ProcessByte(const char received) {
+    if (millis() - last_battery_byte > FRAME_TIMEOUT_MS) {
+        receiving_battery_frame = false;
+        battery_reception_done = false;
+        received_battery_buffer = "";
+        buffer_length = 0;
+        return;
+    }
+
+    if (received == '\n') {
+        battery_reception_done = true;
+        return;
+    }
+
+    if (buffer_length >= BATTERY_BUFFER_MAX_LEN) {
+        receiving_battery_frame = false;
+        battery_reception_done = false;
+        received_battery_buffer = "";
+        buffer_length = 0;
+        return;
+    }
+
+    last_battery_byte = millis();
+    buffer_length++;
+    received_battery_buffer += received;
+}
+
+String Battery_ParseBuffer(void) {
+    const float voltage = received_battery_buffer.toFloat();
+
+    if (voltage <= 0.0f) {
+        return "";
+    }
+
+    float voltage_percent =
+        ((voltage - BATTERY_MIN_VOLTAGE) /
+         (BATTERY_MAX_VOLTAGE - BATTERY_MIN_VOLTAGE)) * 100.0f;
+
+    if (voltage_percent < 0.0f) {
+        voltage_percent = 0.0f;
+    } else if (voltage_percent > 100.0f) {
+        voltage_percent = 100.0f;
+    }
+
+    return String(voltage_percent);
+}
+
+void Battery_StartFrame(void) {
+    receiving_battery_frame = true;
+    received_battery_buffer = "";
+    battery_reception_done = false;
+    last_battery_byte = millis();
+    buffer_length = 0;
+}
+
+void Battery_ProcessFrame(const char received) {
+    Battery_ProcessByte(received);
+
+    if (battery_reception_done) {
+        battery_reception_done = false;
+
+        String parse_battery = Battery_ParseBuffer();
+        if (parse_battery != "") {
+            battery_level = parse_battery;
+        }
+
+        received_battery_buffer = "";
+        receiving_battery_frame = false;
+    }
+}
+
 void Serial1_Process(void) {
     while (Serial1.available() > 0) {
         const char received = Serial1.read();
         const uint32_t now = millis();
 
-        if (received == 'R') {
+        if (receiving_battery_frame) {
+            Battery_ProcessFrame(received);
+        } else if (received == 'R') {
             LinkHandshake_ProcessByte(received, now);
-        } 
-        else if (received == 'B') {
-            // Battery data reception is not implemented yet.
+        } else if (received == 'B') {
+            Battery_StartFrame();
         }
     }
 }
