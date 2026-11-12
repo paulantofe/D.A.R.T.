@@ -87,6 +87,7 @@ void ESP_Boot(void) {
 static uint8_t r_count;
 static uint32_t last_r_time;
 static bool reset_handshake = true;
+static bool boot_handshake = true;
 
 void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
     if (received != 'R') { return; }
@@ -115,6 +116,12 @@ void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
     if (r_count >= REQUIRED_R_COUNT) {
         link_state = Link_State_t::LINK_ONLINE;
         Serial1.write('H');
+
+        if (boot_handshake) {
+            boot_handshake = false;
+
+            Serial.println("[SYSTEM] STM32 Connected. UART Link is online.");
+        }
     }
 }
 
