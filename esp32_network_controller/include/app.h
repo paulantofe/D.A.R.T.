@@ -99,6 +99,10 @@ void SystemState_Update();
  */
 void Serial1_Process();
 
+String Get_SystemState_String(void);
+
+String Get_LinkState_String(void);
+
 /* ------------------------------------------------------ */
 
 #endif

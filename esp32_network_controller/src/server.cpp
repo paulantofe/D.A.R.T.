@@ -193,29 +193,15 @@ esp_err_t Server_Init(void) {
     // Initialize /status Web Route
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         IPAddress request_ip = request->client()->remoteIP();
-        String mode;
+    
+        String system_state_string = Get_SystemState_String();
+        String link_state_string = Get_LinkState_String();
 
-        if (has_active_client && active_client_ip == request_ip) {
-            last_command_time = millis();
-            mode = "Driver";
-        }
-        else {
-            mode = "Spectator";
-        }
-        
-        int8_t rssi = WiFi.RSSI();
-        String json = "{";
-        json += "\"battery\":\"" + rover_battery + "\",";
-        json += "\"rssi\":" + String(rssi) + ",";
-        json += "\"mode\":\"" + mode + "\",";
-        json += "\"stm32_link_known\":";
-        json += stm32_link_status_known ? "true" : "false";
-        json += ",";
-        json += "\"stm32_link_ok\":";
-        json += stm32_link_ok ? "true" : "false";
-        json += ",";
-        json += "\"stream_clients\":" + String(GetActiveStreamClients());
-        json += "}";
+        String json = String("{\"RSSI\":") + String(WiFi.RSSI()) + ", ";
+        json += String("\"Battery\":\"") + battery_level + "\", ";
+        json += String("\"System_State\":\"") + system_state_string + "\", ";
+        json += String("\"Link_State\":\"") + link_state_string + "\", ";
+        json += String("\"Client_Mode\":\"") + client_mode + "\"}";
 
         request->send(200, "application/json", json);
     });

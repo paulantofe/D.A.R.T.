@@ -40,6 +40,14 @@ void SystemState_Update(void) {
     }
 }
 
+String Get_SystemState_String(void) {
+    return system_state == System_State_t::FailSafe    ? "failsafe" :
+           system_state == System_State_t::Idle        ? "idle"     :
+           system_state == System_State_t::Moving      ? "moving"   :
+           system_state == System_State_t::Offline     ? "offline"  :
+           system_state == System_State_t::SystemFault ? "systemfault" : "";        
+}
+
 /* ---------------------------------------------------------- */
 
 
@@ -111,6 +119,12 @@ void LinkHandshake_CheckTimeout(const uint32_t now) {
         reset_handshake = true;
         r_count = 0;
     }
+}
+
+String Get_LinkState_String(void) {
+    return link_state == Link_State_t::LINK_OFFLINE     ? "offline" :
+           link_state == Link_State_t::LINK_ONLINE      ? "online"  :
+           link_state == Link_State_t::LINK_HANDSHAKING ? "handshaking" : "";
 }
 
 /* ------------------------------------------------------- */

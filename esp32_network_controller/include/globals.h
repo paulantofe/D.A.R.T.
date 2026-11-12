@@ -8,9 +8,15 @@
 
 #include <Arduino.h>
 #include "app.h"
+#include <stdint.h>
 
 extern volatile System_State_t system_state;
 
 extern volatile Link_State_t link_state;
+
+// Percent value
+extern String battery_level;
+
+extern String client_mode;
 
 #endif
