@@ -74,14 +74,19 @@ class AsyncJpegStreamResponse : public AsyncAbstractResponse {
 private:
     camera_fb_t *fb;
     size_t index;
+    char header[128];
+    size_t header_len;
+    size_t header_index;
 
 public:
     AsyncJpegStreamResponse() {
         _code = 200;
         _contentType = "multipart/x-mixed-replace; boundary=frame";
         _sendContentLength = false;
-        fb = NULL;
+        fb = nullptr;
         index = 0;
+        header_len = 0;
+        header_index = 0;
         IncrementActiveStreamClients();
     }
 
@@ -93,50 +98,64 @@ public:
     bool _sourceValid() const { return true; }
 
     size_t _fillBuffer(uint8_t *buf, size_t maxLen) override {
-        size_t bytes_sent = 0;
-        
         if (!fb) {
             fb = esp_camera_fb_get();
             if (!fb) {
                 Serial.println("[CAMERA] Frame capture failed.");
                 return RESPONSE_TRY_AGAIN;
             }
+
             index = 0;
-            
-            char header[128];
-            size_t hlen = snprintf(header, sizeof(header), 
-                "\r\n--frame\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n", 
-                fb->len);
-                
-            if (maxLen > hlen) {
-                memcpy(buf, header, hlen);
-                buf += hlen;
-                maxLen -= hlen;
-                bytes_sent += hlen;
-            } else {
+            header_index = 0;
+            header_len = snprintf(
+                header,
+                sizeof(header),
+                "\r\n--frame\r\n"
+                "Content-Type: image/jpeg\r\n"
+                "Content-Length: %zu\r\n\r\n",
+                fb->len
+            );
+
+            if (header_len >= sizeof(header)) {
                 esp_camera_fb_return(fb);
-                fb = NULL;
-                return 0; 
+                fb = nullptr;
+                return RESPONSE_TRY_AGAIN;
             }
         }
 
-        size_t to_copy = fb->len - index;
-        if (to_copy > maxLen) {
-            to_copy = maxLen; 
+        size_t bytes_sent = 0;
+
+        if (header_index < header_len && maxLen > 0) {
+            size_t header_bytes = header_len - header_index;
+            if (header_bytes > maxLen) {
+                header_bytes = maxLen;
+            }
+
+            memcpy(buf, header + header_index, header_bytes);
+            header_index += header_bytes;
+            buf += header_bytes;
+            maxLen -= header_bytes;
+            bytes_sent += header_bytes;
         }
 
-        memcpy(buf, fb->buf + index, to_copy);
-        index += to_copy;
-        bytes_sent += to_copy;
+        if (maxLen > 0 && index < fb->len) {
+            size_t frame_bytes = fb->len - index;
+            if (frame_bytes > maxLen) {
+                frame_bytes = maxLen;
+            }
 
-        if (index == fb->len) {
+            memcpy(buf, fb->buf + index, frame_bytes);
+            index += frame_bytes;
+            bytes_sent += frame_bytes;
+        }
+
+        if (header_index == header_len && index == fb->len) {
             esp_camera_fb_return(fb);
-            fb = NULL;
+            fb = nullptr;
         }
-        
+
         return bytes_sent;
     }
-       
 };
 
 /* ------------------------------------------------------------ */
