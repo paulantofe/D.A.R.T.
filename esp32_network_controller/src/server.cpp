@@ -199,13 +199,6 @@ esp_err_t Server_Init(void) {
             return;
         }
 
-        if (!has_active_client) {
-            has_active_client = true;
-            active_client_ip = request_ip;
-            Serial.print("[SERVER] New driver Connected: ");
-            Serial.println(active_client_ip);
-        }
-        
         if (request->hasParam("val", true)) {
             String command = request->getParam("val", true)->value();
 
@@ -216,6 +209,14 @@ esp_err_t Server_Init(void) {
             request->send(200, "text/plain", "OK");
         } else {
             request->send(400, "text/plain", "Missing Value");
+        }
+
+        if (!has_active_client) {
+            has_active_client = true;
+            last_status_request = millis();
+            active_client_ip = request_ip;
+            Serial.print("[SERVER] New driver Connected: ");
+            Serial.println(active_client_ip);
         }
     });
 
