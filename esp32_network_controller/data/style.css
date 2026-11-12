@@ -1,8 +1,5 @@
 :root {
   color-scheme: dark;
-  --page: #0b1118;
-  --panel: #121b25;
-  --panel-raised: #172330;
   --line: #283746;
   --text: #edf4f2;
   --muted: #8d9da8;
@@ -87,7 +84,6 @@ button {
 .eyebrow,
 .readout-label,
 .camera-caption,
-.section-index,
 .control-footnote,
 .mode-label {
   color: var(--muted);
@@ -150,13 +146,21 @@ button {
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
-  align-items: start;
+  align-items: stretch;
   gap: 18px;
 }
 
 .main-column {
   display: grid;
   min-width: 0;
+  gap: 18px;
+}
+
+.right-column {
+  display: grid;
+  align-self: start;
+  height: 100%;
+  align-content: space-between;
   gap: 18px;
 }
 
@@ -293,14 +297,9 @@ p {
   padding: 20px;
 }
 
-.section-index {
-  color: #62727e;
-  font-size: 9px;
-}
-
 .status-container {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: 16px;
 }
@@ -337,6 +336,7 @@ p {
 .status-label {
   color: var(--muted);
   font-size: 11px;
+  line-height: 1.2;
 }
 
 .status-value {
@@ -514,7 +514,6 @@ p {
   text-align: center;
   font-size: 9px;
   letter-spacing: 0.7px;
-  text-transform: uppercase;
 }
 
 .page-footer {
@@ -533,10 +532,16 @@ p {
 
   .workspace {
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
   }
 
   .control-panel {
     position: static;
+  }
+
+  .right-column {
+    height: auto;
+    align-content: normal;
   }
 }
 
