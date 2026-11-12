@@ -28,6 +28,8 @@ void loop() {
 
     SystemState_Update();
 
+    LinkHandshake_CheckTimeout(millis());
+
     Check_DriverConnection();
 
     delay(1);

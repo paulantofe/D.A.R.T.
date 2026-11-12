@@ -155,8 +155,6 @@ void Serial1_Process(void) {
             // Battery data reception is not implemented yet.
         }
     }
-
-    LinkHandshake_CheckTimeout(millis());
 }
 
 /* ----------------------------------------------------- */
