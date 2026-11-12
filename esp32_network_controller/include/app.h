@@ -121,6 +121,12 @@ String Get_SystemState_String(void);
  */
 String Get_LinkState_String(void);
 
+/**
+ * @brief    Process one byte from an STM32 battery-voltage frame.
+ * @details  Battery frames use the format B<float>\n. The leading 'B' is
+ *           consumed by Serial1_Process before this function is called.
+ * @param    received  Next byte from the battery-voltage payload.
+ */
 void Battery_ProcessFrame(const char received);
 
 /* ------------------------------------------------------ */

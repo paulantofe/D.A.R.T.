@@ -141,19 +141,40 @@ String Get_LinkState_String(void) {
 /* ------------------------------------------------------- */
 
 
-/* ------------------ Serial1 Handler ------------------ */
+/* ------------------ Battery Handler ------------------ */
 
+/** Minimum 2S battery-pack voltage used for percentage conversion. */
 #define BATTERY_MIN_VOLTAGE         6.0f
+
+/** Maximum 2S battery-pack voltage used for percentage conversion. */
 #define BATTERY_MAX_VOLTAGE         8.4f
+
+/** Maximum interval between bytes in one battery frame. */
 #define FRAME_TIMEOUT_MS            100U
+
+/** Maximum number of characters in the voltage payload. */
 #define BATTERY_BUFFER_MAX_LEN      4U
 
+/** Accumulated voltage payload between B and the terminating newline. */
 String received_battery_buffer = "";
+
+/** Indicates that the current battery frame has received its newline. */
 bool battery_reception_done = false;
+
+/** Indicates that Serial1 is currently receiving a battery frame. */
 bool receiving_battery_frame = false;
+
+/** Timestamp of the most recently received battery-frame byte. */
 volatile uint32_t last_battery_byte = 0;
+
+/** Number of voltage-payload characters received in the current frame. */
 uint8_t buffer_length = 0;
 
+/**
+ * @brief    Store one byte from the current battery frame.
+ * @details  Aborts the frame when the inter-byte timeout or payload limit is
+ *           exceeded, and marks the frame complete when a newline is found.
+ */
 void Battery_ProcessByte(const char received) {
     if (millis() - last_battery_byte > FRAME_TIMEOUT_MS) {
         receiving_battery_frame = false;
@@ -181,6 +202,11 @@ void Battery_ProcessByte(const char received) {
     received_battery_buffer += received;
 }
 
+/**
+ * @brief    Convert the received battery voltage to a percentage string.
+ * @details  Uses the configured 2S pack limits and clamps the result to
+ *           0–100 percent. An invalid or non-positive reading returns empty.
+ */
 String Battery_ParseBuffer(void) {
     const float voltage = received_battery_buffer.toFloat();
 
@@ -201,6 +227,9 @@ String Battery_ParseBuffer(void) {
     return String(voltage_percent);
 }
 
+/**
+ * @brief    Reset the state and begin receiving a battery frame.
+ */
 void Battery_StartFrame(void) {
     receiving_battery_frame = true;
     received_battery_buffer = "";
@@ -209,6 +238,9 @@ void Battery_StartFrame(void) {
     buffer_length = 0;
 }
 
+/**
+ * @brief    Process a byte and publish a completed battery frame.
+ */
 void Battery_ProcessFrame(const char received) {
     Battery_ProcessByte(received);
 
@@ -224,6 +256,11 @@ void Battery_ProcessFrame(const char received) {
         receiving_battery_frame = false;
     }
 }
+
+/* -------------------------------------------------- */
+
+
+/* ------------------ Serial1 Handler ------------------ */
 
 void Serial1_Process(void) {
     while (Serial1.available() > 0) {
