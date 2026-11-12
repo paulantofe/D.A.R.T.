@@ -66,22 +66,25 @@ void ESP_Boot(void);
 void SystemFault_Enter(void);
 
 /**
- * @brief    Process one received STM32 handshake byte.
- * @details  Counts timed 'R' messages and changes the link state to
- *           LINK_ONLINE after the required sequence. Sends the current driver
- *           state in response to each runtime heartbeat.
+ * @brief    Process one received STM32 heartbeat byte.
+ * @details  Counts timed boot-ready messages and changes the link state to
+ *           LINK_ONLINE after the required sequence. The first completed
+ *           sequence receives the boot-ready response; later sequences are
+ *           runtime recovery handshakes. Once online, each STM32 heartbeat
+ *           receives the current driver-state response.
  * @param    received  Byte received from the STM32 over Serial1.
  * @param    now       Current millisecond timestamp used for interval
  *                     validation.
- * @note     The caller should invoke this function only for received 'R'
- *           bytes.
+ * @note     The caller should invoke this function only for
+ *           SP_STM32_HEARTBEAT bytes.
  */
 void LinkHandshake_ProcessByte(const uint8_t received, const uint32_t now);
 
 /**
  * @brief    Detect an expired STM32 heartbeat.
  * @details  Changes the link state to LINK_OFFLINE and resets handshake
- *           progress when no 'R' message has arrived within the timeout.
+ *           progress when no SP_STM32_HEARTBEAT byte has arrived within the
+ *           timeout.
  * @param    now       Current millisecond timestamp used for timeout
  *                     validation.
  */
@@ -99,15 +102,19 @@ void SystemState_Update(void);
 /**
  * @brief    Release the active driver after a status heartbeat timeout.
  * @details  Clears the active driver identity when no status request has
- *           been received within DRIVER_TIMEOUT_MS.
+ *           been received within DRIVER_TIMEOUT_MS. The next runtime
+ *           heartbeat response then reports SP_DRIVER_DISCONNECTED.
  */
 void DriverConnection_CheckTimeout(void);
 
 /**
  * @brief    Process bytes received over the STM32 serial link.
- * @details  Dispatches received protocol bytes to the handshake and other
- *           serial handlers, then checks for a link timeout.
+ * @details  Dispatches system-fault, heartbeat, and battery-frame bytes to
+ *           their handlers. An incoming system fault enters the terminal
+ *           SystemFault state.
  * @note     This function should be called continuously from the main loop.
+ *           Link timeout checking is performed separately by
+ *           LinkHandshake_CheckTimeout().
  */
 void Serial1_Process(void);
 
