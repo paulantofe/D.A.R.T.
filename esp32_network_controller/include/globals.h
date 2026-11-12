@@ -17,6 +17,7 @@ extern volatile Link_State_t link_state;
 // Percent value
 extern String battery_level;
 
-extern String client_mode;
+extern bool has_active_client;
+extern IPAddress active_client_ip;
 
 #endif

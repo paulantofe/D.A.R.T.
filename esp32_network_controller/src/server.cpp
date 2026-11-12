@@ -16,30 +16,8 @@
 
 AsyncWebServer server(80);
 
-IPAddress active_client_ip;
-uint32_t active_stream_clients = 0;
-portMUX_TYPE active_stream_clients_mux = portMUX_INITIALIZER_UNLOCKED;
-
-uint32_t GetActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    const uint32_t count = active_stream_clients;
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-    return count;
-}
-
-void IncrementActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    ++active_stream_clients;
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-}
-
-void DecrementActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    if (active_stream_clients > 0) {
-        --active_stream_clients;
-    }
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-}
+bool has_active_client = false;
+IPAddress active_client_ip = { 0, 0, 0, 0 };
 
 // Response class for camera live stream GET request
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
@@ -192,10 +170,12 @@ esp_err_t Server_Init(void) {
 
     // Initialize /status Web Route
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
-        IPAddress request_ip = request->client()->remoteIP();
+        const IPAddress request_ip = request->client()->remoteIP();
     
-        String system_state_string = Get_SystemState_String();
-        String link_state_string = Get_LinkState_String();
+        const String client_mode = has_active_client && request_ip == active_client_ip
+                                       ? "Driver" : "Spectator";
+        const String system_state_string = Get_SystemState_String();
+        const String link_state_string = Get_LinkState_String();
 
         String json = String("{\"RSSI\":") + String(WiFi.RSSI()) + ", ";
         json += String("\"Battery\":\"") + battery_level + "\", ";

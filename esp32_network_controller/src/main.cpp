@@ -7,8 +7,6 @@ volatile Link_State_t link_state = Link_State_t::LINK_OFFLINE;
 
 extern String battery_level = "N/A";
 
-extern String client_mode = "N/A";
-
 void setup() {
     ESP_Boot();
 }
