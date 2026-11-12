@@ -59,7 +59,7 @@ void ESP_Boot(void);
 /**
  * @brief    Enter the terminal system-fault state.
  * @details  Sets the application state to SystemFault and repeatedly
- *           transmits the single-byte 'X' fault indication to the STM32.
+ *           transmits the system-fault indication to the STM32.
  * @note     This function does not return and requires the system to be
  *           rebooted to leave the fault state.
  */
@@ -68,8 +68,8 @@ void SystemFault_Enter(void);
 /**
  * @brief    Process one received STM32 handshake byte.
  * @details  Counts timed 'R' messages and changes the link state to
- *           LINK_ONLINE after the required sequence. Sends 'H' when the
- *           handshake is established.
+ *           LINK_ONLINE after the required sequence. Sends the heartbeat
+ *           frame and current driver state when the handshake is established.
  * @param    received  Byte received from the STM32 over Serial1.
  * @param    now       Current millisecond timestamp used for interval
  *                     validation.

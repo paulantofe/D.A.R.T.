@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "camera.h"
 #include "server.h"
+#include "serial_protocol.h"
 
 /* ------------------ System Fault Handler ------------------ */
 
@@ -19,7 +20,7 @@ void SystemFault_Enter(void) {
     Serial.println("[SYSTEM] Encountered System Fault. Please reboot the rover.");
     
     while (true) {
-        Serial1.print('X');
+        Serial1.write(SP_SYSTEM_FAULT);
         delay(SEND_X_FREQ_MS);
     }    
 }
@@ -90,7 +91,7 @@ static bool reset_handshake = true;
 static bool boot_handshake = true;
 
 void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
-    if (received != 'R') { return; }
+    if (received != SP_STM32_HEARTBEAT) { return; }
     
     if (reset_handshake) {
         reset_handshake = false;
@@ -115,7 +116,10 @@ void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
 
     if (r_count >= REQUIRED_R_COUNT) {
         link_state = Link_State_t::LINK_ONLINE;
-        Serial1.write('H');
+        Serial1.write(SP_UART_HEARTBEAT);
+        Serial1.write(has_active_client
+                          ? SP_DRIVER_CONNECTED
+                          : SP_DRIVER_DISCONNECTED);
 
         if (boot_handshake) {
             boot_handshake = false;
@@ -276,9 +280,9 @@ void Serial1_Process(void) {
 
         if (receiving_battery_frame) {
             Battery_ProcessFrame(received);
-        } else if (received == 'R') {
+        } else if (received == SP_STM32_HEARTBEAT) {
             LinkHandshake_ProcessByte(received, now);
-        } else if (received == 'B') {
+        } else if (received == SP_BATTERY_FRAME) {
             Battery_StartFrame();
         }
     }
