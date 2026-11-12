@@ -16,5 +16,7 @@ void loop() {
 
     SystemState_Update();
 
+    Check_DriverConnection();
+
     delay(1);
 }

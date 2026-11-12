@@ -20,4 +20,6 @@ extern String battery_level;
 extern bool has_active_client;
 extern IPAddress active_client_ip;
 
+extern volatile uint32_t last_status_request;
+
 #endif

@@ -91,6 +91,8 @@ void LinkHandshake_CheckTimeout(const uint32_t now);
  */
 void SystemState_Update(void);
 
+void Check_DriverConnection(void);
+
 /**
  * @brief    Process bytes received over the STM32 serial link.
  * @details  Dispatches received protocol bytes to the handshake and other

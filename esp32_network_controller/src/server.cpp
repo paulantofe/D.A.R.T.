@@ -171,8 +171,6 @@ esp_err_t Server_Init(void) {
             return;
         }
 
-        last_command_time = millis();
-
         if (!has_active_client) {
             has_active_client = true;
             active_client_ip = request_ip;
@@ -196,6 +194,10 @@ esp_err_t Server_Init(void) {
     // Initialize /status Web Route
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         const IPAddress request_ip = request->client()->remoteIP();
+
+        if (has_active_client && request_ip == active_client_ip) {
+            last_status_request = millis();
+        }
     
         const String client_mode = has_active_client && request_ip == active_client_ip
                                        ? "Driver" : "Spectator";

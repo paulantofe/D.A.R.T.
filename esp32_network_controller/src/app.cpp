@@ -150,3 +150,18 @@ void Serial1_Process(void) {
 }
 
 /* ------------------------------------------------------- */
+
+#define DRIVER_TIMEOUT_MS      2000U
+
+volatile uint32_t last_status_request = 0;
+
+void Check_DriverConnection(void) {
+    if (has_active_client) {
+        if (millis() - last_status_request > DRIVER_TIMEOUT_MS) {
+            has_active_client = false;
+            active_client_ip = { 0, 0, 0, 0 };
+
+            Serial.println("[SYSTEM] Driver disconnected. Timeout Elapsed.");
+        }
+    }
+}
