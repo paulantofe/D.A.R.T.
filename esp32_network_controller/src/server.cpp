@@ -19,6 +19,31 @@ AsyncWebServer server(80);
 bool has_active_client = false;
 IPAddress active_client_ip = { 0, 0, 0, 0 };
 
+uint32_t active_stream_clients = 0;
+portMUX_TYPE active_stream_clients_mux =
+    portMUX_INITIALIZER_UNLOCKED;
+
+uint32_t GetActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    const uint32_t count = active_stream_clients;
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+    return count;
+}
+
+void IncrementActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    ++active_stream_clients;
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+}
+
+void DecrementActiveStreamClients(void) {
+    portENTER_CRITICAL(&active_stream_clients_mux);
+    if (active_stream_clients > 0) {
+        --active_stream_clients;
+    }
+    portEXIT_CRITICAL(&active_stream_clients_mux);
+}
+
 // Response class for camera live stream GET request
 class AsyncJpegStreamResponse : public AsyncAbstractResponse {
 private:
@@ -181,7 +206,9 @@ esp_err_t Server_Init(void) {
         json += String("\"Battery\":\"") + battery_level + "\", ";
         json += String("\"System_State\":\"") + system_state_string + "\", ";
         json += String("\"Link_State\":\"") + link_state_string + "\", ";
-        json += String("\"Client_Mode\":\"") + client_mode + "\"}";
+        json += String("\"Client_Mode\":\"") + client_mode + "\", ";
+        json += String("\"Active_Clients\":") + String(GetActiveStreamClients());
+        json += "}";
 
         request->send(200, "application/json", json);
     });
