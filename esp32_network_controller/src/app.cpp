@@ -124,6 +124,12 @@ void LinkHandshake_CheckTimeout(const uint32_t now) {
         reset_handshake = true;
         r_count = 0;
     }
+
+    if (link_state == LINK_HANDSHAKING && now - last_r_time > R_INTERVAL_TIMEOUT_MS) {
+        link_state = LINK_OFFLINE;
+        reset_handshake = true;
+        r_count = 0;
+    }
 }
 
 String Get_LinkState_String(void) {
