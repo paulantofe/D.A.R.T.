@@ -150,7 +150,7 @@ String Get_LinkState_String(void) {
 #define BATTERY_MAX_VOLTAGE         8.4f
 
 /** Maximum interval between bytes in one battery frame. */
-#define FRAME_TIMEOUT_MS            100U
+#define BATTERY_FRAME_TIMEOUT_MS    100U
 
 /** Maximum number of characters in the voltage payload. */
 #define BATTERY_BUFFER_MAX_LEN      4U
@@ -176,7 +176,7 @@ uint8_t buffer_length = 0;
  *           exceeded, and marks the frame complete when a newline is found.
  */
 void Battery_ProcessByte(const char received) {
-    if (millis() - last_battery_byte > FRAME_TIMEOUT_MS) {
+    if (millis() - last_battery_byte > BATTERY_FRAME_TIMEOUT_MS) {
         receiving_battery_frame = false;
         battery_reception_done = false;
         received_battery_buffer = "";
