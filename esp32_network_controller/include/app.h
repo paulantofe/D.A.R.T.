@@ -89,7 +89,7 @@ void LinkHandshake_CheckTimeout(const uint32_t now);
  *           FailSafe when the link is lost.
  * @note     SystemFault is terminal and is not changed by this function.
  */
-void SystemState_Update();
+void SystemState_Update(void);
 
 /**
  * @brief    Process bytes received over the STM32 serial link.
@@ -97,7 +97,7 @@ void SystemState_Update();
  *           serial handlers, then checks for a link timeout.
  * @note     This function should be called continuously from the main loop.
  */
-void Serial1_Process();
+void Serial1_Process(void);
 
 String Get_SystemState_String(void);
 

@@ -132,7 +132,7 @@ String Get_LinkState_String(void) {
 
 /* ------------------ Serial1 Handler ------------------ */
 
-void Serial1_Process() {
+void Serial1_Process(void) {
     while (Serial1.available() > 0) {
         const char received = Serial1.read();
         const uint32_t now = millis();
