@@ -76,7 +76,7 @@ void SystemFault_Enter(void);
  * @note     The caller should invoke this function only for received 'R'
  *           bytes.
  */
-void LinkHandshake_ProcessByte(const char received, const uint32_t now);
+void LinkHandshake_ProcessByte(const uint8_t received, const uint32_t now);
 
 /**
  * @brief    Detect an expired STM32 heartbeat.
@@ -127,7 +127,7 @@ String Get_LinkState_String(void);
  *           consumed by Serial1_Process before this function is called.
  * @param    received  Next byte from the battery-voltage payload.
  */
-void Battery_ProcessFrame(const char received);
+void Battery_ProcessFrame(const uint8_t received);
 
 /* ------------------------------------------------------ */
 

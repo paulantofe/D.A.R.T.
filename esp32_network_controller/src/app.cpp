@@ -90,7 +90,7 @@ static uint32_t last_r_time;
 static bool reset_handshake = true;
 static bool boot_handshake = true;
 
-void LinkHandshake_ProcessByte(const char received, const uint32_t now) {
+void LinkHandshake_ProcessByte(const uint8_t received, const uint32_t now) {
     if (received != SP_STM32_HEARTBEAT) { return; }
     
     if (reset_handshake) {
@@ -190,7 +190,7 @@ static uint8_t buffer_length = 0;
  * @details  Aborts the frame when the inter-byte timeout or payload limit is
  *           exceeded, and marks the frame complete when a newline is found.
  */
-void Battery_ProcessByte(const char received) {
+static void Battery_ProcessByte(const uint8_t received) {
     if (millis() - last_battery_byte > BATTERY_FRAME_TIMEOUT_MS) {
         receiving_battery_frame = false;
         battery_reception_done = false;
@@ -214,7 +214,7 @@ void Battery_ProcessByte(const char received) {
 
     last_battery_byte = millis();
     buffer_length++;
-    received_battery_buffer += received;
+    received_battery_buffer += static_cast<char>(received);
 }
 
 /**
@@ -256,7 +256,7 @@ void Battery_StartFrame(void) {
 /**
  * @brief    Process a byte and publish a completed battery frame.
  */
-void Battery_ProcessFrame(const char received) {
+void Battery_ProcessFrame(const uint8_t received) {
     Battery_ProcessByte(received);
 
     if (battery_reception_done) {
@@ -279,10 +279,12 @@ void Battery_ProcessFrame(const char received) {
 
 void Serial1_Process(void) {
     while (Serial1.available() > 0) {
-        const char received = Serial1.read();
+        const uint8_t received = static_cast<uint8_t>(Serial1.read());
         const uint32_t now = millis();
 
-        if (receiving_battery_frame) {
+        if (received == SP_SYSTEM_FAULT) {
+            SystemFault_Enter();
+        } else if (receiving_battery_frame) {
             Battery_ProcessFrame(received);
         } else if (received == SP_STM32_HEARTBEAT) {
             LinkHandshake_ProcessByte(received, now);
