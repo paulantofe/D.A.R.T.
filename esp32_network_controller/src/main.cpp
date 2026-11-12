@@ -30,7 +30,7 @@ void loop() {
 
     LinkHandshake_CheckTimeout(millis());
 
-    Check_DriverConnection();
+    DriverConnection_CheckTimeout();
 
     delay(1);
 }

@@ -286,7 +286,7 @@ void Serial1_Process(void) {
 
 volatile uint32_t last_status_request = 0;
 
-void Check_DriverConnection(void) {
+void DriverConnection_CheckTimeout(void) {
     if (has_active_client) {
         if (millis() - last_status_request > DRIVER_TIMEOUT_MS) {
             has_active_client = false;

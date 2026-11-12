@@ -101,7 +101,7 @@ void SystemState_Update(void);
  * @details  Clears the active driver identity when no status request has
  *           been received within DRIVER_TIMEOUT_MS.
  */
-void Check_DriverConnection(void);
+void DriverConnection_CheckTimeout(void);
 
 /**
  * @brief    Process bytes received over the STM32 serial link.
