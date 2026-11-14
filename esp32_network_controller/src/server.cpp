@@ -8,6 +8,7 @@
 #include "server.h"
 #include "esp_camera.h"
 #include "globals.h"
+#include "rdt_link.h"
 #include <WiFi.h>
 #include <LittleFS.h>
 #include <WiFiManager.h>
@@ -24,6 +25,11 @@ static AsyncWebServer server(80);
 bool has_active_client = false;
 IPAddress active_client_ip = { 0, 0, 0, 0 };
 
+/**
+ * @brief Convert a browser command character to an RDT control payload.
+ * @param[in] command Browser command character.
+ * @return The matching RDT control value, or zero for an unknown command.
+ */
 static uint8_t Control_FromCommand(char command) {
     switch (command) {
         case 'W': return RDT_CONTROL_FORWARD;

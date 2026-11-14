@@ -83,14 +83,17 @@ void ESP_Boot(void) {
 /* -------------------------------------------------- */
 
 
+/* ------------------ UART Processing ------------------ */
+
 String Get_LinkState_String(void) {
     return link_state == Link_State_t::LINK_OFFLINE     ? "offline" :
            link_state == Link_State_t::LINK_ONLINE      ? "online"  :
            link_state == Link_State_t::LINK_HANDSHAKING ? "handshaking" : "";
 }
 
-/* ------------------------------------------------------- */
-
+/**
+ * @brief Read all pending Serial1 bytes and pass them to the RDT parser.
+ */
 static void Serial1_Receive(void) {
     while (Serial1.available() > 0) {
         uint8_t received = static_cast<uint8_t>(Serial1.read());
@@ -99,8 +102,12 @@ static void Serial1_Receive(void) {
     }
 }
 
+/** Timestamp of the most recently transmitted control frame. */
 static uint32_t last_command_sent = 0;
 
+/**
+ * @brief Periodically transmit the current validated control command.
+ */
 static void Serial1_Send(void) {
     if (link_state == LINK_HANDSHAKING || link_state == LINK_OFFLINE) {
         return;
@@ -125,10 +132,15 @@ static void Serial1_Send(void) {
     }
 }
 
+/**
+ * @brief Run the ESP32 Serial1 receive and transmit services.
+ */
 void Process_Serial1(void) {
     Serial1_Receive();
     Serial1_Send();
 }
+
+/* -------------------------------------------------- */
 
 
 /* ------------------ Driver Connection Handler ------------------ */

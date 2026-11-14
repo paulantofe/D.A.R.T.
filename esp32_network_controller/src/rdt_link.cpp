@@ -1,12 +1,35 @@
+/**
+ * @file     rdt_link.cpp
+ * @brief    ESP32-side RDT parser, handshake, status, and watchdog logic.
+ */
+
 #include "rdt_link.h"
 #include "globals.h"
 
-static RDT_Parser_t rdt_parser;
+/* ------------------ RDT Link State ------------------ */
 
+static RDT_Parser_t rdt_parser;
+static uint8_t req_counter;
+static uint32_t last_req;
+static uint32_t handshake_started;
+static uint32_t last_status_received;
+static bool reset = true;
+
+/* ----------------------------------------------------- */
+
+
+/* ------------------ RDT Frame Transmission ------------------ */
+
+/**
+ * @brief Initialize the private RDT stream parser.
+ */
 void RDT_Link_Init(void) {
     RDT_Parser_Init(&rdt_parser);
 }
 
+/**
+ * @brief Encode and write one RDT frame to Serial1.
+ */
 RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t payload_length) {
     if (payload == nullptr && payload_length > 0U) {
         return RDT_RESULT_INVALID_FRAME;
@@ -39,6 +62,14 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
     return RDT_RESULT_OK;
 }
 
+/* ------------------------------------------------------------ */
+
+
+/* ------------------ RDT Frame Reception ------------------ */
+
+/**
+ * @brief Parse one UART byte and dispatch completed RDT frames.
+ */
 void RDT_Handle_IncomingByte(uint8_t received) {
     RDT_Frame_t frame;
 
@@ -67,12 +98,14 @@ void RDT_Handle_IncomingByte(uint8_t received) {
     }
 }
 
-static uint8_t req_counter;
-static uint32_t last_req;
-static uint32_t handshake_started;
-static uint32_t last_status_received;
-static bool reset = true;
+/* ----------------------------------------------------- */
 
+
+/* ------------------ RDT Handshake ------------------ */
+
+/**
+ * @brief Start or restart a handshake attempt.
+ */
 static void RDT_Reset_Handshake(void) {
     const uint32_t now = millis();
 
@@ -83,6 +116,9 @@ static void RDT_Reset_Handshake(void) {
     link_state = Link_State_t::LINK_HANDSHAKING;
 }
 
+/**
+ * @brief Send the handshake response and enter the online state.
+ */
 static void RDT_Conclude_Handshake(void) {
     const uint8_t response = RDT_ESP_OK;
     const RDT_Result_t result =
@@ -105,6 +141,9 @@ static void RDT_Conclude_Handshake(void) {
     reset = false;
 }
 
+/**
+ * @brief Process one valid STM32 handshake request.
+ */
 void RDT_Handle_Handshake(RDT_Frame_t *frame) {
     if (frame->payload[0] != RDT_STM_REQ) {
         return;
@@ -135,6 +174,14 @@ void RDT_Handle_Handshake(RDT_Frame_t *frame) {
     }
 }
 
+/* -------------------------------------------------- */
+
+
+/* ------------------ RDT Watchdogs ------------------ */
+
+/**
+ * @brief Apply handshake and status watchdog timeouts.
+ */
 void RDT_Link_CheckTimeout(uint32_t now) {
     if (link_state == Link_State_t::LINK_ONLINE) {
         if (now - last_req > RDT_HANDSHAKE_TIMEOUT_MS ||
@@ -157,6 +204,14 @@ void RDT_Link_CheckTimeout(uint32_t now) {
     }
 }
 
+/* -------------------------------------------------- */
+
+
+/* ------------------ RDT Status ------------------ */
+
+/**
+ * @brief Decode and publish a valid STM32 status frame.
+ */
 void RDT_Handle_Status(RDT_Frame_t *frame) {
     float battery, speed;
     
@@ -174,3 +229,5 @@ void RDT_Handle_Status(RDT_Frame_t *frame) {
         last_status_received = millis();
     }
 }
+
+/* -------------------------------------------------- */

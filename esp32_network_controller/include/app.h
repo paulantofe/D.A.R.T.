@@ -7,8 +7,6 @@
 #define APP_H
 
 #include <Arduino.h>
-#include "rdt_link.h"
-#include <stdint.h>
 
 /* ------------------ System State Definitions ------------------ */
 
@@ -57,6 +55,12 @@ typedef enum {
  */
 void ESP_Boot(void);
 
+/**
+ * @brief Process pending UART bytes and transmit the current control command.
+ *
+ * This function is called from the main loop and owns the normal Serial1
+ * receive/transmit scheduling.
+ */
 void Process_Serial1(void);
 
 /**

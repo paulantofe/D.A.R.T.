@@ -9,8 +9,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <Arduino.h>
-#include "esp_camera.h" 
+#include "esp_camera.h"
 
 /**
  * @brief    Initialize the camera module of the ESP32-CAM board.

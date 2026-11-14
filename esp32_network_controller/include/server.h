@@ -21,9 +21,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <Arduino.h>
-#include <stdint.h>
-#include "esp_camera.h" 
+#include "esp_camera.h"
 
 /**
  * @brief  Initialize the ESP32 web server.
