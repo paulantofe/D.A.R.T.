@@ -145,7 +145,7 @@ bool RDT_CRC8_Validate(
  * @brief Encode and escape a logical frame for UART transmission.
  */
 RDT_Result_t RDT_Frame_Encode(
-    const RDT_Frame_t *frame,
+    RDT_Frame_t *frame,
     uint8_t *output,
     uint16_t output_capacity,
     uint16_t *output_length

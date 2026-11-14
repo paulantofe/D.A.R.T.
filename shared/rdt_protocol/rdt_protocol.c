@@ -1,5 +1,21 @@
 #include "rdt_protocol.h"
 
+static bool RDT_Frame_ValidateLayout(uint8_t type, uint8_t length) {
+    switch (type) {
+        case RDT_CONTROL_TYPE:
+            return length == RDT_CONTROL_LENGTH;
+
+        case RDT_STATUS_TYPE:
+            return length == RDT_STATUS_LENGTH;
+
+        case RDT_HANDSHAKE_TYPE:
+            return length == RDT_HANDSHAKE_LENGTH;
+
+        default:
+            return false;
+    }
+}
+
 static void RDT_Parser_Reset(RDT_Parser_t *parser) {
     parser->state = RDT_PARSER_WAIT_START;
     parser->escaped = false;
@@ -47,6 +63,13 @@ static RDT_Result_t RDT_Parser_ConsumeByte(
                     byte)) {
                 RDT_Parser_Reset(parser);
                 return RDT_RESULT_CRC_ERROR;
+            }
+
+            if (!RDT_Frame_ValidateLayout(
+                    parser->body[0],
+                    payload_length)) {
+                RDT_Parser_Reset(parser);
+                return RDT_RESULT_INVALID_FRAME;
             }
 
             frame->type = parser->body[0];
@@ -119,12 +142,16 @@ static bool RDT_AppendByte(
 }
 
 RDT_Result_t RDT_Frame_Encode(
-    const RDT_Frame_t *frame,
+    RDT_Frame_t *frame,
     uint8_t *output,
     uint16_t output_capacity,
     uint16_t *output_length
 ) {
     if (frame == NULL || output == NULL || output_length == NULL) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    if (!RDT_Frame_ValidateLayout(frame->type, frame->length)) {
         return RDT_RESULT_INVALID_FRAME;
     }
 
@@ -143,6 +170,7 @@ RDT_Result_t RDT_Frame_Encode(
     }
 
     const uint8_t crc = RDT_CRC8_Calculate(crc_data, crc_data_length);
+    frame->crc = crc;
 
     uint16_t position = 0U;
     output[position++] = RDT_START_BYTE;
@@ -162,7 +190,7 @@ RDT_Result_t RDT_Frame_Encode(
         }
     }
 
-    if (!RDT_AppendByte(crc, output, output_capacity, &position)) {
+    if (!RDT_AppendByte(frame->crc, output, output_capacity, &position)) {
         return RDT_RESULT_BUFFER_TOO_SMALL;
     }
 
