@@ -3,6 +3,7 @@
  * @brief Shared implementation of the Rover Data Transport protocol.
  */
 
+#include <stddef.h>
 #include "rdt_protocol.h"
 
 /* ------------------ Static Helper Functions ------------------ */

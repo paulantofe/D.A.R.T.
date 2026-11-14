@@ -14,6 +14,7 @@ static uint32_t last_req;
 static uint32_t handshake_started;
 static uint32_t last_status_received;
 static bool reset = true;
+static bool boot_handshake = true;
 
 /* ----------------------------------------------------- */
 
@@ -182,8 +183,6 @@ void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 
 
 /* ------------------ RDT Watchdogs ------------------ */
-
-static bool boot_handshake = true;
 
 /**
  * @brief Apply handshake and status watchdog timeouts.

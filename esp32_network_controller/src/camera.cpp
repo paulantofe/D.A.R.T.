@@ -6,6 +6,7 @@
  *           definitions for the AI-Thinker ESP32-CAM board.
  */
 
+#include <Arduino.h>
 #include "camera.h"
 
 /**
