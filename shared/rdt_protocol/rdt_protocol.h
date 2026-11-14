@@ -100,6 +100,7 @@ typedef enum {
     RDT_RESULT_FRAME_READY,
     RDT_RESULT_CRC_ERROR,
     RDT_RESULT_INVALID_FRAME,
+    RDT_RESULT_BUFFER_TOO_SMALL
 } RDT_Result_t;
 
 /** Decoded logical RDT frame before application processing. */
@@ -121,14 +122,14 @@ typedef struct {
 /**
  * @brief Calculate the CRC-8 for a byte sequence.
  */
-uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint8_t length);
+uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint16_t length);
 
 /**
  * @brief Validate a CRC-8 value against a byte sequence.
  */
 bool RDT_CRC8_Validate(
     const uint8_t *data,
-    uint8_t length,
+    uint16_t length,
     uint8_t expected_crc
 );
 
@@ -136,9 +137,7 @@ bool RDT_CRC8_Validate(
  * @brief Encode and escape a logical frame for UART transmission.
  */
 RDT_Result_t RDT_Frame_Encode(
-    uint8_t type,
-    const uint8_t *payload,
-    uint8_t payload_length,
+    const RDT_Frame_t *frame,
     uint8_t *output,
     uint16_t output_capacity,
     uint16_t *output_length
