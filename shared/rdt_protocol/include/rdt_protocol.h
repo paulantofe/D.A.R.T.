@@ -91,9 +91,11 @@ extern "C" {
 /* -------------------------------------------------------------------- */
 
 
-/* ------------------ RDT Protocol APIs ------------------ */
+/* ------------------ RDT Protocol Types ------------------ */
 
-/** Result of an RDT protocol operation. */
+/**
+ * @brief Result of an RDT protocol operation.
+ */
 typedef enum {
     RDT_RESULT_OK = 0,
     RDT_RESULT_IN_PROGRESS,
@@ -103,7 +105,13 @@ typedef enum {
     RDT_RESULT_BUFFER_TOO_SMALL
 } RDT_Result_t;
 
-/** Decoded logical RDT frame before application processing. */
+/**
+ * @brief Decoded logical RDT frame before application processing.
+ *
+ * The payload and CRC fields contain unescaped logical bytes. Escaping is
+ * applied only to the serialized representation produced by
+ * RDT_Frame_Encode().
+ */
 typedef struct {
     uint8_t type;
     uint8_t length;
@@ -119,7 +127,12 @@ typedef enum {
     RDT_PARSER_READ_CRC
 } RDT_ParserState_t;
 
-/** Stateful parser for bytes received from the UART stream. */
+/**
+ * @brief Stateful parser for bytes received from the UART stream.
+ *
+ * A parser instance must be initialized with RDT_Parser_Init() before bytes
+ * are submitted with RDT_Parser_PushByte().
+ */
 typedef struct {
     RDT_ParserState_t state;
     bool escaped;
@@ -127,13 +140,30 @@ typedef struct {
     uint8_t body[258];
 } RDT_Parser_t;
 
+/* -------------------------------------------------------- */
+
+
+/* ------------------ RDT Protocol APIs ------------------ */
+
 /**
- * @brief Calculate the CRC-8 for a byte sequence.
+ * @brief Calculate the RDT CRC-8 for a byte sequence.
+ *
+ * The calculation uses the RDT polynomial and processes the input bytes
+ * without escaping. For a frame, pass Type, Length, and Payload only.
+ *
+ * @param[in] data   Bytes to process.
+ * @param[in] length Number of bytes in data.
+ * @return The calculated CRC-8 value.
  */
 uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint16_t length);
 
 /**
  * @brief Validate a CRC-8 value against a byte sequence.
+ *
+ * @param[in] data         Bytes over which the CRC was calculated.
+ * @param[in] length       Number of bytes in data.
+ * @param[in] expected_crc CRC value received with the frame.
+ * @return true when the calculated CRC equals expected_crc.
  */
 bool RDT_CRC8_Validate(
     const uint8_t *data,
@@ -143,6 +173,16 @@ bool RDT_CRC8_Validate(
 
 /**
  * @brief Encode and escape a logical frame for UART transmission.
+ *
+ * The frame is validated, its CRC is recalculated and stored in frame->crc,
+ * and its serialized form is written as Start, escaped body, and escaped CRC.
+ * The payload length is the unescaped logical payload length.
+ *
+ * @param[in,out] frame           Logical frame to encode.
+ * @param[out]    output          Destination buffer for serialized bytes.
+ * @param[in]     output_capacity Size of output in bytes.
+ * @param[out]    output_length   Number of serialized bytes written.
+ * @return RDT_RESULT_OK on success, or an error result.
  */
 RDT_Result_t RDT_Frame_Encode(
     RDT_Frame_t *frame,
@@ -153,11 +193,22 @@ RDT_Result_t RDT_Frame_Encode(
 
 /**
  * @brief Initialize a UART stream parser.
+ *
+ * @param[out] parser Parser state to initialize.
  */
 void RDT_Parser_Init(RDT_Parser_t *parser);
 
 /**
  * @brief Submit one received UART byte to the stream parser.
+ *
+ * One byte is consumed per call. The parser removes escaping, validates the
+ * frame layout and CRC, and copies a completed logical frame to frame.
+ *
+ * @param[in,out] parser Parser state.
+ * @param[in]     received_byte Byte received from UART.
+ * @param[out]    frame         Completed frame when the result is
+ *                              RDT_RESULT_FRAME_READY.
+ * @return The parser state/result after consuming the byte.
  */
 RDT_Result_t RDT_Parser_PushByte(
     RDT_Parser_t *parser,
@@ -167,6 +218,15 @@ RDT_Result_t RDT_Parser_PushByte(
 
 /**
  * @brief Decode a status payload into battery voltage and rover speed.
+ *
+ * The payload must contain two four-byte ASCII values in the form a.bc,
+ * without a separator.
+ *
+ * @param[in]  payload         Status payload.
+ * @param[in]  payload_length  Number of bytes in payload.
+ * @param[out] battery_voltage Decoded battery voltage.
+ * @param[out] speed_mps       Decoded rover speed in metres per second.
+ * @return RDT_RESULT_OK on success, or RDT_RESULT_INVALID_FRAME.
  */
 RDT_Result_t RDT_Status_Decode(
     const uint8_t *payload,
@@ -177,6 +237,15 @@ RDT_Result_t RDT_Status_Decode(
 
 /**
  * @brief Encode battery voltage and rover speed into a status payload.
+ *
+ * Values are rounded to two decimal places and must fit the wire format
+ * 0.00 through 9.99.
+ *
+ * @param[in]  battery_voltage Battery voltage to encode.
+ * @param[in]  speed_mps       Rover speed in metres per second.
+ * @param[out] payload         Destination status payload.
+ * @param[in]  payload_capacity Size of payload in bytes.
+ * @return RDT_RESULT_OK on success, or RDT_RESULT_INVALID_FRAME.
  */
 RDT_Result_t RDT_Status_Encode(
     float battery_voltage,
@@ -187,6 +256,9 @@ RDT_Result_t RDT_Status_Encode(
 
 /**
  * @brief Check whether a control payload value is defined by RDT.
+ *
+ * @param[in] control Control payload byte.
+ * @return true when control is one of the defined RDT control values.
  */
 bool RDT_Control_IsValid(uint8_t control);
 

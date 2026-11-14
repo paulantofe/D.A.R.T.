@@ -1,5 +1,15 @@
+/**
+ * @file
+ * @brief Shared implementation of the Rover Data Transport protocol.
+ */
+
 #include "rdt_protocol.h"
 
+/* ------------------ Static Helper Functions ------------------ */
+
+/**
+ * @brief Check that a message type uses its defined payload length.
+ */
 static bool RDT_Frame_ValidateLayout(uint8_t type, uint8_t length) {
     switch (type) {
         case RDT_CONTROL_TYPE:
@@ -16,12 +26,18 @@ static bool RDT_Frame_ValidateLayout(uint8_t type, uint8_t length) {
     }
 }
 
+/**
+ * @brief Reset a parser to its initial wait-for-start state.
+ */
 static void RDT_Parser_Reset(RDT_Parser_t *parser) {
     parser->state = RDT_PARSER_WAIT_START;
     parser->escaped = false;
     parser->body_length = 0U;
 }
 
+/**
+ * @brief Consume one unescaped byte according to the parser state.
+ */
 static RDT_Result_t RDT_Parser_ConsumeByte(
     RDT_Parser_t *parser,
     uint8_t byte,
@@ -90,6 +106,74 @@ static RDT_Result_t RDT_Parser_ConsumeByte(
     }
 }
 
+/**
+ * @brief Append one byte to an encoded frame, escaping reserved values.
+ */
+static bool RDT_AppendByte(
+    uint8_t value,
+    uint8_t *output,
+    uint16_t capacity,
+    uint16_t *position
+) {
+    const bool must_escape =
+        value == RDT_START_BYTE || value == RDT_ESCAPE_BYTE;
+
+    const uint16_t required = must_escape ? 2U : 1U;
+
+    if (*position > capacity || capacity - *position < required) {
+        return false;
+    }
+
+    if (must_escape) {
+        output[(*position)++] = RDT_ESCAPE_BYTE;
+    }
+
+    output[(*position)++] = value;
+    return true;
+}
+
+/**
+ * @brief Parse one fixed-width a.bc ASCII value.
+ */
+static bool RDT_ParseFloat(const uint8_t *text, float *value) {
+    if (text[0] < '0' || text[0] > '9' ||
+        text[1] != '.' ||
+        text[2] < '0' || text[2] > '9' ||
+        text[3] < '0' || text[3] > '9') {
+        return false;
+    }
+
+    *value = (float) (text[0] - '0') +
+             (float) (text[2] - '0') / 10.0f +
+             (float) (text[3] - '0') / 100.0f;
+
+    return true;
+}
+
+/**
+ * @brief Format a value as a fixed-width a.bc ASCII value.
+ */
+static bool RDT_ParseText(float value, uint8_t *text) {
+    if (value < 0.0f || value > 9.99f) {
+        return false;
+    }
+
+    const uint16_t scaled =
+        (uint16_t)(value * 100.0f + 0.5f);
+
+    text[0] = (uint8_t)(scaled / 100U) + '0';
+    text[1] = '.';
+    text[2] = (uint8_t)((scaled / 10U) % 10U) + '0';
+    text[3] = (uint8_t)(scaled % 10U) + '0';
+
+    return true;
+}
+
+/* ------------------------------------------------------------- */
+
+
+/* ------------------ Public Protocol Functions ------------------ */
+
 uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint16_t length) {
     uint8_t crc = 0x00U;
 
@@ -116,29 +200,6 @@ bool RDT_CRC8_Validate(
     uint8_t calculated_crc = RDT_CRC8_Calculate(data, length);
 
     return calculated_crc == expected_crc;
-}
-
-static bool RDT_AppendByte(
-    uint8_t value,
-    uint8_t *output,
-    uint16_t capacity,
-    uint16_t *position
-) {
-    const bool must_escape =
-        value == RDT_START_BYTE || value == RDT_ESCAPE_BYTE;
-
-    const uint16_t required = must_escape ? 2U : 1U;
-
-    if (*position > capacity || capacity - *position < required) {
-        return false;
-    }
-
-    if (must_escape) {
-        output[(*position)++] = RDT_ESCAPE_BYTE;
-    }
-
-    output[(*position)++] = value;
-    return true;
 }
 
 RDT_Result_t RDT_Frame_Encode(
@@ -198,13 +259,11 @@ RDT_Result_t RDT_Frame_Encode(
     return RDT_RESULT_OK;
 }
 
-
 void RDT_Parser_Init(RDT_Parser_t *parser) {
     if (parser != NULL) {
         RDT_Parser_Reset(parser);
     }
 }
-
 
 RDT_Result_t RDT_Parser_PushByte(
     RDT_Parser_t *parser,
@@ -241,21 +300,6 @@ RDT_Result_t RDT_Parser_PushByte(
     return RDT_Parser_ConsumeByte(parser, received_byte, frame);
 }
 
-static bool RDT_ParseFloat(const uint8_t *text, float *value) {
-    if (text[0] < '0' || text[0] > '9' ||
-        text[1] != '.' ||
-        text[2] < '0' || text[2] > '9' ||
-        text[3] < '0' || text[3] > '9') {
-        return false;
-    }
-
-    *value = (float) (text[0] - '0') + 
-             (float) (text[2] - '0') / 10.0f +
-             (float) (text[3] - '0') / 100.0f;
-
-    return true;
-}
-
 RDT_Result_t RDT_Status_Decode(
     const uint8_t *payload,
     uint8_t payload_length,
@@ -275,22 +319,6 @@ RDT_Result_t RDT_Status_Decode(
     }
 
     return RDT_RESULT_OK;
-}
-
-static bool RDT_ParseText(float value, uint8_t *text) {
-    if (value < 0.0f || value > 9.99f) {
-        return false;
-    }
-
-    const uint16_t scaled =
-        (uint16_t)(value * 100.0f + 0.5f);
-
-    text[0] = (uint8_t)(scaled / 100U) + '0';
-    text[1] = '.';
-    text[2] = (uint8_t)((scaled / 10U) % 10U) + '0';
-    text[3] = (uint8_t)(scaled % 10U) + '0';
-
-    return true;
 }
 
 RDT_Result_t RDT_Status_Encode(
@@ -332,3 +360,5 @@ bool RDT_Control_IsValid(uint8_t control) {
             return false;
     }
 }
+
+/* --------------------------------------------------------------- */
