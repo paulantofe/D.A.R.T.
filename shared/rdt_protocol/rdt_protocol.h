@@ -6,6 +6,7 @@
 #ifndef RDT_PROTOCOL_H
 #define RDT_PROTOCOL_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -88,6 +89,101 @@ extern "C" {
 /** @} */
 
 /* -------------------------------------------------------------------- */
+
+
+/* ------------------ RDT Protocol APIs ------------------ */
+
+/** Result of an RDT protocol operation. */
+typedef enum {
+    RDT_RESULT_OK = 0,
+    RDT_RESULT_IN_PROGRESS,
+    RDT_RESULT_FRAME_READY,
+    RDT_RESULT_CRC_ERROR,
+    RDT_RESULT_INVALID_FRAME,
+} RDT_Result_t;
+
+/** Decoded logical RDT frame before application processing. */
+typedef struct {
+    uint8_t type;
+    uint8_t length;
+    uint8_t payload[255];
+    uint8_t crc;
+} RDT_Frame_t;
+
+/** Stateful parser for bytes received from the UART stream. */
+typedef struct {
+    uint8_t state;
+    bool escaped;
+    uint16_t body_length;
+    uint8_t body[258];
+} RDT_Parser_t;
+
+/**
+ * @brief Calculate the CRC-8 for a byte sequence.
+ */
+uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint8_t length);
+
+/**
+ * @brief Validate a CRC-8 value against a byte sequence.
+ */
+bool RDT_CRC8_Validate(
+    const uint8_t *data,
+    uint8_t length,
+    uint8_t expected_crc
+);
+
+/**
+ * @brief Encode and escape a logical frame for UART transmission.
+ */
+RDT_Result_t RDT_Frame_Encode(
+    uint8_t type,
+    const uint8_t *payload,
+    uint8_t payload_length,
+    uint8_t *output,
+    uint16_t output_capacity,
+    uint16_t *output_length
+);
+
+/**
+ * @brief Initialize a UART stream parser.
+ */
+void RDT_Parser_Init(RDT_Parser_t *parser);
+
+/**
+ * @brief Submit one received UART byte to the stream parser.
+ */
+RDT_Result_t RDT_Parser_PushByte(
+    RDT_Parser_t *parser,
+    uint8_t received_byte,
+    RDT_Frame_t *frame
+);
+
+/**
+ * @brief Decode a status payload into battery voltage and rover speed.
+ */
+RDT_Result_t RDT_Status_Decode(
+    const uint8_t *payload,
+    uint8_t payload_length,
+    float *battery_voltage,
+    float *speed_mps
+);
+
+/**
+ * @brief Encode battery voltage and rover speed into a status payload.
+ */
+RDT_Result_t RDT_Status_Encode(
+    float battery_voltage,
+    float speed_mps,
+    uint8_t *payload,
+    uint8_t payload_capacity
+);
+
+/**
+ * @brief Check whether a control payload value is defined by RDT.
+ */
+bool RDT_Control_IsValid(uint8_t control);
+
+/* ---------------------------------------------------- */
 
 #ifdef __cplusplus
 }
