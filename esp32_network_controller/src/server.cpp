@@ -24,6 +24,22 @@ static AsyncWebServer server(80);
 bool has_active_client = false;
 IPAddress active_client_ip = { 0, 0, 0, 0 };
 
+static uint8_t Control_FromCommand(char command) {
+    switch (command) {
+        case 'W': return RDT_CONTROL_FORWARD;
+        case 'Q': return RDT_CONTROL_FORWARD_LEFT;
+        case 'A': return RDT_CONTROL_LEFT;
+        case 'Z': return RDT_CONTROL_BACKWARD_LEFT;
+        case 'S': return RDT_CONTROL_BACKWARD;
+        case 'C': return RDT_CONTROL_BACKWARD_RIGHT;
+        case 'D': return RDT_CONTROL_RIGHT;
+        case 'E': return RDT_CONTROL_FORWARD_RIGHT;
+        case 'X': return RDT_CONTROL_STOP;
+
+        default:  return 0U;
+    }
+}
+
 /* -------------------------------------------------- */
 
 
@@ -229,16 +245,27 @@ esp_err_t Server_Init(void) {
         if (request->hasParam("val", true)) {
             String command = request->getParam("val", true)->value();
 
-            if (command.length() == 0) {
-                request->send(400, "text/plain", "Empty Command Value");
+            if (command.length() != 1U) {
+                request->send(400, "text/plain", "Invalid Command");
                 return;
             }
 
-            request->send(
-                501,
-                "text/plain",
-                "RDT control transmission is not implemented"
-            );
+            const uint8_t control = Control_FromCommand(command[0]);
+
+            if (!RDT_Control_IsValid(control)) {
+                request->send(400, "text/plain", "Invalid Command");
+                return;
+            }
+
+            current_command = control;
+
+            if (!has_active_client) {
+                has_active_client = true;
+                active_client_ip = request_ip;
+                last_status_request = millis();
+            }
+
+            request->send(200, "text/plain", "OK");
         } else {
             request->send(400, "text/plain", "Missing Value");
         }

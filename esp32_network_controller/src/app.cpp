@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "camera.h"
 #include "server.h"
+#include "rdt_link.h"
 
 /* ------------------ System Fault Handler ------------------ */
 
@@ -16,7 +17,11 @@ void SystemFault_Enter(void) {
 
     Serial.println("[SYSTEM] Encountered System Fault. Please reboot the rover.");
     
+    const uint8_t response = RDT_CONTROL_SYSTEM_FAULT;
+
     while (true) {
+        RDT_SendFrame(RDT_CONTROL_TYPE, &response, RDT_CONTROL_LENGTH);
+        
         delay(50U);
     }    
 }
@@ -70,6 +75,8 @@ void ESP_Boot(void) {
         SystemFault_Enter();
     }
 
+    RDT_Link_Init();
+
     Serial.println("[SYSTEM] ESP32 initialization successful. Waiting for STM32...");
 }
 
@@ -84,18 +91,56 @@ String Get_LinkState_String(void) {
 
 /* ------------------------------------------------------- */
 
+static void Serial1_Receive(void) {
+    while (Serial1.available() > 0) {
+        uint8_t received = static_cast<uint8_t>(Serial1.read());
+
+        RDT_Handle_IncomingByte(received);
+    }
+}
+
+static uint32_t last_command_sent = 0;
+
+static void Serial1_Send(void) {
+    if (link_state == LINK_HANDSHAKING || link_state == LINK_OFFLINE) {
+        return;
+    }
+    
+    if (!RDT_Control_IsValid(current_command)) {
+        return;
+    }
+
+    const uint32_t now = millis();
+
+    if (now - last_command_sent < RDT_ESP_CONTROL_PERIOD_MS) {
+        return;
+    }
+
+    if (RDT_SendFrame(
+            RDT_CONTROL_TYPE,
+            &current_command,
+            RDT_CONTROL_LENGTH
+        ) == RDT_RESULT_OK) {
+        last_command_sent = now;
+    }
+}
+
+void Process_Serial1(void) {
+    Serial1_Receive();
+    Serial1_Send();
+}
+
 
 /* ------------------ Driver Connection Handler ------------------ */
-
-static constexpr uint32_t DRIVER_TIMEOUT_MS = 2000U;
 
 volatile uint32_t last_status_request = 0;
 
 void DriverConnection_CheckTimeout(void) {
     if (has_active_client) {
-        if (millis() - last_status_request > DRIVER_TIMEOUT_MS) {
+        if (millis() - last_status_request > RDT_BROWSER_TIMEOUT_MS) {
             has_active_client = false;
             active_client_ip = { 0, 0, 0, 0 };
+            current_command = RDT_CONTROL_FAILSAFE;
 
             Serial.println("[SYSTEM] Driver disconnected. Timeout Elapsed.");
         }

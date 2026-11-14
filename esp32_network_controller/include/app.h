@@ -7,6 +7,7 @@
 #define APP_H
 
 #include <Arduino.h>
+#include "rdt_link.h"
 #include <stdint.h>
 
 /* ------------------ System State Definitions ------------------ */
@@ -56,6 +57,8 @@ typedef enum {
  */
 void ESP_Boot(void);
 
+void Process_Serial1(void);
+
 /**
  * @brief    Enter the terminal system-fault state.
  * @details  Sets the application state to SystemFault and repeatedly
@@ -77,7 +80,7 @@ void SystemState_Update(void);
 /**
  * @brief    Release the active driver after a status heartbeat timeout.
  * @details  Clears the active driver identity when no status request has
- *           been received within DRIVER_TIMEOUT_MS.
+ *           been received within RDT_BROWSER_TIMEOUT_MS.
  */
 void DriverConnection_CheckTimeout(void);
 
