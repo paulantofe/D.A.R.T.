@@ -141,6 +141,7 @@ static void RDT_Conclude_Handshake(void) {
     link_state = Link_State_t::LINK_ONLINE;
     last_req = millis();
     last_status_received = last_req;
+    boot_handshake = false;
     reset = false;
 }
 
@@ -182,6 +183,8 @@ void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 
 /* ------------------ RDT Watchdogs ------------------ */
 
+static bool boot_handshake = true;
+
 /**
  * @brief Apply handshake and status watchdog timeouts.
  */
@@ -204,6 +207,10 @@ void RDT_Link_CheckTimeout(uint32_t now) {
         req_counter = 0U;
         reset = true;
         current_command = RDT_CONTROL_STOP;
+        if (boot_handshake) {
+            boot_handshake = false;
+            SystemFault_Enter();
+        }
     }
 }
 
