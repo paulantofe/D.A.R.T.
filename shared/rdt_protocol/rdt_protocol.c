@@ -277,7 +277,7 @@ RDT_Result_t RDT_Status_Encode(
 
     bool valid_battery = RDT_ParseText(battery_voltage, &payload[0]);
     bool valid_speed   = RDT_ParseText(speed_mps, &payload[4]);
-    
+
     if (!valid_battery || !valid_speed) {
         return RDT_RESULT_INVALID_FRAME;
     }
@@ -285,4 +285,22 @@ RDT_Result_t RDT_Status_Encode(
     return RDT_RESULT_OK;
 }
 
+bool RDT_Control_IsValid(uint8_t control) {
+    switch (control) {
+        case RDT_CONTROL_FORWARD:
+        case RDT_CONTROL_FORWARD_LEFT:
+        case RDT_CONTROL_LEFT:
+        case RDT_CONTROL_BACKWARD_LEFT:
+        case RDT_CONTROL_BACKWARD:
+        case RDT_CONTROL_BACKWARD_RIGHT:
+        case RDT_CONTROL_RIGHT:
+        case RDT_CONTROL_FORWARD_RIGHT:
+        case RDT_CONTROL_STOP:
+        case RDT_CONTROL_SYSTEM_FAULT:
+        case RDT_CONTROL_FAILSAFE:
+            return true;
 
+        default:
+            return false;
+    }
+}
