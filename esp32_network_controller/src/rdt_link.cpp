@@ -190,8 +190,14 @@ static bool boot_handshake = true;
  */
 void RDT_Link_CheckTimeout(uint32_t now) {
     if (link_state == Link_State_t::LINK_ONLINE) {
-        if (now - last_req > RDT_HANDSHAKE_TIMEOUT_MS ||
-            now - last_status_received > RDT_ESP_STATUS_TIMEOUT_MS) {
+        const bool status_timeout =
+            now - last_status_received > RDT_ESP_STATUS_TIMEOUT_MS;
+
+        if (status_timeout) {
+            Serial.println("[SYSTEM] STM32 status timeout. Link offline.");
+        }
+
+        if (status_timeout) {
             link_state = Link_State_t::LINK_OFFLINE;
             req_counter = 0U;
             reset = true;
@@ -203,6 +209,7 @@ void RDT_Link_CheckTimeout(uint32_t now) {
 
     if (link_state == Link_State_t::LINK_HANDSHAKING &&
         now - handshake_started > RDT_HANDSHAKE_TIMEOUT_MS) {
+        Serial.println("[SYSTEM] STM32 handshake timeout. Link offline.");
         link_state = Link_State_t::LINK_OFFLINE;
         req_counter = 0U;
         reset = true;
