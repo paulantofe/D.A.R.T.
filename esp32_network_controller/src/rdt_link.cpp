@@ -114,6 +114,8 @@ static void RDT_Reset_Handshake(void) {
     handshake_started = now;
     reset = false;
     link_state = Link_State_t::LINK_HANDSHAKING;
+
+     Serial.println("[SYSTEM] Handshake Started...");
 }
 
 /**
@@ -135,6 +137,7 @@ static void RDT_Conclude_Handshake(void) {
         return;
     }
 
+    Serial.println("[SYSTEM] Handshake established.");
     link_state = Link_State_t::LINK_ONLINE;
     last_req = millis();
     last_status_received = last_req;
