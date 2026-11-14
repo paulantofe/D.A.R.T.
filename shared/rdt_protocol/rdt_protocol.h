@@ -111,9 +111,17 @@ typedef struct {
     uint8_t crc;
 } RDT_Frame_t;
 
+typedef enum {
+    RDT_PARSER_WAIT_START,
+    RDT_PARSER_READ_TYPE,
+    RDT_PARSER_READ_LENGTH,
+    RDT_PARSER_READ_PAYLOAD,
+    RDT_PARSER_READ_CRC
+} RDT_ParserState_t;
+
 /** Stateful parser for bytes received from the UART stream. */
 typedef struct {
-    uint8_t state;
+    RDT_ParserState_t state;
     bool escaped;
     uint16_t body_length;
     uint8_t body[258];
