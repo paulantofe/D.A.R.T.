@@ -249,3 +249,40 @@ RDT_Result_t RDT_Status_Decode(
     return RDT_RESULT_OK;
 }
 
+static bool RDT_ParseText(float value, uint8_t *text) {
+    if (value < 0.0f || value > 9.99f) {
+        return false;
+    }
+
+    const uint16_t scaled =
+        (uint16_t)(value * 100.0f + 0.5f);
+
+    text[0] = (uint8_t)(scaled / 100U) + '0';
+    text[1] = '.';
+    text[2] = (uint8_t)((scaled / 10U) % 10U) + '0';
+    text[3] = (uint8_t)(scaled % 10U) + '0';
+
+    return true;
+}
+
+RDT_Result_t RDT_Status_Encode(
+    float battery_voltage,
+    float speed_mps,
+    uint8_t *payload,
+    uint8_t payload_capacity
+) {
+    if (payload == NULL || payload_capacity < RDT_STATUS_LENGTH) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    bool valid_battery = RDT_ParseText(battery_voltage, &payload[0]);
+    bool valid_speed   = RDT_ParseText(speed_mps, &payload[4]);
+    
+    if (!valid_battery || !valid_speed) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    return RDT_RESULT_OK;
+}
+
+
