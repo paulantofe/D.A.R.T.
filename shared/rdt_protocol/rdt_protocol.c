@@ -17,3 +17,9 @@ uint8_t RDT_CRC8_Calculate(const uint8_t *data, uint8_t length) {
 
     return crc;
 }
+
+bool RDT_CRC8_Validate(const uint8_t *data, uint8_t length, uint8_t expected_crc) {
+    uint8_t calculated_crc = RDT_CRC8_Calculate(data, length);
+
+    return calculated_crc == expected_crc;
+}
