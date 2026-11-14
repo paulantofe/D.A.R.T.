@@ -36,7 +36,7 @@ typedef enum {
 typedef enum {
     /** No valid heartbeat has been received from the STM32. */
     LINK_OFFLINE,
-    /** The ESP32 is counting valid timed 'R' messages. */
+    /** The ESP32 is negotiating the RDT handshake. */
     LINK_HANDSHAKING,
     /** The handshake completed and the link is active. */
     LINK_ONLINE
@@ -66,31 +66,6 @@ void ESP_Boot(void);
 void SystemFault_Enter(void);
 
 /**
- * @brief    Process one received STM32 heartbeat byte.
- * @details  Counts timed boot-ready messages and changes the link state to
- *           LINK_ONLINE after the required sequence. The first completed
- *           sequence receives the boot-ready response; later sequences are
- *           runtime recovery handshakes. Once online, each STM32 heartbeat
- *           receives the current driver-state response.
- * @param    received  Byte received from the STM32 over Serial1.
- * @param    now       Current millisecond timestamp used for interval
- *                     validation.
- * @note     The caller should invoke this function only for
- *           SP_STM32_HEARTBEAT bytes.
- */
-void LinkHandshake_ProcessByte(const uint8_t received, const uint32_t now);
-
-/**
- * @brief    Detect an expired STM32 heartbeat.
- * @details  Changes the link state to LINK_OFFLINE and resets handshake
- *           progress when no SP_STM32_HEARTBEAT byte has arrived within the
- *           timeout.
- * @param    now       Current millisecond timestamp used for timeout
- *                     validation.
- */
-void LinkHandshake_CheckTimeout(const uint32_t now);
-
-/**
  * @brief    Update the application state from the link state.
  * @details  Transitions an offline or failed-safe application to Idle when
  *           the STM32 link is online, and forces Idle or Moving into
@@ -102,21 +77,9 @@ void SystemState_Update(void);
 /**
  * @brief    Release the active driver after a status heartbeat timeout.
  * @details  Clears the active driver identity when no status request has
- *           been received within DRIVER_TIMEOUT_MS. The next runtime
- *           heartbeat response then reports SP_DRIVER_DISCONNECTED.
+ *           been received within DRIVER_TIMEOUT_MS.
  */
 void DriverConnection_CheckTimeout(void);
-
-/**
- * @brief    Process bytes received over the STM32 serial link.
- * @details  Dispatches system-fault, heartbeat, and battery-frame bytes to
- *           their handlers. An incoming system fault enters the terminal
- *           SystemFault state.
- * @note     This function should be called continuously from the main loop.
- *           Link timeout checking is performed separately by
- *           LinkHandshake_CheckTimeout().
- */
-void Serial1_Process(void);
 
 /**
  * @brief    Return the current application state as a JSON-friendly string.
@@ -127,14 +90,6 @@ String Get_SystemState_String(void);
  * @brief    Return the current STM32 link state as a JSON-friendly string.
  */
 String Get_LinkState_String(void);
-
-/**
- * @brief    Process one byte from an STM32 battery-voltage frame.
- * @details  Battery frames use the format B<float>\n. The leading 'B' is
- *           consumed by Serial1_Process before this function is called.
- * @param    received  Next byte from the battery-voltage payload.
- */
-void Battery_ProcessFrame(const uint8_t received);
 
 /* ------------------------------------------------------ */
 

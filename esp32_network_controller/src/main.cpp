@@ -24,11 +24,7 @@ void setup() {
 }
 
 void loop() {
-    Serial1_Process();
-
     SystemState_Update();
-
-    LinkHandshake_CheckTimeout(millis());
 
     DriverConnection_CheckTimeout();
 
