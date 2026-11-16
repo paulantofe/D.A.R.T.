@@ -13,6 +13,7 @@ let retryStreamTimer = null;
 let streamConnected = false;
 
 function tryConnectStream() {
+  console.log('[STREAM] Connecting stream...');
   clearTimeout(retryStreamTimer);
   stream.setAttribute('src', `/stream?${Date.now()}`);
 }
@@ -23,6 +24,8 @@ stream.addEventListener('load', () => {
   videoContainer.classList.add('stream-active');
   streamStatus.classList.add('live');
   streamStatus.lastElementChild.textContent = 'Live';
+
+  console.log('[STREAM] Stream is online.');
 });
 
 stream.addEventListener('error', () => {
@@ -33,8 +36,8 @@ stream.addEventListener('error', () => {
   streamStatus.lastElementChild.textContent =
     streamConnected ? 'Reconnecting' : 'N/A';
 
-  console.log('Stream error: ' + 
-    (streamConnected ? 'lost stream connection' : 'failed to connect stream')
+  console.error('Stream error: ' + 
+    (streamConnected ? 'lost stream connection. ' : 'failed to connect stream. '),
   );
 
   stream.removeAttribute('src');
