@@ -210,6 +210,8 @@ esp_err_t Server_Init(void) {
     }
 
     Serial.println("[SERVER] WiFi connected.");
+    WiFi.setSleep(false);
+    Serial.println("[SERVER] WiFi sleep disabled for streaming.");
     Serial.print("[SERVER] IP Address: ");
     Serial.println(WiFi.localIP());
 
