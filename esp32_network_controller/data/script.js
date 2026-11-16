@@ -42,6 +42,7 @@ stream.addEventListener('error', () => {
 
   stream.removeAttribute('src');
 
+  clearTimeout(retryStreamTimer);
   retryStreamTimer = setTimeout(tryConnectStream, 2000);
 });
 
@@ -184,4 +185,48 @@ window.addEventListener('blur', () => {
 /* ------------------------------------------------------------------------- */
 
 
-/* ------------------ Status Panel and Failsafe Heartbeat ------------------ *//* ------------------------------------------------------------------------- */
+/* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
+
+const statusContainers = {
+  mode: document.getElementById('mode-status'),
+  wifi: document.getElementById('wifi-status'),
+  battery: document.getElementById('battery-status'),
+  system: document.getElementById('system-status'),
+  clients: document.getElementById('stream-clients-status'),
+  link: document.getElementById('hardware-status')
+};
+
+function updateStatus(json) {
+  if (!json) {
+    return;
+  }
+
+  statusContainers.mode.textContent = json.Client_Mode;
+  statusContainers.wifi.textContent = json.RSSI;
+  statusContainers.battery.textContent = json.Battery;
+  statusContainers.system.textContent = json.System_State;
+  statusContainers.clients.textContent = json.Active_Clients;
+  statusContainers.link.textContent = json.Link_State;
+}
+
+async function pollStatus() {
+  try {
+    const response = await fetch('/status');
+
+    if (!response.ok) {
+      throw new Error(`Status request failed: ${response.status}`);
+    }
+
+    const status = await response.json();
+
+    updateStatus(status);
+  } catch (error) {
+    console.error('[STATUS] Poll failed: ', error);
+  } finally {
+    setTimeout(pollStatus, 1000);
+  }
+}
+
+pollStatus();
+
+/* ------------------------------------------------------------------------- */
