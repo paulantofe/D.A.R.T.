@@ -175,11 +175,17 @@ for (const [key, button] of Object.entries(buttons)) {
 }
 
 window.addEventListener('blur', () => {
+  const hadPressedKeys = pressedKeys.size > 0;
+
   pressedKeys.clear();
+
   for (const button of Object.values(buttons)) {
     button.classList.remove('pressed');
   }
-  updateCommand();
+  
+  if (hadPressedKeys) {
+    updateCommand();
+  }
 });
 
 /* ------------------------------------------------------------------------- */
