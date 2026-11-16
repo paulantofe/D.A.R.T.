@@ -33,6 +33,10 @@ stream.addEventListener('error', () => {
   streamStatus.lastElementChild.textContent =
     streamConnected ? 'Reconnecting' : 'N/A';
 
+  console.log('Stream error: ' + 
+    (streamConnected ? 'lost stream connection' : 'failed to connect stream')
+  );
+
   stream.removeAttribute('src');
 
   retryStreamTimer = setTimeout(tryConnectStream, 2000);
@@ -46,13 +50,8 @@ window.addEventListener('load', () => {
 
 
 /* ------------------ User Input Parsing and Send Command ------------------ */
-
-
 /* ------------------------------------------------------------------------- */
 
 
 /* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
-
-
-
 /* ------------------------------------------------------------------------- */
