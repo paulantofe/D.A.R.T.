@@ -31,6 +31,8 @@ int main(void) {
 	STM_Boot();
 
 	while (1) {
+		Process_UART_Tx();
+
 		RDT_Link_CheckTimeout(HAL_GetTick());
 	}
 }

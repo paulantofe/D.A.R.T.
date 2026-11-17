@@ -43,6 +43,8 @@ void Failsafe_Enter(void);
 
 void Failsafe_Exit(void);
 
+void Process_UART_Tx(void);
+
 /* ------------------------------------------------------ */
 
 
