@@ -15,12 +15,8 @@
 int main(void) {
 	STM_Boot();
 
-	if (HAL_UART_Receive_IT(&huart1, &rx_byte, 1) != HAL_OK) {
-		Error_Handler();
-	}
-
 	while (1) {
-		Task_Process_UART_RX();
+
 	}
 }
 
