@@ -22,10 +22,7 @@ uint16_t tx_length = 0U;
 /** Indicates that an interrupt-driven UART transmission is active. */
 volatile uint8_t tx_busy = false;
 
-/**
- * @brief Clear the UART transmit buffer and release the transmit lock.
- */
-void Reset_TBuffer(void) {
+void RDT_Reset_TxBuffer(void) {
 	for (uint16_t i = 0; i < 520; ++i) {
 		tx_buffer[i] = 0;
 	}
@@ -81,13 +78,6 @@ static void RDT_Handle_Command(RDT_Frame_t *frame) {
 
 /* ------------------ RDT Frame Transmission ------------------ */
 
-/**
- * @brief Encode and transmit one logical RDT frame.
- * @param[in] type Message type.
- * @param[in] payload Unescaped payload bytes.
- * @param[in] payload_length Number of payload bytes.
- * @return The frame transmission result.
- */
 RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t payload_length) {
 	if (payload == ((void*) 0) && payload_length > 0U) {
 		return RDT_RESULT_INVALID_FRAME;
@@ -117,12 +107,12 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
 	    );
 
 	if (result != RDT_RESULT_OK) {
-		Reset_TBuffer();
+		RDT_Reset_TxBuffer();
 		return result;
 	}
 
 	if (HAL_UART_Transmit_IT(&huart1, tx_buffer, tx_length) != HAL_OK) {
-		Reset_TBuffer();
+		RDT_Reset_TxBuffer();
 		return RDT_RESULT_INVALID_FRAME;
 	}
 
@@ -134,17 +124,10 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
 
 /* ------------------ RDT Frame Reception ------------------ */
 
-/**
- * @brief Initialize the incoming RDT parser.
- */
 void RDT_Link_Init(void) {
 	RDT_Parser_Init(&rdt_parser);
 }
 
-/**
- * @brief Parse one received UART byte and dispatch completed frames.
- * @param[in] received Received UART byte.
- */
 void RDT_Handle_IncomingByte(const uint8_t received) {
 	RDT_Frame_t frame;
 
@@ -178,10 +161,6 @@ void RDT_Handle_IncomingByte(const uint8_t received) {
 
 /* ------------------ RDT Link Watchdog ------------------ */
 
-/**
- * @brief Apply the STM32 control-command watchdog.
- * @param[in] now Current HAL tick value.
- */
 void RDT_Link_CheckTimeout(uint32_t now) {
 	if (boot_handshake) {
 		return;

@@ -34,10 +34,6 @@ volatile uint8_t current_command = RDT_CONTROL_STOP;
 
 /* ------------------ Application Entry Point ------------------ */
 
-/**
- * @brief Initialize the STM32 application and run its main loop.
- * @return This function does not return.
- */
 int main(void) {
 	STM_Boot();
 

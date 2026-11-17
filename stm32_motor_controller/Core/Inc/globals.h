@@ -1,3 +1,8 @@
+/**
+ * @file     globals.h
+ * @brief    Header file for global variables, shared between project source files.
+ */
+
 #ifndef INC_GLOBALS_H_
 #define INC_GLOBALS_H_
 

@@ -22,9 +22,6 @@ volatile bool boot_handshake = true;
 
 /* ------------------ Failsafe State APIs ------------------ */
 
-/**
- * @brief Enter the runtime failsafe state.
- */
 void Failsafe_Enter(void) {
 	if (boot_handshake) { return; }
 
@@ -36,9 +33,7 @@ void Failsafe_Enter(void) {
 	HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
 }
 
-/**
- * @brief Exit the failsafe state after a valid ESP32 handshake.
- */
+
 void Failsafe_Exit(void) {
 	link_state = LINK_ONLINE;
 
@@ -54,17 +49,14 @@ void Failsafe_Exit(void) {
 
 }
 
-/* -------------------------------------------------------------- */
+/* --------------------------------------------------------- */
 
 
 /* ------------------ UART Transmission ------------------ */
 
 static uint32_t last_req_sent = 0;
-static uin32_t last_status_sent = 0;
+static uint32_t last_status_sent = 0;
 
-/**
- * @brief Periodically transmit STM32 handshake requests.
- */
 void Process_UART_Tx(void) {
 	if (link_state != LINK_ONLINE) {
 		link_state = LINK_HANDSHAKING;
@@ -112,4 +104,4 @@ void Process_UART_Tx(void) {
 	}
 }
 
-/* -------------------------------------------------------------- */
+/* ------------------------------------------------------- */

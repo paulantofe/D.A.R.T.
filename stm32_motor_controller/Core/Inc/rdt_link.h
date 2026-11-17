@@ -34,7 +34,7 @@ void RDT_Handle_IncomingByte(const uint8_t received);
 /**
  * @brief Reset the UART transmit buffer and release the transmit lock.
  */
-void Reset_TBuffer(void);
+void RDT_Reset_TxBuffer(void);
 
 /**
  * @brief Apply the STM32 control-command watchdog.

@@ -10,10 +10,6 @@
 
 /* ------------------ UART Receive Callback ------------------ */
 
-/**
- * @brief Handle one completed USART1 receive interrupt.
- * @param[in] huart UART handle that generated the callback.
- */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance != USART1) {
 		return;
@@ -29,16 +25,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 /* ------------------ UART Transmit Callback ------------------ */
 
-/**
- * @brief Release the STM32 UART transmit buffer after transmission.
- * @param[in] huart UART handle that generated the callback.
- */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance != USART1) {
 		return;
 	}
 
-	Reset_TBuffer();
+	RDT_Reset_TxBuffer();
 }
 
 /* ------------------------------------------------------------ */
