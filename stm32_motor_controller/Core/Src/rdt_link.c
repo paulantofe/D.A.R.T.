@@ -1,16 +1,30 @@
-#include "rdt_link.h"
-#include "stm32f4xx_hal_hardware_config.h"
-#include "globals.h"
-#include "stdbool.h"
+/**
+ * @file     rdt_link.c
+ * @brief    STM32-side RDT framing, UART transport, and link watchdog logic.
+ */
 
+#include "rdt_link.h"
+#include "globals.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_hardware_config.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+/** Parser state for the incoming STM32 UART stream. */
 RDT_Parser_t rdt_parser;
 
 /* ------------------ Transmit Buffer ------------------ */
 
+/** Shared interrupt-driven UART transmit buffer. */
 uint8_t tx_buffer[520];
+/** Number of encoded bytes currently in tx_buffer. */
 uint16_t tx_length = 0U;
+/** Indicates that an interrupt-driven UART transmission is active. */
 volatile uint8_t tx_busy = false;
 
+/**
+ * @brief Clear the UART transmit buffer and release the transmit lock.
+ */
 void Reset_TBuffer(void) {
 	for (uint16_t i = 0; i < 520; ++i) {
 		tx_buffer[i] = 0;
@@ -24,10 +38,19 @@ void Reset_TBuffer(void) {
 /* ------------------------------------------------------------ */
 
 
-/* ------------------ Static Helper Functions ------------------ */
+/* ------------------ Link Watchdog State ------------------ */
 
 static volatile uint32_t last_rec_command = 0;
 
+/* ------------------------------------------------------------ */
+
+
+/* ------------------ Static Helper Functions ------------------ */
+
+/**
+ * @brief Process a valid ESP32 handshake response.
+ * @param[in] frame Parsed RDT handshake frame.
+ */
 static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 	if (frame == ((void*) 0) || frame->type != RDT_HANDSHAKE_TYPE ||
 			frame->payload[0] != RDT_ESP_OK) {
@@ -38,6 +61,10 @@ static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 	Failsafe_Exit();
 }
 
+/**
+ * @brief Process a valid motor-control command.
+ * @param[in] frame Parsed RDT control frame.
+ */
 static void RDT_Handle_Command(RDT_Frame_t *frame) {
 	if (frame == ((void*) 0) || frame->type != RDT_CONTROL_TYPE ||
 				!RDT_Control_IsValid(frame->payload[0])) {
@@ -52,6 +79,15 @@ static void RDT_Handle_Command(RDT_Frame_t *frame) {
 /* ------------------------------------------------------------- */
 
 
+/* ------------------ RDT Frame Transmission ------------------ */
+
+/**
+ * @brief Encode and transmit one logical RDT frame.
+ * @param[in] type Message type.
+ * @param[in] payload Unescaped payload bytes.
+ * @param[in] payload_length Number of payload bytes.
+ * @return The frame transmission result.
+ */
 RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t payload_length) {
 	if (payload == ((void*) 0) && payload_length > 0U) {
 		return RDT_RESULT_INVALID_FRAME;
@@ -93,10 +129,22 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
 	return RDT_RESULT_OK;
 }
 
+/* ------------------------------------------------------------- */
+
+
+/* ------------------ RDT Frame Reception ------------------ */
+
+/**
+ * @brief Initialize the incoming RDT parser.
+ */
 void RDT_Link_Init(void) {
 	RDT_Parser_Init(&rdt_parser);
 }
 
+/**
+ * @brief Parse one received UART byte and dispatch completed frames.
+ * @param[in] received Received UART byte.
+ */
 void RDT_Handle_IncomingByte(const uint8_t received) {
 	RDT_Frame_t frame;
 
@@ -125,6 +173,15 @@ void RDT_Handle_IncomingByte(const uint8_t received) {
 	}
 }
 
+/* ------------------------------------------------------------- */
+
+
+/* ------------------ RDT Link Watchdog ------------------ */
+
+/**
+ * @brief Apply the STM32 control-command watchdog.
+ * @param[in] now Current HAL tick value.
+ */
 void RDT_Link_CheckTimeout(uint32_t now) {
 	if (boot_handshake) {
 		return;
@@ -135,3 +192,5 @@ void RDT_Link_CheckTimeout(uint32_t now) {
 		return;
 	}
 }
+
+/* ------------------------------------------------------------- */

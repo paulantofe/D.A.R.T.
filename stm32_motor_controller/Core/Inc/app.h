@@ -39,10 +39,24 @@ typedef enum {
 
 /* ------------------ Application APIs ------------------ */
 
+/**
+ * @brief Enter the runtime failsafe state.
+ * @details Marks the link offline, clears the normal-operation LED, and
+ *          enables the failsafe indication. Motor PWM shutdown will be added
+ *          when the motor-control API is available.
+ */
 void Failsafe_Enter(void);
 
+/**
+ * @brief Exit the failsafe state after a valid ESP32 handshake.
+ * @details Marks the link online and restores the normal-operation LED.
+ */
 void Failsafe_Exit(void);
 
+/**
+ * @brief Periodically transmit STM32 handshake requests.
+ * @details Sends RDT_STM_REQ while the ESP32 link is not online.
+ */
 void Process_UART_Tx(void);
 
 /* ------------------------------------------------------ */

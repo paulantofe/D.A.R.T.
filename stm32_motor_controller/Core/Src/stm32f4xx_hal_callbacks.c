@@ -1,7 +1,19 @@
-#include "stm32f4xx_hal_hardware_config.h"
+/**
+ * @file     stm32f4xx_hal_callbacks.c
+ * @brief    STM32 HAL callback implementations.
+ */
+
 #include "globals.h"
 #include "rdt_link.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_hardware_config.h"
 
+/* ------------------ UART Receive Callback ------------------ */
+
+/**
+ * @brief Handle one completed USART1 receive interrupt.
+ * @param[in] huart UART handle that generated the callback.
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance != USART1) {
 		return;
@@ -12,6 +24,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(huart, &received_byte, 1);
 }
 
+/* ------------------------------------------------------------ */
+
+
+/* ------------------ UART Transmit Callback ------------------ */
+
+/**
+ * @brief Release the STM32 UART transmit buffer after transmission.
+ * @param[in] huart UART handle that generated the callback.
+ */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart->Instance != USART1) {
 		return;
@@ -19,3 +40,5 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 
 	Reset_TBuffer();
 }
+
+/* ------------------------------------------------------------ */

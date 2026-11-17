@@ -6,6 +6,8 @@
  */
 
 #include "stm32f4xx_hal_hardware_config.h"
+#include "globals.h"
+#include "rdt_link.h"
 
 
 /* -------------- Peripheral Handle Structures -------------- */

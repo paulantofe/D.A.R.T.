@@ -7,10 +7,13 @@
  *           runtime is not yet implemented.
  */
 
+#include "app.h"
+#include "globals.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
-#include "globals.h"
-#include "app.h"
+#include "rdt_link.h"
+#include <stdint.h>
+#include <rdt_protocol.h>
 
 /* ------------------ Shared Application State ------------------ */
 
@@ -20,13 +23,21 @@ volatile System_State_t system_state = Offline;
 /** Current ESP32-to-STM32 RDT link state. */
 volatile Link_State_t link_state = LINK_OFFLINE;
 
-volatile uint8_t received_byte = 0;
+/** Byte storage used by interrupt-driven UART reception. */
+uint8_t received_byte = 0;
 
+/** Most recently received valid motor-control command. */
 volatile uint8_t current_command = RDT_CONTROL_STOP;
 
 /* -------------------------------------------------------------- */
 
 
+/* ------------------ Application Entry Point ------------------ */
+
+/**
+ * @brief Initialize the STM32 application and run its main loop.
+ * @return This function does not return.
+ */
 int main(void) {
 	STM_Boot();
 
@@ -37,4 +48,5 @@ int main(void) {
 	}
 }
 
+/* -------------------------------------------------------------- */
 

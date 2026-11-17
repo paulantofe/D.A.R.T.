@@ -6,6 +6,7 @@
 #ifndef INC_RDT_LINK_H
 #define INC_RDT_LINK_H
 
+#include <stdint.h>
 #include <rdt_protocol.h>
 
 /* ------------------ RDT Link APIs ------------------ */
@@ -30,8 +31,15 @@ void RDT_Link_Init(void);
  */
 void RDT_Handle_IncomingByte(const uint8_t received);
 
+/**
+ * @brief Reset the UART transmit buffer and release the transmit lock.
+ */
 void Reset_TBuffer(void);
 
+/**
+ * @brief Apply the STM32 control-command watchdog.
+ * @param[in] now Current HAL tick value.
+ */
 void RDT_Link_CheckTimeout(uint32_t now);
 
 /* -------------------------------------------------- */

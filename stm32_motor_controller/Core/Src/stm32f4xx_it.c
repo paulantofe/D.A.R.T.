@@ -5,8 +5,9 @@
  * @details  This file implements the Service Routines for different IRQs.
  */
 
-#include "stm32f4xx_hal_hardware_config.h"
 #include "stm32f4xx_it.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_hardware_config.h"
 
 void SysTick_Handler(void) {
 	HAL_IncTick();
