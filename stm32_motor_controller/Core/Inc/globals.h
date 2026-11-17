@@ -7,4 +7,8 @@
 extern volatile System_State_t system_state;
 extern volatile Link_State_t link_state;
 
+extern volatile uint8_t current_command;
+
+extern volatile uint8_t received_byte;
+
 #endif

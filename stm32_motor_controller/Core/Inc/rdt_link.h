@@ -25,28 +25,14 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
 void RDT_Link_Init(void);
 
 /**
- * @brief Process link watchdogs and handshake/control timing.
- * @param[in] now Current millisecond timestamp.
- */
-void RDT_Link_CheckTimeout(uint32_t now);
-
-/**
  * @brief Submit one received UART byte to the RDT parser.
  * @param[in] received Received UART byte.
  */
 void RDT_Handle_IncomingByte(const uint8_t received);
 
-/**
- * @brief Process a decoded handshake frame.
- * @param[in] frame Decoded logical handshake frame.
- */
-void RDT_Handle_Handshake(RDT_Frame_t *frame);
+void Reset_TBuffer(void);
 
-/**
- * @brief Process a decoded status frame.
- * @param[in] frame Decoded logical status frame.
- */
-void RDT_Handle_Status(RDT_Frame_t *frame);
+void RDT_Link_CheckTimeout(uint32_t now);
 
 /* -------------------------------------------------- */
 

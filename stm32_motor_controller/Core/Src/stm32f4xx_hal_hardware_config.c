@@ -34,20 +34,8 @@ void STM_Boot(void) {
 	TIM5_Config();
 	ADC1_Config();
 
-	// Wait for ESP32 to boot (Handshake)
-	HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_SET);
-	uint8_t rx_buffer = 0;
-	while (rx_buffer != 'K') {
-		uint8_t tx_msg = 'R';
-		HAL_UART_Transmit(&huart1, &tx_msg, 1, 10);
-
-		HAL_UART_Receive(&huart1, &rx_buffer, 1, 10);
-
-		HAL_Delay(100);
-	}
-
-	HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_SET);
+	RDT_Link_Init();
+	HAL_UART_Receive_IT(&huart1, &received_byte, 1);
 }
 
 void Error_Handler(void) {
