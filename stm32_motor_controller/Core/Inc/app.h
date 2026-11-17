@@ -54,8 +54,9 @@ void Failsafe_Enter(void);
 void Failsafe_Exit(void);
 
 /**
- * @brief Periodically transmit STM32 handshake requests.
+ * @brief Handle recovery handshake and send status.
  * @details Sends RDT_STM_REQ while the ESP32 link is not online.
+ *          Sends RDT Status Frame every RDT_STM_STATUS_PERIOD_MS while ESP32 link is online.
  */
 void Process_UART_Tx(void);
 

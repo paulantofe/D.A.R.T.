@@ -60,6 +60,7 @@ void Failsafe_Exit(void) {
 /* ------------------ UART Transmission ------------------ */
 
 static uint32_t last_req_sent = 0;
+static uin32_t last_status_sent = 0;
 
 /**
  * @brief Periodically transmit STM32 handshake requests.
@@ -84,6 +85,30 @@ void Process_UART_Tx(void) {
 
 			last_req_sent = HAL_GetTick();
 		}
+
+		return;
+	}
+
+	if (HAL_GetTick() - last_status_sent >= RDT_STM_STATUS_PERIOD_MS) {
+		float current_speed = ENC_GetSpeed();
+		float current_battery = ADC_GetBattery();
+
+		uint8_t tx_payload[RDT_STATUS_LENGTH] = "";
+		RDT_Result_t result =
+			RDT_Status_Encode(
+				current_battery,
+			    current_speed,
+			    tx_payload,
+			    RDT_STATUS_LENGTH
+		    );
+
+		if (result != RDT_RESULT_OK) {
+			return;
+		}
+
+		RDT_SendFrame(RDT_STATUS_TYPE, tx_payload, RDT_STATUS_LENGTH);
+
+		last_status_sent = HAL_GetTick();
 	}
 }
 
