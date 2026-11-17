@@ -1,6 +1,8 @@
 #include "rdt_link.h"
 #include "stm32f4xx_hal_hardware_config.h"
 
+RDT_Parser_t rdt_parser;
+
 RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t payload_length) {
 	if (payload == ((void*) 0) && payload_length > 0U) {
 		return RDT_RESULT_INVALID_FRAME;
@@ -34,4 +36,8 @@ RDT_Result_t RDT_SendFrame(const uint8_t type, const uint8_t *payload, uint8_t p
 	}
 
 	return RDT_RESULT_OK;
+}
+
+void RDT_Link_Init(void) {
+	RDT_Parser_Init(&rdt_parser);
 }
