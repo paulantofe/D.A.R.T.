@@ -3,7 +3,11 @@
 #include "globals.h"
 #include "stm32f4xx_hal_hardware_config.h"
 
-void Failsafe_enter(void) {
+volatile bool boot_handshake = true;
+
+void Failsafe_Enter(void) {
+	if (boot_handshake) { return; }
+
 	// PWM 0. Later with motor APIs
 
 	link_state = LINK_OFFLINE;
@@ -12,9 +16,7 @@ void Failsafe_enter(void) {
 	HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
 }
 
-static bool boot_handshake = true;
-
-void Failsafe_exit(void) {
+void Failsafe_Exit(void) {
 	link_state = LINK_ONLINE;
 
 	if (boot_handshake) {

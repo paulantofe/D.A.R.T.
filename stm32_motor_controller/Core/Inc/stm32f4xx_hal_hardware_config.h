@@ -62,11 +62,6 @@ void STM_Boot(void);
 void Error_Handler(void);
 
 /**
- * @brief Failsafe state.
- */
-void Failsafe_Handler(void);
-
-/**
  * @brief   Configure system clock to maximum speed.
  * @details Establishes the core and peripheral bus maximum frequencies:
  *            - SYSCLK / HCLK : 168 MHz

@@ -39,9 +39,9 @@ typedef enum {
 
 /* ------------------ Application APIs ------------------ */
 
-void Failsafe_enter(void);
+void Failsafe_Enter(void);
 
-void Failsafe_exit(void);
+void Failsafe_Exit(void);
 
 /* ------------------------------------------------------ */
 

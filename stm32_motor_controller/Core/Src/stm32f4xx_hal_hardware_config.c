@@ -36,6 +36,9 @@ void STM_Boot(void) {
 
 	RDT_Link_Init();
 	HAL_UART_Receive_IT(&huart1, &received_byte, 1);
+
+	HAL_GPIO_WritePin(GPIOD, GREEN_LED | ORANGE_LED, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_SET);
 }
 
 void Error_Handler(void) {

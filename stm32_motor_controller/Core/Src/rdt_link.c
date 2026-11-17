@@ -26,16 +26,17 @@ void Reset_TBuffer(void) {
 
 /* ------------------ Static Helper Functions ------------------ */
 
+static volatile uint32_t last_rec_command = 0;
+
 static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 	if (frame == ((void*) 0) || frame->type != RDT_HANDSHAKE_TYPE ||
 			frame->payload[0] != RDT_ESP_OK) {
 		return;
 	}
 
+	last_rec_command = HAL_GetTick();
 	Failsafe_Exit();
 }
-
-static uint32_t last_rec_command = 0;
 
 static void RDT_Handle_Command(RDT_Frame_t *frame) {
 	if (frame == ((void*) 0) || frame->type != RDT_CONTROL_TYPE ||
@@ -125,6 +126,10 @@ void RDT_Handle_IncomingByte(const uint8_t received) {
 }
 
 void RDT_Link_CheckTimeout(uint32_t now) {
+	if (boot_handshake) {
+		return;
+	}
+
 	if (now - last_rec_command >= RDT_STM_CONTROL_TIMEOUT_MS) {
 		Failsafe_Enter();
 		return;
