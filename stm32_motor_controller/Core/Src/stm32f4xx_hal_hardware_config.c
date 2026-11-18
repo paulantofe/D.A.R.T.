@@ -8,6 +8,7 @@
 #include "stm32f4xx_hal_hardware_config.h"
 #include "globals.h"
 #include "rdt_link.h"
+#include "rmc_motor_controller.h"
 
 
 /* -------------- Peripheral Handle Structures -------------- */
@@ -31,10 +32,9 @@ void STM_Boot(void) {
 	SystemClock_Config();
 	UART_Config();
 	TIM6_Config();
-	TIM3_Config();
-	TIM2_Config();
-	TIM5_Config();
 	ADC1_Config();
+
+	RMC_Motor_Init();
 
 	RDT_Link_Init();
 	HAL_UART_Receive_IT(&huart1, &received_byte, 1);
