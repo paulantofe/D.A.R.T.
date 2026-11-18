@@ -10,6 +10,10 @@
 
 /* ------------------ Motor Structures Definition ------------------ */
 
+#define RMC_DELTA_T_S               0.01f
+#define RMC_TICKS_PER_WHEEL_REV     400.0f
+#define RMC_WHEEL_CIRCUM_M          0.2042f
+
 typedef struct {
 	/* Motor Input */
 	TIM_HandleTypeDef *htim_enc;  /**< pointer to TIM peripheral in encoder mode */
@@ -54,6 +58,23 @@ void RMC_Motor_Init(void) {
 	right_motor.htim_pwm = &htim3;
 	right_motor.pwm_channel = TIM_CHANNEL_2;
 	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
+}
+
+void RMC_Motor_SpeedUpdate(void) {
+	uint32_t enc_current_pos = 0;
+	int32_t delta_pos = 0;
+
+	// Left Motor Speed
+	enc_current_pos = __HAL_TIM_GET_COUNTER(left_motor.htim_enc);
+	delta_pos = (int32_t) (enc_current_pos - left_motor.enc_last_pos);
+	left_motor.enc_last_pos = enc_current_pos;
+	left_motor.current_speed = ((float)delta_pos / RMC_TICKS_PER_WHEEL_REV) * RMC_WHEEL_CIRCUM_M / RMC_DELTA_T_S;
+
+	// Right Motor Speed
+	enc_current_pos = __HAL_TIM_GET_COUNTER(right_motor.htim_enc);
+	delta_pos = (int32_t) (enc_current_pos - right_motor.enc_last_pos);
+	right_motor.enc_last_pos = enc_current_pos;
+	right_motor.current_speed = ((float)delta_pos / RMC_TICKS_PER_WHEEL_REV) * RMC_WHEEL_CIRCUM_M / RMC_DELTA_T_S;
 }
 
 float RMC_Motor_GetSpeed(void) {
