@@ -1,6 +1,6 @@
 /**
  * @file     rmc_motor_controller.h
- * @brief    Rover Motor Controller source file
+ * @brief    Rover Motor Controller header file
  *
  * @details  This file provides the APIs needed to control the rover motors.
  */

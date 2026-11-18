@@ -1,5 +1,14 @@
+/**
+ * @file     rmc_motor_controller.c
+ * @brief    Rover Motor Controller source file
+ *
+ * @details  This file implements the APIs needed to control the rover motors.
+ */
+
 #include "rmc_motor_controller.h"
 #include "stm32f4xx_hal_hardware_config.h"
+
+/* ------------------ Motor Structures Definition ------------------ */
 
 typedef struct {
 	/* Motor Input */
@@ -17,6 +26,11 @@ typedef struct {
 
 static RMC_Motor_t left_motor;
 static RMC_Motor_t right_motor;
+
+/* ----------------------------------------------------------------- */
+
+
+/* ------------------ Public Motor APIs Implementation ------------------ */
 
 void RMC_Motor_Init() {
 	TIM2_Config();
@@ -41,3 +55,5 @@ void RMC_Motor_Init() {
 	right_motor.pwm_channel = TIM_CHANNEL_2;
 	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
 }
+
+/* ---------------------------------------------------------------------- */
