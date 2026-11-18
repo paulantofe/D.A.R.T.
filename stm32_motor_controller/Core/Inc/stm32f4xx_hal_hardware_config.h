@@ -81,6 +81,12 @@ void SystemClock_Config(void);
 void LED_Config(void);
 
 /**
+ * @brief   Configure the GPIO pins for L298N's IN pins.
+ * @details Instance: GPIOD | PD0 (IN1) | PD1 (IN2) | PD2 (IN3) | PD3 (IN4)
+ */
+void L298N_INPins_Config(void);
+
+/**
  * @brief   Configure the USART1 Peripheral.
  * @details The UART Protocol is used to transmit/receive messages to/from esp32 (Master).
  *          Instance: USART1 | TX: PB6 | RX: PB7 | Baud: 115200.

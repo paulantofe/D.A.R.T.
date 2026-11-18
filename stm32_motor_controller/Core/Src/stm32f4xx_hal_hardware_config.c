@@ -99,6 +99,22 @@ void LED_Config(void) {
 	HAL_GPIO_Init(GPIOD, &led);
 }
 
+void L298N_INPins_Config(void) {
+	GPIO_InitTypeDef in_pin = { 0 };
+
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+
+	in_pin.Mode = GPIO_MODE_OUTPUT_PP;
+	in_pin.Pull = GPIO_NOPULL;
+	in_pin.Speed = GPIO_SPEED_FREQ_LOW;
+	in_pin.Pin = GPIO_PIN_0 | GPIO_PIN_1 |
+			     GPIO_PIN_2 | GPIO_PIN_3;
+
+	HAL_GPIO_WritePin(GPIOD, in_pin.Pin, GPIO_PIN_RESET);
+
+	HAL_GPIO_Init(GPIOD, &in_pin);
+}
+
 void UART_Config(void) {
 	huart1.Instance = USART1;
 	huart1.Init.BaudRate = 115200;
