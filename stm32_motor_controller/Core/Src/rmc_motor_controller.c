@@ -7,6 +7,7 @@
 
 #include "rmc_motor_controller.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "rdt_protocol.h"
 
 /* ------------------ Motor Structures Definition ------------------ */
 
@@ -24,6 +25,10 @@
 #define RMC_RIGHT_MOTOR_IN3_PIN      GPIO_PIN_2
 #define RMC_RIGHT_MOTOR_IN4_PORT     GPIOD
 #define RMC_RIGHT_MOTOR_IN4_PIN      GPIO_PIN_3
+
+#define RMC_POWER_FULL               100.0f
+#define RMC_POWER_TURN               60.0f
+#define RMC_POWER_SPIN               50.0f
 
 typedef struct {
 	/* Motor Input */
@@ -146,6 +151,62 @@ void RMC_Motor_SpeedUpdate(void) {
 	delta_pos = (int32_t) (enc_current_pos - right_motor.enc_last_pos);
 	right_motor.enc_last_pos = enc_current_pos;
 	right_motor.current_speed = (float)delta_pos * RMC_TICKS_TO_MPS;
+}
+
+void RMC_Motor_ExecuteCommand_V1(const uint8_t current_command) {
+	switch (current_command) {
+	   case RDT_CONTROL_FORWARD:
+		   RMC_Motor_SetPower(&left_motor, RMC_POWER_FULL);
+		   RMC_Motor_SetPower(&right_motor, RMC_POWER_FULL);
+		   break;
+
+	   case RDT_CONTROL_FORWARD_LEFT:
+		   RMC_Motor_SetPower(&left_motor, RMC_POWER_TURN);
+		   RMC_Motor_SetPower(&right_motor, RMC_POWER_FULL);
+	   	   break;
+
+	   case RDT_CONTROL_LEFT:
+		   RMC_Motor_SetPower(&left_motor, -RMC_POWER_SPIN);
+           RMC_Motor_SetPower(&right_motor, RMC_POWER_SPIN);
+		   break;
+
+
+	   case RDT_CONTROL_BACKWARD_LEFT:
+		   RMC_Motor_SetPower(&left_motor, -RMC_POWER_TURN);
+		   RMC_Motor_SetPower(&right_motor, -RMC_POWER_FULL);
+	       break;
+
+
+	   case RDT_CONTROL_BACKWARD:
+		   RMC_Motor_SetPower(&left_motor, -RMC_POWER_FULL);
+           RMC_Motor_SetPower(&right_motor, -RMC_POWER_FULL);
+	   	   break;
+
+
+	   case RDT_CONTROL_BACKWARD_RIGHT:
+		   RMC_Motor_SetPower(&left_motor, -RMC_POWER_FULL);
+           RMC_Motor_SetPower(&right_motor, -RMC_POWER_TURN);
+	   	   break;
+
+	   case RDT_CONTROL_RIGHT:
+		   RMC_Motor_SetPower(&left_motor, RMC_POWER_SPIN);
+		   RMC_Motor_SetPower(&right_motor, -RMC_POWER_SPIN);
+	   	   break;
+
+
+	   case RDT_CONTROL_FORWARD_RIGHT:
+		   RMC_Motor_SetPower(&left_motor, RMC_POWER_FULL);
+		   RMC_Motor_SetPower(&right_motor, RMC_POWER_TURN);
+	   	   break;
+
+	   case RDT_CONTROL_STOP:
+		   RMC_Motor_Stop();
+	   	   break;
+
+	   default:
+		   RMC_Motor_Stop();
+		   break;
+	}
 }
 
 float RMC_Motor_GetSpeed(void) {

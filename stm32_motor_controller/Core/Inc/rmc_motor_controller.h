@@ -27,6 +27,13 @@ void RMC_Motor_Stop(void);
 void RMC_Motor_SpeedUpdate(void);
 
 /**
+ * @brief   Execute the motor command received from ESP32.
+ * @details Uses the current_command variable from globals.h and outputs it in open loop.
+ * @note    This is version 1, intended for tests, and does not implement the PID control loop.
+ */
+void RMC_Motor_ExecuteCommand_V1(void);
+
+/**
  * @brief   Get the rover current speed in mps.
  * @return  Linear speed of the rover calculated with the formula:
  *               (v_left + v_right) / 2.
