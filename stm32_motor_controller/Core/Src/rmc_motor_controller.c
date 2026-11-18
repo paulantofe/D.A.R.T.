@@ -85,6 +85,9 @@ void RMC_Motor_Init(void) {
 }
 
 void RMC_Motor_Stop(void) {
+	left_motor.target_speed = 0.0f;
+	right_motor.target_speed = 0.0f;
+
 	__HAL_TIM_SET_COMPARE(left_motor.htim_pwm, left_motor.pwm_channel, 0);
 	__HAL_TIM_SET_COMPARE(right_motor.htim_pwm, right_motor.pwm_channel, 0);
 }

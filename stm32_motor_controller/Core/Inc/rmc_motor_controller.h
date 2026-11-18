@@ -16,7 +16,7 @@ void RMC_Motor_Init(void);
 
 /**
  * @brief   Stop the motors.
- * @details Sets the PWM output to 0.
+ * @details Sets the PWM output to 0 and resets each motor's target speed.
  */
 void RMC_Motor_Stop(void);
 
