@@ -67,7 +67,7 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
 		GPIO_InitTypeDef tim2_ch = { 0 };
 		tim2_ch.Mode = GPIO_MODE_AF_PP;
 		tim2_ch.Alternate = GPIO_AF1_TIM2;
-		tim2_ch.Pull = GPIO_NOPULL;
+		tim2_ch.Pull = GPIO_PULLUP;
 		tim2_ch.Speed = GPIO_SPEED_FAST;
 
 		tim2_ch.Pin = GPIO_PIN_15;
@@ -83,7 +83,7 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
 		GPIO_InitTypeDef tim5_ch = { 0 };
 		tim5_ch.Mode = GPIO_MODE_AF_PP;
 		tim5_ch.Alternate = GPIO_AF2_TIM5;
-		tim5_ch.Pull = GPIO_NOPULL;
+		tim5_ch.Pull = GPIO_PULLUP;
 		tim5_ch.Speed = GPIO_SPEED_FAST;
 		tim5_ch.Pin = GPIO_PIN_0 | GPIO_PIN_1;
 
