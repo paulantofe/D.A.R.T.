@@ -13,6 +13,14 @@
 #define RMC_DELTA_T_S               0.01f
 #define RMC_TICKS_PER_WHEEL_REV     400.0f
 #define RMC_WHEEL_CIRCUM_M          0.2042f
+#define RMC_LEFT_MOTOR_IN1_PORT      GPIOA
+#define RMC_LEFT_MOTOR_IN1_PIN       GPIO_PIN_0
+#define RMC_RIGHT_MOTOR_IN1_PORT     GPIOA
+#define RMC_RIGHT_MOTOR_IN1_PIN      GPIO_PIN_0
+#define RMC_LEFT_MOTOR_IN2_PORT      GPIOA
+#define RMC_LEFT_MOTOR_IN2_PIN       GPIO_PIN_0
+#define RMC_RIGHT_MOTOR_IN2_PORT     GPIOA
+#define RMC_RIGHT_MOTOR_IN2_PIN      GPIO_PIN_0
 
 typedef struct {
 	/* Motor Input */
@@ -26,6 +34,13 @@ typedef struct {
 	/* Motor Output */
 	TIM_HandleTypeDef *htim_pwm;  /**< pointer to TIM peripheral in PWM mode */
 	uint32_t pwm_channel;         /**< PWM Channel of the TIM */
+
+	/* Motor Direction (L298N IN pins) */
+	GPIO_TypeDef *dir_port_1;      /**< INx Port */
+    uint16_t dir_pin_1;            /**< INx Pin  */
+	GPIO_TypeDef *dir_port_2;      /**< INx Port */
+	uint16_t dir_pin_2;            /**< INx Pin  */
+
 } RMC_Motor_t;
 
 static RMC_Motor_t left_motor;
@@ -42,6 +57,10 @@ void RMC_Motor_Init(void) {
 	TIM3_Config();
 
 	left_motor.htim_enc = &htim2;
+	left_motor.dir_port_1 = RMC_LEFT_MOTOR_IN1_PORT;
+	left_motor.dir_pin_1 = RMC_LEFT_MOTOR_IN1_PIN;
+	left_motor.dir_port_2 = RMC_LEFT_MOTOR_IN2_PORT;
+	left_motor.dir_pin_2 = RMC_LEFT_MOTOR_IN2_PIN;
 	HAL_TIM_Encoder_Start(left_motor.htim_enc, TIM_CHANNEL_ALL);
 	left_motor.enc_last_pos = __HAL_TIM_GET_COUNTER(left_motor.htim_enc);
 	left_motor.current_speed = 0.0f;
@@ -51,6 +70,10 @@ void RMC_Motor_Init(void) {
 	HAL_TIM_PWM_Start(left_motor.htim_pwm, left_motor.pwm_channel);
 
 	right_motor.htim_enc = &htim5;
+	right_motor.dir_port_1 = RMC_RIGHT_MOTOR_IN1_PORT;
+	right_motor.dir_pin_1 = RMC_RIGHT_MOTOR_IN1_PIN;
+	right_motor.dir_port_2 = RMC_RIGHT_MOTOR_IN2_PORT;
+	right_motor.dir_pin_2 = RMC_RIGHT_MOTOR_IN2_PIN;
 	HAL_TIM_Encoder_Start(right_motor.htim_enc, TIM_CHANNEL_ALL);
 	right_motor.enc_last_pos = __HAL_TIM_GET_COUNTER(right_motor.htim_enc);
 	right_motor.current_speed = 0.0f;
