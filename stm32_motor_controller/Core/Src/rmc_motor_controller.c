@@ -69,6 +69,8 @@ void RMC_Motor_Init(void) {
 	left_motor.htim_pwm = &htim3;
 	left_motor.pwm_channel = TIM_CHANNEL_1;
 	HAL_TIM_PWM_Start(left_motor.htim_pwm, left_motor.pwm_channel);
+	__HAL_TIM_SET_COMPARE(left_motor.htim_pwm, left_motor.pwm_channel, 0);
+	HAL_GPIO_WritePin(GPIOD, RMC_LEFT_MOTOR_IN1_PIN, GPIO_PIN_RESET);
 
 	right_motor.htim_enc = &htim5;
 	right_motor.dir_port_1 = RMC_RIGHT_MOTOR_IN1_PORT;
@@ -82,6 +84,8 @@ void RMC_Motor_Init(void) {
 	right_motor.htim_pwm = &htim3;
 	right_motor.pwm_channel = TIM_CHANNEL_2;
 	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
+	__HAL_TIM_SET_COMPARE(right_motor.htim_pwm, right_motor.pwm_channel, 0);
+	HAL_GPIO_WritePin(GPIOD, RMC_RIGHT_MOTOR_IN1_PIN, GPIO_PIN_RESET);
 }
 
 void RMC_Motor_Stop(void) {
