@@ -84,7 +84,7 @@ void Process_UART_Tx(void) {
 
 	if (HAL_GetTick() - last_status_sent >= RDT_STM_STATUS_PERIOD_MS) {
 		float current_speed = RMC_Motor_GetSpeed();
-		float current_battery = ADC_GetBattery();
+		float current_battery = 0.0f; // later will implement a battery getter
 
 		uint8_t tx_payload[RDT_STATUS_LENGTH] = "";
 		RDT_Result_t result =
