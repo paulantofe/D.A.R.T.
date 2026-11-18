@@ -52,6 +52,40 @@ static RMC_Motor_t right_motor;
 /* ----------------------------------------------------------------- */
 
 
+/* ------------------ Static Helper Functions ------------------ */
+
+/**
+ * @brief     Set a motor's output power.
+ * @param[in] motor     pointer to left_motor / right_motor RMC_Motor_t static variables.
+ * @param[in] power_pct power percentage of the motor [-100.0, 100.0].
+ * @details   Negative power means going backward, 0 power means coasting.
+ */
+static void RMC_Motor_SetPower(RMC_Motor_t *motor, float power_pct) {
+	if (power_pct > 100.0f) { power_pct = 100.0f; }
+	else if (power_pct < -100.0f) { power_pct = -100.0f; }
+
+	if (power_pct > 0.0f) {
+		HAL_GPIO_WritePin(motor->dir_port_1, motor->dir_pin_1, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(motor->dir_port_2, motor->dir_pin_2, GPIO_PIN_RESET);
+	}
+	else if (power_pct < 0.0f) {
+		HAL_GPIO_WritePin(motor->dir_port_1, motor->dir_pin_1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(motor->dir_port_2, motor->dir_pin_2, GPIO_PIN_SET);
+		power_pct = -power_pct;
+	} else {
+		HAL_GPIO_WritePin(motor->dir_port_1, motor->dir_pin_1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(motor->dir_port_2, motor->dir_pin_2, GPIO_PIN_RESET);
+	}
+
+	uint32_t arr = __HAL_TIM_GET_AUTORELOAD(motor->htim_pwm);
+	uint32_t duty_cycle = (uint32_t) ((power_pct / 100.0f) * (float)arr);
+
+	__HAL_TIM_SET_COMPARE(motor->htim_pwm, motor->pwm_channel, duty_cycle);
+}
+
+/* ------------------------------------------------------------- */
+
+
 /* ------------------ Public Motor APIs Implementation ------------------ */
 
 void RMC_Motor_Init(void) {
