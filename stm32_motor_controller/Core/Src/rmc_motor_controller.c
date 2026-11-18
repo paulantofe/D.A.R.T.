@@ -131,6 +131,7 @@ void RMC_Motor_Init(void) {
 void RMC_Motor_Stop(void) {
 	left_motor.target_speed = 0.0f;
 	right_motor.target_speed = 0.0f;
+	last_command = RDT_CONTROL_STOP;
 
 	__HAL_TIM_SET_COMPARE(left_motor.htim_pwm, left_motor.pwm_channel, 0);
 	__HAL_TIM_SET_COMPARE(right_motor.htim_pwm, right_motor.pwm_channel, 0);
@@ -153,7 +154,15 @@ void RMC_Motor_SpeedUpdate(void) {
 	right_motor.current_speed = (float)delta_pos * RMC_TICKS_TO_MPS;
 }
 
+static uint8_t last_command = RDT_CONTROL_STOP;
+
 void RMC_Motor_ExecuteCommand_V1(const uint8_t current_command) {
+	if (current_command == last_command) {
+		return;
+	}
+
+	last_command = current_command;
+
 	switch (current_command) {
 	   case RDT_CONTROL_FORWARD:
 		   RMC_Motor_SetPower(&left_motor, RMC_POWER_FULL);
