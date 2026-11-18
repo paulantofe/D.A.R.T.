@@ -15,6 +15,12 @@
 void RMC_Motor_Init(void);
 
 /**
+ * @brief   Stop the motors.
+ * @details Sets the PWM output to 0.
+ */
+void RMC_Motor_Stop(void);
+
+/**
  * @brief   Update the motors current speed.
  * @details Called every 10ms by the TIM PeriodElapsed callback.
  */
