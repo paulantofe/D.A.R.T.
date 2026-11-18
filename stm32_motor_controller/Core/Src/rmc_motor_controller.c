@@ -32,7 +32,7 @@ static RMC_Motor_t right_motor;
 
 /* ------------------ Public Motor APIs Implementation ------------------ */
 
-void RMC_Motor_Init() {
+void RMC_Motor_Init(void) {
 	TIM2_Config();
 	TIM5_Config();
 	TIM3_Config();
@@ -54,6 +54,13 @@ void RMC_Motor_Init() {
 	right_motor.htim_pwm = &htim3;
 	right_motor.pwm_channel = TIM_CHANNEL_2;
 	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
+}
+
+float RMC_Motor_GetSpeed(void) {
+	float v_left = left_motor.current_speed;
+	float v_right = right_motor.current_speed;
+
+	return (v_left + v_right) / 2.0f;
 }
 
 /* ---------------------------------------------------------------------- */

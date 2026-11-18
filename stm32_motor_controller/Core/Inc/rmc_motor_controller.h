@@ -20,4 +20,12 @@ void RMC_Motor_Init(void);
  */
 void RMC_Motor_SpeedUpdate(void);
 
+/**
+ * @brief   Get the rover current speed in mps.
+ * @return  Linear speed of the rover calculated with the formula:
+ *               (v_left + v_right) / 2.
+ * @note    The 360 on the spot turn is considered with speed 0.
+ */
+float RMC_Motor_GetSpeed(void);
+
 #endif
