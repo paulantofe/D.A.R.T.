@@ -10,9 +10,9 @@
 
 /* ------------------ Motor Structures Definition ------------------ */
 
-#define RMC_DELTA_T_S               0.01f
-#define RMC_TICKS_PER_WHEEL_REV     400.0f
-#define RMC_WHEEL_CIRCUM_M          0.2042f
+#define RMC_DELTA_T_S                0.01f
+#define RMC_TICKS_PER_WHEEL_REV      2475.0f
+#define RMC_WHEEL_CIRCUM_M           0.2042f
 #define RMC_LEFT_MOTOR_IN1_PORT      GPIOA
 #define RMC_LEFT_MOTOR_IN1_PIN       GPIO_PIN_0
 #define RMC_RIGHT_MOTOR_IN1_PORT     GPIOA
