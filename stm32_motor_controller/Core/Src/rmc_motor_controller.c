@@ -58,6 +58,7 @@ void RMC_Motor_Init(void) {
 	TIM2_Config();
 	TIM5_Config();
 	TIM3_Config();
+	L298N_INPins_Config();
 
 	left_motor.htim_enc = &htim2;
 	left_motor.dir_port_1 = RMC_LEFT_MOTOR_IN1_PORT;
@@ -70,24 +71,22 @@ void RMC_Motor_Init(void) {
 	left_motor.target_speed = 0.0f;
 	left_motor.htim_pwm = &htim3;
 	left_motor.pwm_channel = TIM_CHANNEL_1;
-	HAL_TIM_PWM_Start(left_motor.htim_pwm, left_motor.pwm_channel);
 	__HAL_TIM_SET_COMPARE(left_motor.htim_pwm, left_motor.pwm_channel, 0);
-	HAL_GPIO_WritePin(GPIOD, RMC_LEFT_MOTOR_IN1_PIN, GPIO_PIN_RESET);
+	HAL_TIM_PWM_Start(left_motor.htim_pwm, left_motor.pwm_channel);
 
 	right_motor.htim_enc = &htim5;
-	right_motor.dir_port_1 = RMC_RIGHT_MOTOR_IN1_PORT;
-	right_motor.dir_pin_1 = RMC_RIGHT_MOTOR_IN1_PIN;
-	right_motor.dir_port_2 = RMC_RIGHT_MOTOR_IN2_PORT;
-	right_motor.dir_pin_2 = RMC_RIGHT_MOTOR_IN2_PIN;
+	right_motor.dir_port_1 = RMC_RIGHT_MOTOR_IN3_PORT;
+	right_motor.dir_pin_1 = RMC_RIGHT_MOTOR_IN3_PIN;
+	right_motor.dir_port_2 = RMC_RIGHT_MOTOR_IN4_PORT;
+	right_motor.dir_pin_2 = RMC_RIGHT_MOTOR_IN4_PIN;
 	HAL_TIM_Encoder_Start(right_motor.htim_enc, TIM_CHANNEL_ALL);
 	right_motor.enc_last_pos = __HAL_TIM_GET_COUNTER(right_motor.htim_enc);
 	right_motor.current_speed = 0.0f;
 	right_motor.target_speed = 0.0f;
 	right_motor.htim_pwm = &htim3;
 	right_motor.pwm_channel = TIM_CHANNEL_2;
-	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
 	__HAL_TIM_SET_COMPARE(right_motor.htim_pwm, right_motor.pwm_channel, 0);
-	HAL_GPIO_WritePin(GPIOD, RMC_RIGHT_MOTOR_IN1_PIN, GPIO_PIN_RESET);
+	HAL_TIM_PWM_Start(right_motor.htim_pwm, right_motor.pwm_channel);
 }
 
 void RMC_Motor_Stop(void) {
