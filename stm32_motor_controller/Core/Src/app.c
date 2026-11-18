@@ -8,6 +8,7 @@
 #include "rdt_link.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "rmc_motor_controller.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <rdt_protocol.h>
