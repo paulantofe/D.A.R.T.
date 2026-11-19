@@ -9,6 +9,8 @@
 #ifndef INC_RMC_MOTOR_CONTROLLER_H_
 #define INC_RMC_MOTOR_CONTROLLER_H_
 
+#include <stdint.h>
+
 /**
  * @brief   Initialize the rover left and right motors.
  */
@@ -31,7 +33,7 @@ void RMC_Motor_SpeedUpdate(void);
  * @details Uses the current_command variable from globals.h and outputs it in open loop.
  * @note    This is version 1, intended for tests, and does not implement the PID control loop.
  */
-void RMC_Motor_ExecuteCommand_V1(void);
+void RMC_Motor_ExecuteCommand_V1(const uint8_t current_command);
 
 /**
  * @brief   Get the rover current speed in mps.

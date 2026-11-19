@@ -93,6 +93,8 @@ static void RMC_Motor_SetPower(RMC_Motor_t *motor, float power_pct) {
 
 /* ------------------ Public Motor APIs Implementation ------------------ */
 
+static uint8_t last_command = RDT_CONTROL_STOP;
+
 void RMC_Motor_Init(void) {
 	TIM2_Config();
 	TIM5_Config();
@@ -153,8 +155,6 @@ void RMC_Motor_SpeedUpdate(void) {
 	right_motor.enc_last_pos = enc_current_pos;
 	right_motor.current_speed = (float)delta_pos * RMC_TICKS_TO_MPS;
 }
-
-static uint8_t last_command = RDT_CONTROL_STOP;
 
 void RMC_Motor_ExecuteCommand_V1(const uint8_t current_command) {
 	if (current_command == last_command) {
