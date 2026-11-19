@@ -26,7 +26,7 @@ volatile bool boot_handshake = true;
 void Failsafe_Enter(void) {
 	if (boot_handshake) { return; }
 
-	// PWM 0. Later with motor APIs
+	RMC_Motor_Stop();
 
 	link_state = LINK_OFFLINE;
 
