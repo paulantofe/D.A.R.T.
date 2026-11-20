@@ -94,6 +94,14 @@ void L298N_INPins_Config(void);
 void UART_Config(void);
 
 /**
+ * @brief   Configure the DMA1 Peripheral.
+ * @details Configure a DMA stream to load the TIM4
+ *          CCR register with values which conform the
+ *          ws2812 HIGH/LOW/RESET logic.
+ */
+void DMA1_Config(void);
+
+/**
  * @brief   Configure the TIM4 Peripheral.
  * @details Configure PWM for a 800kHz signal for the NZR protocol,
  *          used to control WS2812 LEDs.

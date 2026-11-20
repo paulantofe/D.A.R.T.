@@ -20,6 +20,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma1;
 
 /* ---------------------------------------------------------- */
 
@@ -129,6 +130,30 @@ void UART_Config(void) {
 	if (HAL_UART_Init(&huart1) != HAL_OK) {
 		Error_Handler();
 	}
+}
+
+void DMA1_Config(void) {
+	__HAL_RCC_DMA1_CLK_ENABLE();
+
+	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 10, 0);
+
+	hdma1.Instance = DMA1_Stream7;
+	hdma1.Init.Channel = DMA_CHANNEL_2;
+	hdma1.Init.Direction = DMA_MEMORY_TO_PERIPH;
+	hdma1.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma1.Init.MemInc = DMA_MINC_ENABLE;
+	hdma1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+	hdma1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+	hdma1.Init.Mode = DMA_NORMAL;
+	hdma1.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+
+	if (HAL_DMA_Init(&hdma1) != HAL_OK) {
+		Error_Handler();
+	}
+
+	__HAL_LINKDMA(&htim4, hdma[TIM_DMA_ID_CC3], hdma1);
 }
 
 void TIM4_Config(void) {
