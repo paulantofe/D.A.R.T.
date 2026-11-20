@@ -12,6 +12,7 @@
 #define WS2812_DRIVER_WS2812_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
 	WS_BUSY = 0,
@@ -46,6 +47,17 @@ bool WS_CloseLEDs(void);
  *          WS_READY DMA is idle.
  */
 WS_State_t WS_GetState(void);
+
+/**
+ * @brief   Set a pixel color.
+ * @param[in] pixel_id  number of the pixel
+ * @param[in] r Red value [0, 255]
+ * @param[in] g Green value [0, 255]
+ * @param[in] b Blue value [0, 255]
+ * return   true if WS was not busy (pixel is set).
+ *          false if WS was busy (pixel is not set).
+ */
+bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b);
 
 /* ------------------------------------------------- */
 

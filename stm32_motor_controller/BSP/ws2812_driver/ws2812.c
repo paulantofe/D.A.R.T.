@@ -80,4 +80,23 @@ WS_State_t WS_GetState(void) {
 	return ws_dma_state;
 }
 
+bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b) {
+	if (ws_dma_state == WS_BUSY || pixel_id >= WS_NUMBER_OF_LEDS) {
+		return false;
+	}
+
+	uint32_t color = ((uint32_t)g << 16) | ((uint32_t)r << 8) | b;
+	uint16_t offset = pixel_id * WS_BITS_PER_LED;
+
+	for (int8_t bit = 23; bit >= 0; --bit) {
+		if (color & (1U << bit)) {
+			ws_dma_buffer[offset++] = WS_BIT_1;
+		} else {
+			ws_dma_buffer[offset++] = WS_BIT_0;
+		}
+	}
+
+	return true;
+}
+
 /* ---------------------------------------------------------------- */
