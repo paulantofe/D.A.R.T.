@@ -14,6 +14,7 @@
 /* -------------- Peripheral Handle Structures -------------- */
 
 UART_HandleTypeDef huart1;
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim2;
@@ -126,6 +127,26 @@ void UART_Config(void) {
 	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
 
 	if (HAL_UART_Init(&huart1) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void TIM4_Config(void) {
+	TIM_OC_InitTypeDef sConfig = { 0 };
+
+	htim4.Instance = TIM4;
+	htim4.Init.Prescaler = 0;
+	htim4.Init.Period = 105 - 1;
+	htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+	if (HAL_TIM_PWM_Init(&htim4) != HAL_OK) {
+		Error_Handler();
+	}
+
+	sConfig.OCMode = TIM_OCMODE_PWM1;
+	sConfig.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfig.Pulse = 0;
+	if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfig, TIM_CHANNEL_3) != HAL_OK) {
 		Error_Handler();
 	}
 }

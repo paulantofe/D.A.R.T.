@@ -94,6 +94,14 @@ void L298N_INPins_Config(void);
 void UART_Config(void);
 
 /**
+ * @brief   Configure the TIM4 Peripheral.
+ * @details Configure PWM for a 800kHz signal for the NZR protocol,
+ *          used to control WS2812 LEDs.
+ *          Instance: TIM4 | CH3: PB8
+ */
+void TIM4_Config(void);
+
+/**
  * @brief   Configure the TIM6 Peripheral.
  * @details Configure a 10ms (100Hz) time base intended for the PID control loop.
  *          Instance: TIM6.
