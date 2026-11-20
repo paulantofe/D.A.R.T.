@@ -40,6 +40,13 @@ void WS_OnDmaComplete(void);
  */
 bool WS_CloseLEDs(void);
 
+/**
+ * @brief   Get the State of the WS DMA Stream.
+ * @return  WS_BUSY  DMA is busy sending PWM.
+ *          WS_READY DMA is idle.
+ */
+WS_State_t WS_GetState(void);
+
 /* ------------------------------------------------- */
 
 #endif

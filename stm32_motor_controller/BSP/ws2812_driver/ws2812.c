@@ -76,4 +76,8 @@ bool WS_CloseLEDs(void) {
 	return true;
 }
 
+WS_State_t WS_GetState(void) {
+	return ws_dma_state;
+}
+
 /* ---------------------------------------------------------------- */
