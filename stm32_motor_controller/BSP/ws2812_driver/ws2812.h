@@ -11,6 +11,8 @@
 #ifndef WS2812_DRIVER_WS2812_H_
 #define WS2812_DRIVER_WS2812_H_
 
+#include <stdbool.h>
+
 typedef enum {
 	WS_BUSY = 0,
 	WS_READY
@@ -30,6 +32,13 @@ void WS_Init(void);
  * @details Stop PWM and set WS state as ready.
  */
 void WS_OnDmaComplete(void);
+
+/**
+ * @brief   Close all the LEDs.
+ * @return  true if WS was not busy (LEDs are closed).
+ *          false if WS was busy (LEDs are not closed).
+ */
+bool WS_CloseLEDs(void);
 
 /* ------------------------------------------------- */
 

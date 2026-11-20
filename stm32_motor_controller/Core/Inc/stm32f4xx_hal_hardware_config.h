@@ -15,6 +15,7 @@
 //       handle structures (needed for HAL APIs).
 
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;

@@ -59,13 +59,21 @@ void WS_Init(void) {
 	TIM4_Config();
 	DMA1_Config();
 
-	WS_Reset_DmaBuffer();
-	WS_SendPacket();
+	WS_CloseLEDs();
 }
 
 void WS_OnDmaComplete(void) {
 	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
 	ws_dma_state = WS_READY;
+}
+
+bool WS_CloseLEDs(void) {
+	if (ws_dma_state == WS_BUSY) { return false; }
+
+	WS_Reset_DmaBuffer();
+	WS_SendPacket();
+
+	return true;
 }
 
 /* ---------------------------------------------------------------- */
