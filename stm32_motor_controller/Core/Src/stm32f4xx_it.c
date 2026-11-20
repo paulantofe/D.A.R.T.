@@ -22,3 +22,7 @@ void TIM6_DAC_IRQHandler(void) {
 
 	RMC_Motor_SpeedUpdate();
 }
+
+void DMA1_Stream7_IRQHandler(void) {
+	HAL_DMA_IRQHandler(&hdma1);
+}

@@ -20,6 +20,7 @@ extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
+extern DMA_HandleTypeDef hdma1;
 extern ADC_HandleTypeDef hadc1;
 
 /* ---------------------------------------------------------- */

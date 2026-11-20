@@ -38,18 +38,6 @@ static void WS_Reset_DmaBuffer(void) {
 	}
 }
 
-static void WS_SendPacket(void) {
-	if (ws_dma_state == WS_BUSY) {
-		return;
-	}
-
-	ws_dma_state = WS_BUSY;
-
-	if (HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_3, (uint32_t *)ws_dma_buffer, WS_BUFFER_CAPACITY) != HAL_OK) {
-		Error_Handler();
-	}
-}
-
 /* --------------------------------------------------------------------------- */
 
 
@@ -65,6 +53,18 @@ void WS_Init(void) {
 void WS_OnDmaComplete(void) {
 	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
 	ws_dma_state = WS_READY;
+}
+
+void WS_SendPacket(void) {
+	if (ws_dma_state == WS_BUSY) {
+		return;
+	}
+
+	ws_dma_state = WS_BUSY;
+
+	if (HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_3, (uint32_t *)ws_dma_buffer, WS_BUFFER_CAPACITY) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 bool WS_CloseLEDs(void) {

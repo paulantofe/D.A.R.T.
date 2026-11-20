@@ -135,8 +135,8 @@ void UART_Config(void) {
 void DMA1_Config(void) {
 	__HAL_RCC_DMA1_CLK_ENABLE();
 
-	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 10, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
+	HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 10, 0);
 
 	hdma1.Instance = DMA1_Stream7;
 	hdma1.Init.Channel = DMA_CHANNEL_2;
