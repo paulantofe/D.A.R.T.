@@ -130,7 +130,8 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
 void WS_RequestHeadlightControl(uint8_t OnorOff);
 
 /**
- * @brief Handle the status LEDs color update request.
+ * @brief Handle the status LEDs color update request and
+ *        headlight update request.
  * @note This API is designed to be called in main while (1),
  *       not in ISRs.
  */
