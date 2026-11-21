@@ -103,6 +103,18 @@ void WS_SetStatusBrightness(uint8_t brightness);
  */
 void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b);
 
+/**
+ * @brief   Request a status color set.
+ * @details Sets a request flag and initializes pending color variables.
+ *          Main thread is expected to act on the request flag and set the
+ *          status LEDs color.
+ * @param[in] r Red value [0, 255]
+ * @param[in] g Green value [0, 255]
+ * @param[in] b Blue value [0, 255]
+ * @note This is API is designed to run in ISRs/ISRs Callbacks.
+ */
+void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
+
 /* ------------------------------------------------- */
 
 #endif

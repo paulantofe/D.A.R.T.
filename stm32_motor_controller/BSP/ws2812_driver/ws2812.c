@@ -16,6 +16,11 @@ static volatile WS_State_t ws_dma_state = WS_READY;
 
 static uint8_t ws_status_brightness = 0;
 
+static volatile bool update_status_flag = false;
+static volatile uint8_t pending_r = 0,
+		                pending_g = 0,
+					    pending_b = 0;
+
 static void WS_Reset_DmaBuffer(void) {
 	for (uint16_t i = 0; i < WS_DATA_LEN; ++i) {
 		ws_dma_buffer[i] = WS_BIT_0;
@@ -108,6 +113,13 @@ void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	}
 
 	WS_SendPacket();
+}
+
+void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b) {
+	pending_r = r;
+	pending_g = g;
+	pending_r = b;
+	update_status_flag = true;
 }
 
 /* ---------------------------------------------------------------- */
