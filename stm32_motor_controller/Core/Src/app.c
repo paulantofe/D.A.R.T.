@@ -89,7 +89,6 @@ void Failsafe_Enter(void) {
 	WS_RequestStatusColor(255, 65, 0);
 }
 
-
 void Failsafe_Exit(void) {
 	if (link_state == LINK_ONLINE && !boot_handshake) { return; }
 
