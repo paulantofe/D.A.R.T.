@@ -131,6 +131,11 @@ void RMC_Motor_Init(void) {
 }
 
 void RMC_Motor_Stop(void) {
+	if (left_motor.htim_pwm == NULL || left_motor.htim_pwm->Instance == NULL ||
+		right_motor.htim_pwm == NULL || right_motor.htim_pwm->Instance == NULL) {
+		return;
+	}
+
 	left_motor.target_speed = 0.0f;
 	right_motor.target_speed = 0.0f;
 	last_command = RDT_CONTROL_STOP;
