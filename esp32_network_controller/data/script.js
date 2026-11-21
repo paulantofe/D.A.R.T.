@@ -261,14 +261,15 @@ function updateStatus(json) {
   canControl = json.Link_State === 'online' &&
              json.System_State !== 'systemfault' &&
              json.System_State !== 'offline';
-
-if (!canControl || json.System_State === 'failsafe') {
+             
+  if (!canControl || json.System_State === 'failsafe') {
   headlightOn = false;
-  headlightStatus.textContent = 'Off';
-  headlightButton.classList.remove('pressed');
-  commandStatus.textContent = 'Stop';
-}
-  
+    headlightStatus.textContent = 'Off';
+    headlightButton.classList.remove('pressed');
+    commandStatus.textContent = 'Stop';
+  }
+
+
   statusContainers.mode.textContent = json.Client_Mode;
   statusContainers.wifi.textContent = json.RSSI;
   statusContainers.battery.textContent = json.Battery;
