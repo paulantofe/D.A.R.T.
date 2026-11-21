@@ -9,6 +9,7 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
 #include "rmc_motor_controller.h"
+#include "ws2812_driver/ws2812.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <rdt_protocol.h>
@@ -25,6 +26,8 @@ volatile bool boot_handshake = true;
 
 void Failsafe_Enter(void) {
 	if (boot_handshake) { return; }
+
+	if (link_state == LINK_OFFLINE) { return; }
 
 	RMC_Motor_Stop();
 
