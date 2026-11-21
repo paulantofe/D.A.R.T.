@@ -29,13 +29,13 @@ void STM_Boot(void) {
 
 	SystemClock_Config();
 
+	WS_Init();
+
 	LED_Config();
 
 	UART_Config();
 
 	TIM6_Config();
-
-	WS_Init();
 
 	RMC_Motor_Init();
 
