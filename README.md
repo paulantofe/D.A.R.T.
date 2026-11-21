@@ -94,7 +94,7 @@ Originally conceived as a university project, this repository represents a pursu
     * `RDT_ESCAPE_BYTE` = `0x7D`
     * `RDT_CRC8_POLYNOMIAL` = `0x07`
   * **Message types and lengths:**
-    * `RDT_CONTROL_TYPE` = `0x01`
+    * `RDT_CONTROL_TYPE` = `0x02`
     * `RDT_STATUS_TYPE` = `0x02`
     * `RDT_HANDSHAKE_TYPE` = `0x03`
     * `RDT_CONTROL_LENGTH` = `0x01`
@@ -126,6 +126,8 @@ Originally conceived as a university project, this repository represents a pursu
     * `RDT_CONTROL_STOP` = `0x88`
     * `RDT_CONTROL_SYSTEM_FAULT` = `0x91`
     * `RDT_CONTROL_FAILSAFE` = `0x92`
+    * `RDT_CONTROL_HEADLIGHT_ON` = `0x93`
+    * `RDT_CONTROL_HEADLIGHT_OFF` = `ox93`
 
 
 ## Architecture Diagram
