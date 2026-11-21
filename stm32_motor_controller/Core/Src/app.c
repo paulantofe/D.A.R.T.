@@ -35,10 +35,14 @@ void Failsafe_Enter(void) {
 
 	HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
+
+	WS_RequestStatusColor(255, 65, 0);
 }
 
 
 void Failsafe_Exit(void) {
+	if (link_state == LINK_ONLINE && !boot_handshake) { return; }
+
 	link_state = LINK_ONLINE;
 
 	if (boot_handshake) {
@@ -50,7 +54,7 @@ void Failsafe_Exit(void) {
 	}
 
 	HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_SET);
-
+    WS_RequestStatusColor(0, 255, 0);
 }
 
 /* --------------------------------------------------------- */
