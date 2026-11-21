@@ -289,12 +289,20 @@ RDT_Result_t RDT_Command_Encode(
 );
 
 /**
- * @brief Check whether a control payload value is defined by RDT.
+ * @brief Check whether a motor control payload value is defined by RDT.
  *
- * @param[in] control Control payload byte.
- * @return true when control is one of the defined RDT control values.
+ * @param[in] control Motor control payload byte.
+ * @return true when motor control is one of the defined RDT control values.
  */
-bool RDT_Control_IsValid(uint8_t control);
+bool RDT_Control_Motor_IsValid(uint8_t control);
+
+/**
+ * @brief Check whether a headlight control payload value is defined by RDT.
+ *
+ * @param[in] control Headlight control payload byte.
+ * @return true when headlight control is one of the defined RDT control values.
+ */
+bool RDT_Control_Headlight_IsValid(uint8_t control);
 
 /* ---------------------------------------------------- */
 

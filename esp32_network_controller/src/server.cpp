@@ -41,6 +41,8 @@ static uint8_t Control_FromCommand(char command) {
         case 'D': return RDT_CONTROL_RIGHT;
         case 'E': return RDT_CONTROL_FORWARD_RIGHT;
         case 'X': return RDT_CONTROL_STOP;
+        case 'F': return RDT_CONTROL_HEADLIGHT_ON;
+        case 'f': return RDT_CONTROL_HEADLIGHT_OFF;
 
         default:  return 0U;
     }
@@ -253,19 +255,21 @@ esp_err_t Server_Init(void) {
         if (request->hasParam("val", true)) {
             String command = request->getParam("val", true)->value();
 
-            if (command.length() != 1U) {
+            if (command.length() != RDT_CONTROL_LENGTH) {
                 request->send(400, "text/plain", "Invalid Command");
                 return;
             }
 
-            const uint8_t control = Control_FromCommand(command[0]);
+            const uint8_t motor_cmd = Control_FromCommand(command[0]);
+            const uint8_t headlight_cmd = Control_FromCommand(command[1]);
 
-            if (!RDT_Control_IsValid(control)) {
+            if (!RDT_Control_Motor_IsValid(motor_cmd) || !RDT_Control_Headlight_IsValid(headlight_cmd)) {
                 request->send(400, "text/plain", "Invalid Command");
                 return;
             }
 
-            current_command = control;
+            current_motor_cmd = motor_cmd;
+            current_headlight_cmd = headlight_cmd;
 
             if (!has_active_client) {
                 has_active_client = true;
