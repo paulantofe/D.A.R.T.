@@ -22,6 +22,40 @@ volatile bool boot_handshake = true;
 /* -------------------------------------------------------------- */
 
 
+/* ------------------ Boot and Error Handler ------------------ */
+
+void STM_Boot(void) {
+	// Configure Hardware
+	HAL_Init();
+	LED_Config();
+	SystemClock_Config();
+	UART_Config();
+	TIM6_Config();
+	ADC1_Config();
+
+	RMC_Motor_Init();
+
+	RDT_Link_Init();
+	HAL_UART_Receive_IT(&huart1, &received_byte, 1);
+
+	HAL_GPIO_WritePin(GPIOD, GREEN_LED | ORANGE_LED, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_SET);
+}
+
+void Error_Handler(void) {
+	__disable_irq();
+
+	HAL_GPIO_WritePin(GPIOD, GREEN_LED | ORANGE_LED | BLUE_LED, GPIO_PIN_RESET);
+
+	while (1) {
+		HAL_GPIO_TogglePin(GPIOD, RED_LED);
+		for (volatile uint32_t i = 0; i < 20000000; i++) { __NOP(); }
+	}
+}
+
+/* ------------------------------------------------------------ */
+
+
 /* ------------------ Failsafe State APIs ------------------ */
 
 void Failsafe_Enter(void) {

@@ -45,6 +45,20 @@ typedef enum {
 /* ------------------ Application APIs ------------------ */
 
 /**
+ * @brief   Boot the STM32F407G-DISC1 Board.
+ * @details Initialize the necessary peripherals and trigger System_Fault state upon fail.
+ *          Wait for ESP32 to boot before going into thread mode.
+ */
+void STM_Boot(void);
+
+/**
+ * @brief   System Fault State.
+ * @details Freeze the system, disable all interrupts and blink the Red LED.
+ * @note    Software blocking delay is used because SysTick/HAL_Delay might be broken.
+ */
+void Error_Handler(void);
+
+/**
  * @brief Enter the runtime failsafe state.
  * @details Marks the link offline, clears the normal-operation LED, and
  *          enables the failsafe indication. Motor PWM shutdown will be added

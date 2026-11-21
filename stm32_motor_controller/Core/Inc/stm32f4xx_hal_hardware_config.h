@@ -9,6 +9,7 @@
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
+#include "app.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
 // Note: Any file including this header file will have access to the
@@ -48,20 +49,6 @@ typedef enum {
 
 
 /* -------------- Hardware Configuration APIs -------------- */
-
-/**
- * @brief   Boot the STM32F407G-DISC1 Board.
- * @details Initialize the necessary peripherals and trigger System_Fault state upon fail.
- *          Wait for ESP32 to boot before going into thread mode.
- */
-void STM_Boot(void);
-
-/**
- * @brief   System Fault State.
- * @details Freeze the system, disable all interrupts and blink the Red LED.
- * @note    Software blocking delay is used because SysTick/HAL_Delay might be broken.
- */
-void Error_Handler(void);
 
 /**
  * @brief   Configure system clock to maximum speed.
