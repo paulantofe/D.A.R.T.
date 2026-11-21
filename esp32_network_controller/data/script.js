@@ -55,6 +55,9 @@ window.addEventListener('load', () => {
 
 /* ------------------ User Input Parsing and Send Command ------------------ */
 
+const HEADLIGHT_ON_COMMAND = 'F';
+const HEADLIGHT_OFF_COMMAND = 'f';
+
 const buttons = {
   'w': document.getElementById('btn-forward'),
   'a': document.getElementById('btn-left'),
@@ -62,11 +65,15 @@ const buttons = {
   'd': document.getElementById('btn-right'),
 };
 
+const headlightButton = document.getElementById('btn-speedlight-on');
+const commandStatus = document.getElementById('cmd-status');
+
 const keyAliases = {
-  w: 'w',
-  a: 'a',
-  s: 's',
-  d: 'd',
+  w: 'w', W: 'w',
+  a: 'a', A: 'a',
+  s: 's', S: 's',
+  d: 'd', D: 'd',
+  f: 'f', F: 'f',
   ArrowUp: 'w',
   ArrowLeft: 'a',
   ArrowDown: 's',
@@ -85,8 +92,20 @@ const commands = {
   '-1,1': 'C' // backward-right
 };
 
-const pressedKeys = new Set();
+const commandsMessage = {
+  'Q': 'Forward-Left',
+  'W': 'Forward',
+  'E': 'Forward-Right',
+  'A': 'Left',
+  'X': 'Stop',
+  'D': 'Right',
+  'Z': 'Backward-Left',
+  'S': 'Backward',
+  'C': 'Backward-Right'
+}
 
+const pressedKeys = new Set();
+let headlightOn = false;
 let commandQueue = Promise.resolve();
 
 function parseCommand() {
@@ -101,7 +120,7 @@ function parseCommand() {
   return commands[`${vertical},${horizontal}`];
 }
 
-async function sendCommand(command) {
+async function sendCommand(command, nextHeadlightState) {
   const response = await fetch('/control', {
     method: 'POST',
     headers: {
@@ -113,19 +132,37 @@ async function sendCommand(command) {
   if (!response.ok) {
     throw new Error(`Control request failed: ${response.status}`);
   }
+
+  headlightOn = nextHeadlightState;
+  headlightStatus.textContent = headlightOn ? 'On' : 'Off';
+  commandStatus.textContent = commandsMessage[command[0]];
+  headlightButton.classList.toggle('pressed', headlightOn);
 }
 
-function updateCommand() {
-  const command = parseCommand();
+function updateCommand(nextHeadlightState = headlightOn) {
+  const motorCmd = parseCommand();
+  const headlightCmd = nextHeadlightState ? HEADLIGHT_ON_COMMAND : HEADLIGHT_OFF_COMMAND;
+  const command = `${motorCmd}${headlightCmd}`;
 
   commandQueue = commandQueue
-    .then(() => sendCommand(command))
+    .then(() => sendCommand(command, nextHeadlightState))
     .catch((error) => {
-      console.error('[CONTROL] Failed to send command: ', error);
+      console.error('[CONTROL] Rejected or failed: ', error);
     });
 }
 
+const headlightStatus = document.getElementById('light-status');
+
+function toggleHeadlight(event) {
+  if (!canControl) return;
+  
+  event.preventDefault();
+  updateCommand(!headlightOn);
+}
+
 function pressCommand(key, event) {
+  if (!canControl) return;
+  
   event.preventDefault();
   pressedKeys.add(key);
   buttons[key].classList.add('pressed');
@@ -133,6 +170,8 @@ function pressCommand(key, event) {
 }
 
 function releaseCommand(key, event) {
+  if (!pressedKeys.has(key)) return;
+  
   event.preventDefault();
   pressedKeys.delete(key);
   buttons[key].classList.remove('pressed');
@@ -146,13 +185,18 @@ window.addEventListener('keydown', (event) => {
     return;
   }
 
+  if (key === 'f') {
+    toggleHeadlight(event);
+    return;
+  }
+  
   pressCommand(key, event);
 });
 
 window.addEventListener('keyup', (event) => {
   const key = keyAliases[event.key];
 
-  if (!key) {
+  if (!key || key === 'f') {
     return;
   }
 
@@ -174,6 +218,10 @@ for (const [key, button] of Object.entries(buttons)) {
   });
 }
 
+headlightButton.addEventListener('pointerdown', (event) => {
+  toggleHeadlight(event);
+});
+
 window.addEventListener('blur', () => {
   const hadPressedKeys = pressedKeys.size > 0;
 
@@ -193,13 +241,16 @@ window.addEventListener('blur', () => {
 
 /* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
 
+let canControl = false;
+
 const statusContainers = {
   mode: document.getElementById('mode-status'),
   wifi: document.getElementById('wifi-status'),
   battery: document.getElementById('battery-status'),
   system: document.getElementById('system-status'),
   clients: document.getElementById('stream-clients-status'),
-  link: document.getElementById('hardware-status')
+  link: document.getElementById('hardware-status'),
+  status: document.getElementById('speed-status')
 };
 
 function updateStatus(json) {
@@ -207,11 +258,23 @@ function updateStatus(json) {
     return;
   }
 
+  canControl = json.Link_State === 'online' &&
+               (json.System_State === 'idle' || json.System_State === 'moving') &&
+               json.Client_Mode !== 'Spectator';
+
+  if (!canControl) {
+    headlightOn = false;
+    headlightStatus.textContent = 'Off';
+    headlightButton.classList.remove('pressed');
+    commandStatus.textContent = 'Stop';
+  }
+  
   statusContainers.mode.textContent = json.Client_Mode;
   statusContainers.wifi.textContent = json.RSSI;
   statusContainers.battery.textContent = json.Battery;
   statusContainers.system.textContent = json.System_State;
   statusContainers.clients.textContent = json.Active_Clients;
+  statusContainers.status.textContent = json.Speed;
   statusContainers.link.textContent = json.Link_State;
 }
 

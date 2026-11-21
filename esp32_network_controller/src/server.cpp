@@ -301,6 +301,7 @@ esp_err_t Server_Init(void) {
         json += String("\"System_State\":\"") + system_state_string + "\", ";
         json += String("\"Link_State\":\"") + link_state_string + "\", ";
         json += String("\"Client_Mode\":\"") + client_mode + "\", ";
+        json += String("\"Speed\":\"") + speed_mps + "\", ";
         json += String("\"Active_Clients\":") + String(GetActiveStreamClients());
         json += "}";
 

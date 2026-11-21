@@ -200,7 +200,7 @@ void RDT_Link_CheckTimeout(uint32_t now) {
             link_state = Link_State_t::LINK_OFFLINE;
             req_counter = 0U;
             reset = true;
-            current_command = RDT_CONTROL_STOP;
+            current_motor_cmd = RDT_CONTROL_STOP;
         }
 
         return;
@@ -212,7 +212,7 @@ void RDT_Link_CheckTimeout(uint32_t now) {
         link_state = Link_State_t::LINK_OFFLINE;
         req_counter = 0U;
         reset = true;
-        current_command = RDT_CONTROL_STOP;
+        current_motor_cmd = RDT_CONTROL_STOP;
         if (boot_handshake) {
             boot_handshake = false;
             SystemFault_Enter();
