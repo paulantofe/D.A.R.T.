@@ -145,14 +145,21 @@ void WS_ProcessRequest(void) {
 void WS_ForceStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	if (!ws_initialized) { return; }
 
-	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
+
+	__HAL_DMA_DISABLE(&hdma1);
+	uint32_t abort_timeout = 100000;
+	while ((hdma1.Instance->CR & DMA_SxCR_EN) && abort_timeout--) { __NOP(); }
+
+	hdma1.State = HAL_DMA_STATE_READY;
+	hdma1.Lock  = HAL_UNLOCKED;
+	TIM_CHANNEL_STATE_SET(&htim4, TIM_CHANNEL_3, HAL_TIM_CHANNEL_STATE_READY);
 	ws_dma_state = WS_READY;
 
 	for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
 		WS_SetPixel(i, r, g, b);
 	}
 
-	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7);
+	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7 | DMA_FLAG_HTIF3_7 | DMA_FLAG_TEIF3_7 | DMA_FLAG_DMEIF3_7 | DMA_FLAG_FEIF3_7);
 	HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_3, (uint32_t *)ws_dma_buffer, WS_BUFFER_CAPACITY);
 
 
@@ -162,6 +169,10 @@ void WS_ForceStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	}
 
 	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
+	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7);
+
+	__HAL_TIM_DISABLE_DMA(&htim4, TIM_DMA_CC3);
+	__HAL_DMA_DISABLE(&hdma1);
 	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7);
 }
 
