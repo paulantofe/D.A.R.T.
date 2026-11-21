@@ -70,7 +70,9 @@ static void RDT_Handle_Command(RDT_Frame_t *frame) {
 
 	last_rec_command = HAL_GetTick();
 
-	current_command = frame->payload[0];
+	if (current_command != frame->payload[0]) {
+		current_command = frame->payload[0];
+	}
 }
 
 /* ------------------------------------------------------------- */
