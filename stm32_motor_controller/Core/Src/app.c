@@ -65,7 +65,7 @@ void Error_Handler(void) {
 			WS_ForceStatusColor(0, 0, 0);
 		}
 
-		for (volatile uint32_t i = 0; i < 20000000; i++) { __NOP(); }
+		for (volatile uint32_t i = 0; i < 10000000; i++) { __NOP(); }
 	}
 }
 
