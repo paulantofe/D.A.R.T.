@@ -23,6 +23,9 @@ static volatile uint8_t pending_r = 0,
 		                pending_g = 0,
 					    pending_b = 0;
 
+static volatile bool update_headlight_flag = false;
+static volatile uint8_t headlight_OnorOff = WS_HEADLIGHT_OFF;
+
 static void WS_Reset_DmaBuffer(void) {
 	for (uint16_t i = 0; i < WS_DATA_LEN; ++i) {
 		ws_dma_buffer[i] = WS_BIT_0;
@@ -125,21 +128,47 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	update_status_flag = true;
 }
 
+void WS_RequestHeadlightControl(uint8_t OnorOff) {
+	headlight_OnorOff = OnorOff;
+	update_headlight_flag = true;
+}
+
 void WS_ProcessRequest(void) {
-	if (!update_status_flag || ws_dma_state == WS_BUSY) {
-		return;
+	if (ws_dma_state == WS_BUSY) { return; }
+
+	bool need_send = false;
+
+	if (update_status_flag) {
+		update_status_flag = false;
+		uint8_t r = pending_r;
+		uint8_t g = pending_g;
+		uint8_t b = pending_b;
+
+		for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
+			WS_SetPixel(i, r, g, b);
+		}
+		need_send = true;
 	}
 
-	uint8_t r = pending_r;
-	uint8_t g = pending_g;
-	uint8_t b = pending_b;
-	update_status_flag = false;
+	if (update_headlight_flag) {
+		update_headlight_flag = false;
+		uint8_t cmd = headlight_OnorOff;
 
-	for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
-		WS_SetPixel(i, r, g, b);
+		if (cmd == WS_HEADLIGHT_ON || cmd == WS_HEADLIGHT_OFF) {
+			uint8_t r = (cmd == WS_HEADLIGHT_ON) ? WS_HEADLIGHT_R : 0;
+			uint8_t g = (cmd == WS_HEADLIGHT_ON) ? WS_HEADLIGHT_G : 0;
+			uint8_t b = (cmd == WS_HEADLIGHT_ON) ? WS_HEADLIGHT_B : 0;
+
+			for (uint8_t i = WS_STATUS_LEDS; i < WS_NUMBER_OF_LEDS; ++i) {
+				WS_SetPixel(i, r, g, b);
+			}
+			need_send = true;
+		}
 	}
 
-	WS_SendPacket();
+	if (need_send) {
+		WS_SendPacket();
+	}
 }
 
 void WS_ForceStatusColor(uint8_t r, uint8_t g, uint8_t b) {

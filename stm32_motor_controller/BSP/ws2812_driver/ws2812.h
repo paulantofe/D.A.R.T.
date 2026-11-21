@@ -24,6 +24,11 @@
 #define WS_STATUS_LEDS           12
 #define WS_HEADLIGHT_LEDS        7
 #define WS_HEADLIGHT_BRIGHTNESS  150U
+#define WS_HEADLIGHT_ON          1U
+#define WS_HEADLIGHT_OFF         0U
+#define WS_HEADLIGHT_R           255U
+#define WS_HEADLIGHT_G           220U
+#define WS_HEADLIGHT_B           180U
 
 #define WS_BIT_1                 59   // ~0.7us HIGH
 #define WS_BIT_0                 29   // ~0.35us HIGH
@@ -114,6 +119,15 @@ void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b);
  * @note This is API is designed to run in ISRs/ISRs Callbacks.
  */
 void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * @brief   Request headlight control.
+ * @details Sets a request flag. Main thread is expected to
+ *          act on the request flag and control the headlight LEDs.
+ * @param[in] OnorOff  WS_HEADLIGHT_ON / WS_HEADLIGHT_OFF macros.
+ * @note This is API is designed to run in ISRs/ISRs Callbacks.
+ */
+void WS_RequestHeadlightControl(uint8_t OnorOff);
 
 /**
  * @brief Handle the status LEDs color update request.
