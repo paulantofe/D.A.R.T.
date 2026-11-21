@@ -113,7 +113,8 @@ static void Serial1_Send(void) {
         return;
     }
     
-    if (!RDT_Control_IsValid(current_command)) {
+    if (!RDT_Control_Motor_IsValid(current_motor_cmd) ||
+        !RDT_Control_Headlight_IsValid(current_headlight_cmd)) {
         return;
     }
 
@@ -123,9 +124,19 @@ static void Serial1_Send(void) {
         return;
     }
 
+    uint8_t current_command[RDT_CONTROL_LENGTH];
+    if (RDT_Command_Encode(
+        current_motor_cmd,
+        current_headlight_cmd,
+        current_command,
+        RDT_CONTROL_LENGTH
+    ) != RDT_RESULT_OK) {
+        return;
+    }
+
     if (RDT_SendFrame(
             RDT_CONTROL_TYPE,
-            &current_command,
+            current_command,
             RDT_CONTROL_LENGTH
         ) == RDT_RESULT_OK) {
         last_command_sent = now;
