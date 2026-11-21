@@ -24,7 +24,8 @@ typedef enum {
 /**
  * @brief   Initialize the WS LEDs
  * @details Init the used peripherals in order to control
- *          the WS2812 LEDs (TIM4 in OC PWM and DMA)
+ *          the WS2812 LEDs (TIM4 in OC PWM and DMA),
+ *          set status LEDs brightness to ~50% and close LEDs.
  */
 void WS_Init(void);
 
@@ -55,14 +56,26 @@ WS_State_t WS_GetState(void);
 
 /**
  * @brief   Set a pixel color.
- * @param[in] pixel_id  number of the pixel
+ * @param[in] pixel_id  number of the pixel [0, 18].
  * @param[in] r Red value [0, 255]
  * @param[in] g Green value [0, 255]
  * @param[in] b Blue value [0, 255]
- * return   true if WS was not busy (pixel is set).
- *          false if WS was busy (pixel is not set).
+ * @return   true if WS was not busy (pixel is set).
+ *           false if WS was busy (pixel is not set).
  */
 bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * @brief   Set the status LEDs brightness.
+ * @details Scale the RGB values according to the brightness
+ *          (0 - 0%, 255 - 100%).
+ * @param[in] brightness  brightness of the LEDs [0, 255].
+ * @note Setting the brightness does not change the current LEDs state.
+ *       In order to change it, SetPixel + SendPacket must be called again,
+ *       after the brightness change.
+ *       Headlight LEDs brightness cannot be changed.
+ */
+void WS_SetStatusBrightness(uint8_t brightness);
 
 /* ------------------------------------------------- */
 

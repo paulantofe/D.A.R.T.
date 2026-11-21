@@ -10,14 +10,17 @@
 
 /* ------------------ General Macros Definitions ------------------ */
 
-#define WS_NUMBER_OF_LEDS     19
-#define WS_BITS_PER_LED       24
-#define WS_RESET_SLOTS        50   // 50 * 1.25us = 62.5us LOW
-#define WS_DATA_LEN           (WS_NUMBER_OF_LEDS * WS_BITS_PER_LED)
-#define WS_BUFFER_CAPACITY    (WS_DATA_LEN + WS_RESET_SLOTS)
+#define WS_NUMBER_OF_LEDS        19
+#define WS_BITS_PER_LED          24
+#define WS_RESET_SLOTS           50   // 50 * 1.25us = 62.5us LOW
+#define WS_DATA_LEN              (WS_NUMBER_OF_LEDS * WS_BITS_PER_LED)
+#define WS_BUFFER_CAPACITY       (WS_DATA_LEN + WS_RESET_SLOTS)
+#define WS_STATUS_LEDS           12
+#define WS_HEADLIGHT_LEDS        7
+#define WS_HEADLIGHT_BRIGHTNESS  150U
 
-#define WS_BIT_1              59   // ~0.8us HIGH
-#define WS_BIT_0              29   // ~0.4us HIGH
+#define WS_BIT_1                 59   // ~0.7us HIGH
+#define WS_BIT_0                 29   // ~0.35us HIGH
 
 /* ---------------------------------------------------------------- */
 
@@ -26,7 +29,9 @@
 
 static uint16_t ws_dma_buffer[WS_BUFFER_CAPACITY] = { 0 };
 
-static WS_State_t ws_dma_state = WS_READY;
+static volatile WS_State_t ws_dma_state = WS_READY;
+
+static uint8_t ws_status_brightness = 0;
 
 static void WS_Reset_DmaBuffer(void) {
 	for (uint16_t i = 0; i < WS_DATA_LEN; ++i) {
@@ -46,6 +51,8 @@ static void WS_Reset_DmaBuffer(void) {
 void WS_Init(void) {
 	TIM4_Config();
 	DMA1_Config();
+	ws_status_brightness = 100U;
+	ws_dma_state = WS_READY;
 
 	WS_CloseLEDs();
 }
@@ -85,6 +92,13 @@ bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b) {
 		return false;
 	}
 
+	uint8_t ws_brightness = (pixel_id < WS_STATUS_LEDS) ? ws_status_brightness : WS_HEADLIGHT_BRIGHTNESS;
+
+	uint16_t scale = (uint16_t)ws_brightness + 1;
+	r = (uint8_t)((r * scale) >> 8);
+	g = (uint8_t)((g * scale) >> 8);
+	b = (uint8_t)((b * scale) >> 8);
+
 	uint32_t color = ((uint32_t)g << 16) | ((uint32_t)r << 8) | b;
 	uint16_t offset = pixel_id * WS_BITS_PER_LED;
 
@@ -97,6 +111,10 @@ bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b) {
 	}
 
 	return true;
+}
+
+void WS_SetStatusBrightness(uint8_t brightness) {
+	ws_status_brightness = brightness;
 }
 
 /* ---------------------------------------------------------------- */
