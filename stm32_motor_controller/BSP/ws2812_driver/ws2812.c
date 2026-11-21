@@ -121,7 +121,7 @@ void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	pending_r = r;
 	pending_g = g;
-	pending_r = b;
+	pending_b = b;
 	update_status_flag = true;
 }
 
