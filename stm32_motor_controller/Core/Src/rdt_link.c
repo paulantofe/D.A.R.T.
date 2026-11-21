@@ -59,20 +59,34 @@ static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 }
 
 /**
- * @brief Process a valid motor-control command.
+ * @brief Process a valid control command.
  * @param[in] frame Parsed RDT control frame.
  */
 static void RDT_Handle_Command(RDT_Frame_t *frame) {
 	if (frame == ((void*) 0) || frame->type != RDT_CONTROL_TYPE ||
-				!RDT_Control_IsValid(frame->payload[0])) {
+			frame->length != RDT_CONTROL_LENGTH) {
 		return;
 	}
 
+	uint8_t motor_cmd = 0;
+    uint8_t headlight_cmd = 0;
+
+    if (RDT_Command_Decode(
+    		frame->payload,
+		frame->length,
+		&motor_cmd,
+		&headlight_cmd) != RDT_RESULT_OK) {
+        return;
+    }
+
+    if (!RDT_Control_Motor_IsValid(motor_cmd) || !RDT_Control_Headlight_IsValid(headlight_cmd)) {
+    	    return;
+    }
+
 	last_rec_command = HAL_GetTick();
 
-	if (current_command != frame->payload[0]) {
-		current_command = frame->payload[0];
-	}
+	current_motor_command = motor_cmd;
+	current_headlight_command = headlight_cmd;
 }
 
 /* ------------------------------------------------------------- */
