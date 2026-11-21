@@ -275,6 +275,7 @@ esp_err_t Server_Init(void) {
                 has_active_client = true;
                 active_client_ip = request_ip;
                 last_status_request = millis();
+                Serial.println("[SYSTEM] Driver connected. IP: " + request_ip.toString());
             }
 
             request->send(200, "text/plain", "OK");
