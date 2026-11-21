@@ -94,6 +94,15 @@ bool WS_SetPixel(uint8_t pixel_id, uint8_t r, uint8_t g, uint8_t b);
  */
 void WS_SetStatusBrightness(uint8_t brightness);
 
+/**
+ * @brief   Set the status LEDs color.
+ * @param[in] r Red value [0, 255]
+ * @param[in] g Green value [0, 255]
+ * @param[in] b Blue value [0, 255]
+ * @note This is a blocking API as it is waiting for status to be WS_READY.
+ */
+void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b);
+
 /* ------------------------------------------------- */
 
 #endif

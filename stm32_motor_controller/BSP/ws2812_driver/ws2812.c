@@ -100,4 +100,14 @@ void WS_SetStatusBrightness(uint8_t brightness) {
 	ws_status_brightness = brightness;
 }
 
+void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b) {
+	while (ws_dma_state == WS_BUSY);
+
+	for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
+		WS_SetPixel(i, r, g, b);
+	}
+
+	WS_SendPacket();
+}
+
 /* ---------------------------------------------------------------- */
