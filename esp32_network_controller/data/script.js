@@ -259,15 +259,15 @@ function updateStatus(json) {
   }
 
   canControl = json.Link_State === 'online' &&
-               (json.System_State === 'idle' || json.System_State === 'moving') &&
-               json.Client_Mode !== 'Spectator';
+             json.System_State !== 'systemfault' &&
+             json.System_State !== 'offline';
 
-  if (!canControl) {
-    headlightOn = false;
-    headlightStatus.textContent = 'Off';
-    headlightButton.classList.remove('pressed');
-    commandStatus.textContent = 'Stop';
-  }
+if (!canControl || json.System_State === 'failsafe') {
+  headlightOn = false;
+  headlightStatus.textContent = 'Off';
+  headlightButton.classList.remove('pressed');
+  commandStatus.textContent = 'Stop';
+}
   
   statusContainers.mode.textContent = json.Client_Mode;
   statusContainers.wifi.textContent = json.RSSI;
