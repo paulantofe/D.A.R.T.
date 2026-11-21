@@ -25,13 +25,17 @@ volatile bool boot_handshake = true;
 /* ------------------ Boot and Error Handler ------------------ */
 
 void STM_Boot(void) {
-	// Configure Hardware
 	HAL_Init();
-	LED_Config();
+
 	SystemClock_Config();
+
+	LED_Config();
+
 	UART_Config();
+
 	TIM6_Config();
-	ADC1_Config();
+
+	WS_Init();
 
 	RMC_Motor_Init();
 
@@ -49,8 +53,18 @@ void Error_Handler(void) {
 
 	HAL_GPIO_WritePin(GPIOD, GREEN_LED | ORANGE_LED | BLUE_LED, GPIO_PIN_RESET);
 
+	bool toggle = false;
+
 	while (1) {
+		toggle = !toggle;
 		HAL_GPIO_TogglePin(GPIOD, RED_LED);
+
+		if (toggle) {
+			WS_ForceStatusColor(255, 0, 0);
+		} else {
+			WS_ForceStatusColor(0, 0, 0);
+		}
+
 		for (volatile uint32_t i = 0; i < 20000000; i++) { __NOP(); }
 	}
 }
