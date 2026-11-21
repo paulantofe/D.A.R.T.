@@ -264,11 +264,26 @@ function updateStatus(json) {
              
   if (!canControl || json.System_State === 'failsafe') {
   headlightOn = false;
-    headlightStatus.textContent = 'Off';
+    headlightStatus.textContent = 'N/A';
     headlightButton.classList.remove('pressed');
     commandStatus.textContent = 'Stop';
   }
 
+  if (json.Client_Mode === 'Driver') {
+    statusContainers.mode.classList.remove('spectator');
+    statusContainers.mode.classList.add('driver');
+  } else {
+    statusContainers.mode.classList.remove('driver');
+    statusContainers.mode.classList.add('spectator');
+  }
+
+  if (json.Link_State === 'online') {
+    statusContainers.link.classList.remove('checking');
+    statusContainers.link.classList.add('online');
+  } else {
+    statusContainers.link.classList.remove('online');
+    statusContainers.link.classList.add('checking');
+  }
 
   statusContainers.mode.textContent = json.Client_Mode;
   statusContainers.wifi.textContent = json.RSSI;
