@@ -122,6 +122,14 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
  */
 void WS_ProcessRequest(void);
 
+/**
+ * @brief Force a status color.
+ * @note This API is designed to be called in Error_Handler and
+ *       does not use interrupts (they are disabled in Error_Handler).
+ *       If the WS_Init() didn't run correctly, status LEDs may not work.
+ */
+void WS_ForceStatusColor(uint8_t r, uint8_t g, uint8_t b);
+
 /* ------------------------------------------------- */
 
 #endif

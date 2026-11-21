@@ -16,6 +16,8 @@ static volatile WS_State_t ws_dma_state = WS_READY;
 
 static uint8_t ws_status_brightness = 0;
 
+static bool ws_initialized = false;
+
 static volatile bool update_status_flag = false;
 static volatile uint8_t pending_r = 0,
 		                pending_g = 0,
@@ -41,6 +43,7 @@ void WS_Init(void) {
 	DMA1_Config();
 	ws_status_brightness = 100U;
 	ws_dma_state = WS_READY;
+	ws_initialized = true;
 
 	WS_CloseLEDs();
 }
@@ -137,6 +140,29 @@ void WS_ProcessRequest(void) {
 	}
 
 	WS_SendPacket();
+}
+
+void WS_ForceStatusColor(uint8_t r, uint8_t g, uint8_t b) {
+	if (!ws_initialized) { return; }
+
+	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
+	ws_dma_state = WS_READY;
+
+	for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
+		WS_SetPixel(i, r, g, b);
+	}
+
+	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7);
+	HAL_TIM_PWM_Start_DMA(&htim4, TIM_CHANNEL_3, (uint32_t *)ws_dma_buffer, WS_BUFFER_CAPACITY);
+
+
+	uint32_t timeout = 500000;
+	while (__HAL_DMA_GET_FLAG(&hdma1, DMA_FLAG_TCIF3_7) == RESET && timeout--) {
+		__NOP();
+	}
+
+	HAL_TIM_PWM_Stop_DMA(&htim4, TIM_CHANNEL_3);
+	__HAL_DMA_CLEAR_FLAG(&hdma1, DMA_FLAG_TCIF3_7);
 }
 
 /* ---------------------------------------------------------------- */
