@@ -115,6 +115,13 @@ void WS_SetStatusColor(uint8_t r, uint8_t g, uint8_t b);
  */
 void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
 
+/**
+ * @brief Handle the status LEDs color update request.
+ * @note This API is designed to be called in main while (1),
+ *       not in ISRs.
+ */
+void WS_ProcessRequest(void);
+
 /* ------------------------------------------------- */
 
 #endif

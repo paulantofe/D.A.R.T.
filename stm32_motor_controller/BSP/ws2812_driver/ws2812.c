@@ -122,4 +122,21 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	update_status_flag = true;
 }
 
+void WS_ProcessRequest(void) {
+	if (!update_status_flag || ws_dma_state == WS_BUSY) {
+		return;
+	}
+
+	uint8_t r = pending_r;
+	uint8_t g = pending_g;
+	uint8_t b = pending_b;
+	update_status_flag = false;
+
+	for (uint8_t i = 0; i < WS_STATUS_LEDS; ++i) {
+		WS_SetPixel(i, r, g, b);
+	}
+
+	WS_SendPacket();
+}
+
 /* ---------------------------------------------------------------- */
