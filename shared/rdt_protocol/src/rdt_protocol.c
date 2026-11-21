@@ -342,6 +342,53 @@ RDT_Result_t RDT_Status_Encode(
     return RDT_RESULT_OK;
 }
 
+RDT_Result_t RDT_Command_Decode(
+    const uint8_t *payload,
+    uint8_t payload_length,
+    uint8_t *motor_cmd,
+    uint8_t *headlight_cmd
+) {
+    if (payload == NULL || payload_length == 0 || payload_length != RDT_CONTROL_LENGTH ||
+        motor_cmd == NULL ||  headlight_cmd == NULL) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    bool valid_motor_cmd = RDT_Control_IsValid(payload[0]);
+    bool valid_headlight_cmd = RDT_Control_IsValid(payload[1]);
+
+    if (!valid_motor_cmd || !valid_headlight_cmd) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    *motor_cmd = payload[0];
+    *headlight_cmd = payload[1];
+
+    return RDT_RESULT_OK;
+}
+
+RDT_Result_t RDT_Command_Encode(
+    uint8_t motor_cmd,
+    uint8_t headlight_cmd,
+    uint8_t *payload,
+    uint8_t payload_capacity
+) {
+    if (payload == NULL || payload_capacity < RDT_CONTROL_LENGTH) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    bool valid_motor_cmd = RDT_Control_IsValid(motor_cmd);
+    bool valid_headlight_cmd = RDT_Control_IsValid(headlight_cmd);
+
+    if (!valid_motor_cmd || !valid_headlight_cmd) {
+        return RDT_RESULT_INVALID_FRAME;
+    }
+
+    payload[0] = motor_cmd;
+    payload[1] = headlight_cmd;
+
+    return RDT_RESULT_OK;
+}
+
 bool RDT_Control_IsValid(uint8_t control) {
     switch (control) {
         case RDT_CONTROL_FORWARD:
@@ -355,6 +402,8 @@ bool RDT_Control_IsValid(uint8_t control) {
         case RDT_CONTROL_STOP:
         case RDT_CONTROL_SYSTEM_FAULT:
         case RDT_CONTROL_FAILSAFE:
+        case RDT_CONTROL_HEADLIGHT_OFF:
+        case RDT_CONTROL_HEADLIGHT_ON:
             return true;
 
         default:

@@ -35,7 +35,7 @@ extern "C" {
 #define RDT_STATUS_TYPE      0x02U
 #define RDT_HANDSHAKE_TYPE   0x03U
 
-#define RDT_CONTROL_LENGTH   0x01U
+#define RDT_CONTROL_LENGTH   0x02U
 #define RDT_STATUS_LENGTH    0x08U
 #define RDT_HANDSHAKE_LENGTH 0x01U
 
@@ -85,6 +85,8 @@ extern "C" {
 #define RDT_CONTROL_STOP                0x88U
 #define RDT_CONTROL_SYSTEM_FAULT        0x91U
 #define RDT_CONTROL_FAILSAFE            0x92U
+#define RDT_CONTROL_HEADLIGHT_ON        0x93U
+#define RDT_CONTROL_HEADLIGHT_OFF       0x94U
 
 /** @} */
 
@@ -251,6 +253,37 @@ RDT_Result_t RDT_Status_Decode(
 RDT_Result_t RDT_Status_Encode(
     float battery_voltage,
     float speed_mps,
+    uint8_t *payload,
+    uint8_t payload_capacity
+);
+
+/**
+ * @brief Decode a command payload into motor command and headlight command.
+ *
+ * @param[in]  payload         Status payload.
+ * @param[in]  payload_length  Number of bytes in payload.
+ * @param[out] motor_cmd       Decoded motor command.
+ * @param[out] headlight_cmd   Decoded headlight command.
+ * @return RDT_RESULT_OK on success, or RDT_RESULT_INVALID_FRAME.
+ */
+RDT_Result_t RDT_Command_Decode(
+    const uint8_t *payload,
+    uint8_t payload_length,
+    uint8_t *motor_cmd,
+    uint8_t *headlight_cmd
+);
+
+/**
+ * @brief Encode motor and headlight commands into a control payload.
+ * @param[in]  motor_cmd       Motor command from @ref RDT_ControlPayloads
+ * @param[in]  headlight_cmd   Headlight command from @ref RDT_ControlPayloads
+ * @param[out] payload         Destination status payload.
+ * @param[in]  payload_capacity Size of payload in bytes.
+ * @return RDT_RESULT_OK on success, or RDT_RESULT_INVALID_FRAME.
+ */
+RDT_Result_t RDT_Command_Encode(
+    uint8_t motor_cmd,
+    uint8_t headlight_cmd,
     uint8_t *payload,
     uint8_t payload_capacity
 );
