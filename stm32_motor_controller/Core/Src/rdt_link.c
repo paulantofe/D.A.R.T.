@@ -61,6 +61,7 @@ static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 
 static uint8_t last_headlight_cmd = 0;
 static uint8_t last_motor_cmd = 0;
+static bool driver_was_disconnected = false;
 
 /**
  * @brief Process a valid control command.
@@ -91,6 +92,26 @@ static void RDT_Handle_Command(RDT_Frame_t *frame) {
 
 	if (last_motor_cmd != motor_cmd) {
 		last_motor_cmd = motor_cmd;
+
+		if (motor_cmd == RDT_CONTROL_FAILSAFE) {
+			current_motor_command = RDT_CONTROL_STOP;
+			driver_was_disconnected = true;
+			HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
+
+			WS_RequestStatusColor(255, 65, 0);
+			return;
+		}
+
+		if (driver_was_disconnected) {
+			driver_was_disconnected = false;
+
+			HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
+
+		    WS_RequestStatusColor(0, 255, 0);
+		}
+
 		current_motor_command = motor_cmd;
 	}
 
