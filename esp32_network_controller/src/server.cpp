@@ -6,7 +6,7 @@
  */
 
 #include "server.h"
-#include "esp_camera.h"
+#include "stream_server.h"
 #include "globals.h"
 #include "rdt_link.h"
 #include <WiFi.h>
@@ -49,143 +49,6 @@ static uint8_t Control_FromCommand(char command) {
 }
 
 /* -------------------------------------------------- */
-
-
-/* ------------------ Stream Client Tracking ------------------ */
-
-static uint32_t active_stream_clients = 0;
-static portMUX_TYPE active_stream_clients_mux =
-    portMUX_INITIALIZER_UNLOCKED;
-
-/**
- * @brief    Return the number of active MJPEG stream connections.
- */
-static uint32_t GetActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    const uint32_t count = active_stream_clients;
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-    return count;
-}
-
-/**
- * @brief    Increment the active MJPEG stream connection count.
- */
-static void IncrementActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    ++active_stream_clients;
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-}
-
-/**
- * @brief    Decrement the active MJPEG stream connection count.
- */
-static void DecrementActiveStreamClients(void) {
-    portENTER_CRITICAL(&active_stream_clients_mux);
-    if (active_stream_clients > 0) {
-        --active_stream_clients;
-    }
-    portEXIT_CRITICAL(&active_stream_clients_mux);
-}
-
-/* ------------------------------------------------------------ */
-
-
-/* ------------------ Camera Stream Response ------------------ */
-
-/**
- * @brief    Asynchronous multipart response for the camera MJPEG stream.
- * @details  Captures camera frames on demand and releases each frame after
- *           its contents have been sent.
- */
-class AsyncJpegStreamResponse : public AsyncAbstractResponse {
-private:
-    camera_fb_t *fb;
-    size_t index;
-    char header[128];
-    size_t header_len;
-    size_t header_index;
-
-public:
-    AsyncJpegStreamResponse() {
-        _code = 200;
-        _contentType = "multipart/x-mixed-replace; boundary=frame";
-        _sendContentLength = false;
-        fb = nullptr;
-        index = 0;
-        header_len = 0;
-        header_index = 0;
-        IncrementActiveStreamClients();
-    }
-
-    ~AsyncJpegStreamResponse() {
-        if (fb) esp_camera_fb_return(fb);
-        DecrementActiveStreamClients();
-    }
-
-    bool _sourceValid() const { return true; }
-
-    size_t _fillBuffer(uint8_t *buf, size_t maxLen) override {
-        if (!fb) {
-            fb = esp_camera_fb_get();
-            if (!fb) {
-                Serial.println("[CAMERA] Frame capture failed.");
-                return RESPONSE_TRY_AGAIN;
-            }
-
-            index = 0;
-            header_index = 0;
-            header_len = snprintf(
-                header,
-                sizeof(header),
-                "\r\n--frame\r\n"
-                "Content-Type: image/jpeg\r\n"
-                "Content-Length: %zu\r\n\r\n",
-                fb->len
-            );
-
-            if (header_len >= sizeof(header)) {
-                esp_camera_fb_return(fb);
-                fb = nullptr;
-                return RESPONSE_TRY_AGAIN;
-            }
-        }
-
-        size_t bytes_sent = 0;
-
-        if (header_index < header_len && maxLen > 0) {
-            size_t header_bytes = header_len - header_index;
-            if (header_bytes > maxLen) {
-                header_bytes = maxLen;
-            }
-
-            memcpy(buf, header + header_index, header_bytes);
-            header_index += header_bytes;
-            buf += header_bytes;
-            maxLen -= header_bytes;
-            bytes_sent += header_bytes;
-        }
-
-        if (maxLen > 0 && index < fb->len) {
-            size_t frame_bytes = fb->len - index;
-            if (frame_bytes > maxLen) {
-                frame_bytes = maxLen;
-            }
-
-            memcpy(buf, fb->buf + index, frame_bytes);
-            index += frame_bytes;
-            bytes_sent += frame_bytes;
-        }
-
-        if (header_index == header_len && index == fb->len) {
-            esp_camera_fb_return(fb);
-            fb = nullptr;
-        }
-
-        return bytes_sent;
-    }
-};
-
-/* ------------------------------------------------------------ */
 
 
 /* ------------------ Server Initialization ------------------ */
@@ -303,20 +166,20 @@ esp_err_t Server_Init(void) {
         json += String("\"Link_State\":\"") + link_state_string + "\", ";
         json += String("\"Client_Mode\":\"") + client_mode + "\", ";
         json += String("\"Speed\":\"") + speed_mps + "\", ";
-        json += String("\"Active_Clients\":") + String(GetActiveStreamClients());
+        json += String("\"Active_Clients\":") + String(StreamServer_GetActiveClients());;
         json += "}";
 
         request->send(200, "application/json", json);
     });
 
-    /* Initialize the /stream web route. */
-    server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request) {
-        AsyncJpegStreamResponse *response = new AsyncJpegStreamResponse();
-        request->send(response);
-    });
-
     server.begin();
     Serial.println("[SERVER] Async Web Server Started on port 80.");
+
+    if (StreamServer_Init() != ESP_OK) {
+        Serial.println("[SERVER] Warning: Stream server failed to start.");
+    } else {
+        Serial.println("[SERVER] Stream server started on port 81.");
+    }
 
     return ESP_OK;
 }
@@ -327,6 +190,7 @@ esp_err_t Server_Init(void) {
 /* ------------------ Server Shutdown ------------------ */
 
 void Server_Stop(void) {
+    StreamServer_Stop();
     server.end();
     MDNS.end();
     WiFi.disconnect(true, true);

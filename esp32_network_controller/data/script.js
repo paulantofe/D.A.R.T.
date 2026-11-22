@@ -5,17 +5,29 @@
 
 /* ------------------ Stream Connection ------------------ */
 
+const STREAM_URL = `http://${window.location.hostname}:81/stream`;
+
 const stream = document.getElementById('stream');
 const streamStatus = document.getElementById('stream-status');
 const videoContainer = document.querySelector('.video-container');
 
 let retryStreamTimer = null;
 let streamConnected = false;
+let isUnloading = false;
 
 function tryConnectStream() {
+  if (isUnloading) return;
+
   console.log('[STREAM] Connecting stream...');
   clearTimeout(retryStreamTimer);
-  stream.setAttribute('src', `/stream?${Date.now()}`);
+  stream.setAttribute('src', `${STREAM_URL}?t=${Date.now()}`);
+}
+
+function disconnectStream() {
+  isUnloading = true;
+  clearTimeout(retryStreamTimer);
+  stream.removeAttribute('src');
+  window.stop(); 
 }
 
 stream.addEventListener('load', () => {
@@ -29,6 +41,8 @@ stream.addEventListener('load', () => {
 });
 
 stream.addEventListener('error', () => {
+  if (isUnloading) return;
+
   stream.classList.remove('active');
   videoContainer.classList.remove('stream-active');
   streamStatus.classList.remove('live');
@@ -36,8 +50,9 @@ stream.addEventListener('error', () => {
   streamStatus.lastElementChild.textContent =
     streamConnected ? 'Reconnecting' : 'N/A';
 
-  console.error('Stream error: ' + 
-    (streamConnected ? 'lost stream connection. ' : 'failed to connect stream. '),
+  console.error(
+    'Stream error: ' +
+    (streamConnected ? 'lost stream connection.' : 'failed to connect stream.')
   );
 
   stream.removeAttribute('src');
@@ -46,9 +61,8 @@ stream.addEventListener('error', () => {
   retryStreamTimer = setTimeout(tryConnectStream, 2000);
 });
 
-window.addEventListener('load', () => {
-  tryConnectStream();
-});
+window.addEventListener('load', tryConnectStream);
+window.addEventListener('pagehide', disconnectStream);
 
 /* ------------------------------------------------------- */
 
