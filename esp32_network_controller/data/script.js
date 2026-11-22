@@ -274,6 +274,8 @@ function updateStatus(json) {
     statusContainers.mode.classList.remove('spectator');
     statusContainers.mode.classList.add('driver');
     statusContainers.mode_dot.classList.add('driver');
+    headlightStatus.textContent = headlightOn ? 'On' : 'Off';
+    commandStatus.textContent = 'Stop';
   } else {
     statusContainers.mode.classList.remove('driver');
     statusContainers.mode_dot.classList.remove('driver');
