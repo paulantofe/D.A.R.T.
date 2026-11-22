@@ -58,6 +58,9 @@ static void RDT_Handle_Handshake(RDT_Frame_t *frame) {
 	Failsafe_Exit();
 }
 
+static uint8_t last_headlight_cmd = 0;
+static uint8_t last_motor_cmd = 0;
+
 /**
  * @brief Process a valid control command.
  * @param[in] frame Parsed RDT control frame.
@@ -85,8 +88,15 @@ static void RDT_Handle_Command(RDT_Frame_t *frame) {
 
 	last_rec_command = HAL_GetTick();
 
-	current_motor_command = motor_cmd;
-	current_headlight_command = headlight_cmd;
+	if (last_motor_cmd != motor_cmd) {
+		last_motor_cmd = motor_cmd;
+		current_motor_command = motor_cmd;
+	}
+
+	if (last_headlight_cmd != headlight_cmd) {
+		last_headlight_cmd = headlight_cmd;
+		WS_RequestHeadlightControl(headlight_cmd);
+	}
 }
 
 /* ------------------------------------------------------------- */
