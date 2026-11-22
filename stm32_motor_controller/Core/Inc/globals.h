@@ -21,9 +21,6 @@ extern volatile Link_State_t link_state;
 /** Most recently received valid motor-control command. */
 extern volatile uint8_t current_motor_command;
 
-/** Most recently received valid headlight-control command. */
-extern volatile uint8_t current_headlight_command;
-
 /** Byte storage used by interrupt-driven UART reception. */
 extern uint8_t received_byte;
 
