@@ -1,70 +1,152 @@
-/**
- * @file     script.js
- * @brief    Browser controls and status dashboard logic for the ESP32 server.
- */
-
-/* ------------------ Stream Connection ------------------ */
-
+const WS_URL = `ws://${window.location.hostname}/ws`;
 const STREAM_URL = `http://${window.location.hostname}:81/stream`;
+
+/* ------------------ DOM Elements ------------------ */
 
 const stream = document.getElementById('stream');
 const streamStatus = document.getElementById('stream-status');
 const videoContainer = document.querySelector('.video-container');
 
-let retryStreamTimer = null;
-let streamConnected = false;
+const statusContainers = {
+  mode: document.getElementById('mode-status'),
+  mode_dot: document.getElementById('mode-dot'),
+  wifi: document.getElementById('wifi-status'),
+  battery: document.getElementById('battery-status'),
+  system: document.getElementById('system-status'),
+  clients: document.getElementById('stream-clients-status'),
+  link: document.getElementById('hardware-status'),
+  status: document.getElementById('speed-status')
+};
+
+/* -------------------------------------------------- */
+
+
+/* ------------------ Application State ------------------ */
+
+let ws = null;
+let sessionAuthorized = false;
+let canControl = false;
 let isUnloading = false;
 
-function tryConnectStream() {
-  if (isUnloading) return;
+let wsReconnectTimer = null;
+let heartbeatTimer = null;
+let retryStreamTimer = null;
+let streamConnected = false;
 
-  console.log('[STREAM] Connecting stream...');
+/* ------------------------------------------------------- */
+
+
+/* ------------------ Stream (Port 81) ------------------ */
+
+function tryConnectStream() {
+  if (isUnloading || !sessionAuthorized) return;
+
+  console.log('[STREAM] Connecting...');
   clearTimeout(retryStreamTimer);
   stream.setAttribute('src', `${STREAM_URL}?t=${Date.now()}`);
 }
 
-function disconnectStream() {
-  isUnloading = true;
+function stopStream(statusLabel = 'N/A') {
   clearTimeout(retryStreamTimer);
+  streamConnected = false;
+  stream.classList.remove('active');
+  videoContainer?.classList.remove('stream-active');
+  streamStatus?.classList.remove('live');
+  if (streamStatus?.lastElementChild) {
+    streamStatus.lastElementChild.textContent = statusLabel;
+  }
   stream.removeAttribute('src');
-  window.stop(); 
 }
 
 stream.addEventListener('load', () => {
   streamConnected = true;
   stream.classList.add('active');
-  videoContainer.classList.add('stream-active');
-  streamStatus.classList.add('live');
-  streamStatus.lastElementChild.textContent = 'Live';
-
-  console.log('[STREAM] Stream is online.');
+  videoContainer?.classList.add('stream-active');
+  streamStatus?.classList.add('live');
+  if (streamStatus?.lastElementChild) {
+    streamStatus.lastElementChild.textContent = 'Live';
+  }
+  console.log('[STREAM] Online.');
 });
 
 stream.addEventListener('error', () => {
-  if (isUnloading) return;
+  if (isUnloading || !sessionAuthorized) return;
 
-  stream.classList.remove('active');
-  videoContainer.classList.remove('stream-active');
-  streamStatus.classList.remove('live');
-
-  streamStatus.lastElementChild.textContent =
-    streamConnected ? 'Reconnecting' : 'N/A';
-
-  console.error(
-    'Stream error: ' +
-    (streamConnected ? 'lost stream connection.' : 'failed to connect stream.')
-  );
-
-  stream.removeAttribute('src');
+  const wasConnected = streamConnected;
+  stopStream(wasConnected ? 'Reconnecting' : 'N/A');
 
   clearTimeout(retryStreamTimer);
   retryStreamTimer = setTimeout(tryConnectStream, 2000);
 });
 
-window.addEventListener('load', tryConnectStream);
-window.addEventListener('pagehide', disconnectStream);
+/* ------------------------------------------------------ */
 
-/* ------------------------------------------------------- */
+
+/* ------------------ WebSocket (Port 80) ------------------ */
+
+function connectWebSocket() {
+  if (isUnloading) return;
+
+  clearTimeout(wsReconnectTimer);
+  ws = new WebSocket(WS_URL);
+
+  ws.addEventListener('message', (event) => {
+    let data;
+    try {
+      data = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+
+    if (data.type === 'ready') {
+      sessionAuthorized = true;
+      console.log('[WS] Session acquired.');
+
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send('P');
+        }
+      }, 500);
+
+      tryConnectStream();
+      return;
+    }
+
+    if (data.type === 'status') {
+      updateTelemetryUI(data);
+      return;
+    }
+
+    if (data.type === 'error') {
+      console.warn(`[WS] Error (${data.code}): ${data.msg}`);
+    }
+  });
+
+  ws.addEventListener('close', (event) => {
+    clearInterval(heartbeatTimer);
+    sessionAuthorized = false;
+    canControl = false;
+    resetControlUI();
+
+    if (event.code === 4003) {
+      console.warn('[WS] Rover is already controlled by another client.');
+      stopStream('Busy');
+      return;
+    }
+
+    stopStream('Reconnecting');
+    if (!isUnloading) {
+      wsReconnectTimer = setTimeout(connectWebSocket, 1500);
+    }
+  });
+
+  ws.addEventListener('error', () => {
+    ws.close();
+  });
+}
+
+/* --------------------------------------------------------- */
 
 
 /* ------------------ User Input Parsing and Send Command ------------------ */
@@ -81,6 +163,7 @@ const buttons = {
 
 const headlightButton = document.getElementById('btn-speedlight-on');
 const commandStatus = document.getElementById('cmd-status');
+const headlightStatus = document.getElementById('light-status');
 
 const keyAliases = {
   w: 'w', W: 'w',
@@ -103,7 +186,7 @@ const commands = {
   '0,1':  'D', // right
   '-1,-1': 'Z', // backward-left
   '-1,0':  'S', // backward
-  '-1,1': 'C' // backward-right
+  '-1,1': 'C'  // backward-right
 };
 
 const commandsMessage = {
@@ -116,11 +199,10 @@ const commandsMessage = {
   'Z': 'Backward-Left',
   'S': 'Backward',
   'C': 'Backward-Right'
-}
+};
 
 const pressedKeys = new Set();
 let headlightOn = false;
-let commandQueue = Promise.resolve();
 
 function parseCommand() {
   const up = pressedKeys.has('w');
@@ -134,18 +216,13 @@ function parseCommand() {
   return commands[`${vertical},${horizontal}`];
 }
 
-async function sendCommand(command, nextHeadlightState) {
-  const response = await fetch('/control', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({ val: command }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Control request failed: ${response.status}`);
+function sendCommand(command, nextHeadlightState) {
+  if (!sessionAuthorized || !ws || ws.readyState !== WebSocket.OPEN) {
+    console.error('[CONTROL] Rejected or failed: WebSocket is not connected.');
+    return;
   }
+
+  ws.send(command);
 
   headlightOn = nextHeadlightState;
   headlightStatus.textContent = headlightOn ? 'On' : 'Off';
@@ -158,25 +235,19 @@ function updateCommand(nextHeadlightState = headlightOn) {
   const headlightCmd = nextHeadlightState ? HEADLIGHT_ON_COMMAND : HEADLIGHT_OFF_COMMAND;
   const command = `${motorCmd}${headlightCmd}`;
 
-  commandQueue = commandQueue
-    .then(() => sendCommand(command, nextHeadlightState))
-    .catch((error) => {
-      console.error('[CONTROL] Rejected or failed: ', error);
-    });
+  sendCommand(command, nextHeadlightState);
 }
-
-const headlightStatus = document.getElementById('light-status');
 
 function toggleHeadlight(event) {
   if (!canControl) return;
-  
+
   event.preventDefault();
   updateCommand(!headlightOn);
 }
 
 function pressCommand(key, event) {
   if (!canControl) return;
-  
+
   event.preventDefault();
   pressedKeys.add(key);
   buttons[key].classList.add('pressed');
@@ -185,11 +256,38 @@ function pressCommand(key, event) {
 
 function releaseCommand(key, event) {
   if (!pressedKeys.has(key)) return;
-  
+
   event.preventDefault();
   pressedKeys.delete(key);
   buttons[key].classList.remove('pressed');
   updateCommand();
+}
+
+function clearPressedInputs() {
+  const hadPressedKeys = pressedKeys.size > 0;
+
+  pressedKeys.clear();
+
+  for (const button of Object.values(buttons)) {
+    button?.classList.remove('pressed');
+  }
+
+  if (hadPressedKeys) {
+    updateCommand();
+  }
+}
+
+function resetControlUI() {
+  pressedKeys.clear();
+
+  for (const button of Object.values(buttons)) {
+    button?.classList.remove('pressed');
+  }
+
+  headlightOn = false;
+  if (headlightStatus) headlightStatus.textContent = 'N/A';
+  headlightButton?.classList.remove('pressed');
+  if (commandStatus) commandStatus.textContent = 'N/A';
 }
 
 window.addEventListener('keydown', (event) => {
@@ -203,7 +301,7 @@ window.addEventListener('keydown', (event) => {
     toggleHeadlight(event);
     return;
   }
-  
+
   pressCommand(key, event);
 });
 
@@ -218,6 +316,8 @@ window.addEventListener('keyup', (event) => {
 });
 
 for (const [key, button] of Object.entries(buttons)) {
+  if (!button) continue;
+
   button.addEventListener('pointerdown', (event) => {
     button.setPointerCapture(event.pointerId);
     pressCommand(key, event);
@@ -232,109 +332,70 @@ for (const [key, button] of Object.entries(buttons)) {
   });
 }
 
-headlightButton.addEventListener('pointerdown', (event) => {
+headlightButton?.addEventListener('pointerdown', (event) => {
   toggleHeadlight(event);
 });
 
-window.addEventListener('blur', () => {
-  const hadPressedKeys = pressedKeys.size > 0;
+window.addEventListener('blur', clearPressedInputs);
 
-  pressedKeys.clear();
+/* ------------------------------------------------------------------------- */
 
-  for (const button of Object.values(buttons)) {
-    button.classList.remove('pressed');
+
+/* ------------------ Telemetry ------------------ */
+
+function updateTelemetryUI(json) {
+  canControl =
+    json.Link_State === 'online' &&
+    json.System_State !== 'systemfault' &&
+    json.System_State !== 'offline';
+
+  if (!canControl || json.System_State === 'failsafe' || json.Link_State !== 'online') {
+    resetControlUI();
+  } else {
+    if (headlightStatus) headlightStatus.textContent = headlightOn ? 'On' : 'Off';
   }
-  
-  if (hadPressedKeys) {
-    updateCommand();
+
+  if (statusContainers.link) {
+    statusContainers.link.classList.toggle('online', json.Link_State === 'online');
+    statusContainers.link.classList.toggle('checking', json.Link_State !== 'online');
+    statusContainers.link.textContent = json.Link_State;
   }
+  if (statusContainers.wifi) statusContainers.wifi.textContent = json.RSSI;
+  if (statusContainers.battery) statusContainers.battery.textContent = json.Battery;
+  if (statusContainers.system) {
+    statusContainers.system.textContent =
+      json.System_State === 'idle' || json.System_State === 'moving'
+        ? 'Online'
+        : json.System_State;
+  }
+  if (statusContainers.status) statusContainers.status.textContent = json.Speed;
+}
+
+/* ----------------------------------------------- */
+
+
+/* ------------------ Lifecycle ------------------ */
+
+window.addEventListener('load', connectWebSocket);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) clearPressedInputs();
 });
 
-/* ------------------------------------------------------------------------- */
+window.addEventListener('pagehide', () => {
+  isUnloading = true;
+  clearTimeout(wsReconnectTimer);
+  clearInterval(heartbeatTimer);
+  stopStream('N/A');
 
-
-/* ------------------ Status Panel and Failsafe Heartbeat ------------------ */
-
-let canControl = false;
-
-const statusContainers = {
-  mode: document.getElementById('mode-status'),
-  mode_dot: document.getElementById('mode-dot'),
-  wifi: document.getElementById('wifi-status'),
-  battery: document.getElementById('battery-status'),
-  system: document.getElementById('system-status'),
-  clients: document.getElementById('stream-clients-status'),
-  link: document.getElementById('hardware-status'),
-  status: document.getElementById('speed-status')
-};
-
-function updateStatus(json) {
-  if (!json) {
-    return;
-  }
-
-  canControl = json.Link_State === 'online' &&
-             json.System_State !== 'systemfault' &&
-             json.System_State !== 'offline';
-             
-  if (!canControl || json.System_State === 'failsafe' || json.Client_Mode !== 'Driver') {
-    headlightOn = false;
-    headlightStatus.textContent = 'N/A';
-    headlightButton.classList.remove('pressed');
-    commandStatus.textContent = 'N/A';
-  }
-
-  if (json.Client_Mode === 'Driver') {
-    statusContainers.mode.classList.remove('spectator');
-    statusContainers.mode.classList.add('driver');
-    statusContainers.mode_dot.classList.add('driver');
-    headlightStatus.textContent = headlightOn ? 'On' : 'Off';
-    commandStatus.textContent = 'Stop';
-  } else {
-    statusContainers.mode.classList.remove('driver');
-    statusContainers.mode_dot.classList.remove('driver');
-    statusContainers.mode.classList.add('spectator');
-  }
-
-  if (json.Link_State === 'online') {
-    statusContainers.link.classList.remove('checking');
-    statusContainers.link.classList.add('online');
-  } else {
-    statusContainers.link.classList.remove('online');
-    statusContainers.link.classList.add('checking');
-  }
-
-  statusContainers.mode.textContent = json.Client_Mode;
-  statusContainers.wifi.textContent = json.RSSI;
-  statusContainers.battery.textContent = json.Battery;
-  if (json.System_State === 'idle' || json.System_State === 'moving') {
-    statusContainers.system.textContent = 'Online';
-  } else {
-    statusContainers.system.textContent = json.System_State;
-  }
-  statusContainers.clients.textContent = json.Active_Clients;
-  statusContainers.status.textContent = json.Speed;
-  statusContainers.link.textContent = json.Link_State;
-}
-
-async function pollStatus() {
-  try {
-    const response = await fetch('/status');
-
-    if (!response.ok) {
-      throw new Error(`Status request failed: ${response.status}`);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    if (sessionAuthorized) {
+      const headlightCmd = headlightOn ? HEADLIGHT_ON_COMMAND : HEADLIGHT_OFF_COMMAND;
+      ws.send(`X${headlightCmd}`);
     }
-
-    const status = await response.json();
-
-    updateStatus(status);
-  } catch (error) {
-    console.error('[STATUS] Poll failed: ', error);
-  } finally {
-    setTimeout(pollStatus, 1000);
+    ws.close();
   }
-}
+  window.stop();
+});
 
-pollStatus();
-
-/* ------------------------------------------------------------------------- */
+/* ----------------------------------------------- */
