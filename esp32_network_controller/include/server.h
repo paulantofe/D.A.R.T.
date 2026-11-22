@@ -30,9 +30,13 @@
  */
 esp_err_t Server_Init(void);
 
+void Server_Tick(void);
+
 /**
  * @brief  Stop the ESP32 web server and Wi-Fi.
  */
 void Server_Stop(void);
+
+bool Server_IsActiveClientIP(uint32_t ipv4_addr);
 
 #endif

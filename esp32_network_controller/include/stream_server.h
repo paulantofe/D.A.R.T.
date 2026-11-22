@@ -22,12 +22,6 @@ esp_err_t StreamServer_Init(void);
  */
 void StreamServer_Stop(void);
 
-/**
- * @brief    Get the number of active stream clients.
- * @return   The number of active stream clients.
- */
-uint32_t StreamServer_GetActiveClients(void);
-
 /* ------------------------------------------------ */
 
 #endif

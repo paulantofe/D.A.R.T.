@@ -152,22 +152,3 @@ void Process_Serial1(void) {
 }
 
 /* -------------------------------------------------- */
-
-
-/* ------------------ Driver Connection Handler ------------------ */
-
-volatile uint32_t last_status_request = 0;
-
-void DriverConnection_CheckTimeout(void) {
-    if (has_active_client) {
-        if (millis() - last_status_request > RDT_BROWSER_TIMEOUT_MS) {
-            has_active_client = false;
-            active_client_ip = { 0, 0, 0, 0 };
-            current_motor_cmd = RDT_CONTROL_FAILSAFE;
-
-            Serial.println("[SYSTEM] Driver disconnected. Timeout Elapsed.");
-        }
-    }
-}
-
-/* --------------------------------------------------------------- */

@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "app.h"
 #include "rdt_link.h"
+#include "server.h"
 
 /* ------------------ Shared Application State ------------------ */
 
@@ -43,7 +44,7 @@ void loop() {
 
     SystemState_Update();
 
-    DriverConnection_CheckTimeout();
+    Server_Tick();
 
     delay(1);
 }

@@ -30,15 +30,6 @@ extern String battery_level;
 /** Latest decoded rover speed in metres per second. */
 extern String speed_mps;
 
-/** True when a driver currently owns control of the rover. */
-extern bool has_active_client;
-
-/** IP address of the current driver. */
-extern IPAddress active_client_ip;
-
-/** Timestamp of the current driver's most recent /status request. */
-extern volatile uint32_t last_status_request;
-
 /* -------------------------------------------------------------- */
 
 #endif
