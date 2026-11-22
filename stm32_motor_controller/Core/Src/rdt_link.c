@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "ws2812_driver/ws2812.h"
 #include <stdbool.h>
 #include <stdint.h>
 
