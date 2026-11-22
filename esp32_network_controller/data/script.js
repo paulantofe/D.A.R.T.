@@ -245,6 +245,7 @@ let canControl = false;
 
 const statusContainers = {
   mode: document.getElementById('mode-status'),
+  mode_dot: document.getElementById('mode-dot'),
   wifi: document.getElementById('wifi-status'),
   battery: document.getElementById('battery-status'),
   system: document.getElementById('system-status'),
@@ -262,18 +263,20 @@ function updateStatus(json) {
              json.System_State !== 'systemfault' &&
              json.System_State !== 'offline';
              
-  if (!canControl || json.System_State === 'failsafe') {
-  headlightOn = false;
+  if (!canControl || json.System_State === 'failsafe' || json.Client_Mode !== 'Driver') {
+    headlightOn = false;
     headlightStatus.textContent = 'N/A';
     headlightButton.classList.remove('pressed');
-    commandStatus.textContent = 'Stop';
+    commandStatus.textContent = 'N/A';
   }
 
   if (json.Client_Mode === 'Driver') {
     statusContainers.mode.classList.remove('spectator');
     statusContainers.mode.classList.add('driver');
+    statusContainers.mode_dot.classList.add('driver');
   } else {
     statusContainers.mode.classList.remove('driver');
+    statusContainers.mode_dot.classList.remove('driver');
     statusContainers.mode.classList.add('spectator');
   }
 
@@ -288,7 +291,11 @@ function updateStatus(json) {
   statusContainers.mode.textContent = json.Client_Mode;
   statusContainers.wifi.textContent = json.RSSI;
   statusContainers.battery.textContent = json.Battery;
-  statusContainers.system.textContent = json.System_State;
+  if (json.System_State === 'idle' || json.System_State === 'moving') {
+    statusContainers.system.textContent = 'Online';
+  } else {
+    statusContainers.system.textContent = json.System_State;
+  }
   statusContainers.clients.textContent = json.Active_Clients;
   statusContainers.status.textContent = json.Speed;
   statusContainers.link.textContent = json.Link_State;

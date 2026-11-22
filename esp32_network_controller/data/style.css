@@ -132,6 +132,12 @@ button {
   color: var(--amber);
 }
 
+#mode-dot.driver{
+  background: var(--mint-bright);
+  box-shadow: 0 0 12px rgba(157, 227, 195, 0.7);
+  border-color: rgba(157, 227, 195, 0.28);
+}
+
 .status-dot,
 .caption-dot {
   display: inline-block;
