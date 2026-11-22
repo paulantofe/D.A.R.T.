@@ -13,6 +13,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <rdt_protocol.h>
 
 /* ------------------ General Macros Definitions ------------------ */
 
@@ -124,10 +125,10 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b);
  * @brief   Request headlight control.
  * @details Sets a request flag. Main thread is expected to
  *          act on the request flag and control the headlight LEDs.
- * @param[in] OnorOff  WS_HEADLIGHT_ON / WS_HEADLIGHT_OFF macros.
+ * @param[in] headlight_control  RDT_CONTROL_HEADLIGHT_OFF / RDT_CONTROL_HEADLIGHT_ON macros.
  * @note This is API is designed to run in ISRs/ISRs Callbacks.
  */
-void WS_RequestHeadlightControl(uint8_t OnorOff);
+void WS_RequestHeadlightControl(uint8_t control_headlight);
 
 /**
  * @brief Handle the status LEDs color update request and

@@ -128,8 +128,13 @@ void WS_RequestStatusColor(uint8_t r, uint8_t g, uint8_t b) {
 	update_status_flag = true;
 }
 
-void WS_RequestHeadlightControl(uint8_t OnorOff) {
-	headlight_OnorOff = OnorOff;
+void WS_RequestHeadlightControl(uint8_t control_headlight) {
+	if (control_headlight == RDT_CONTROL_HEADLIGHT_ON) {
+		headlight_OnorOff = WS_HEADLIGHT_ON;
+	}
+	else if (control_headlight == RDT_CONTROL_HEADLIGHT_OFF) {
+		headlight_OnorOff = WS_HEADLIGHT_OFF;
+	}
 	update_headlight_flag = true;
 }
 
