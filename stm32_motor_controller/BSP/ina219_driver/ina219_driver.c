@@ -99,10 +99,10 @@ HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max
 		return HAL_ERROR;
 	}
 
-	float current_lsb = max_current_a / INA_CAL_CONSTANT;
+	float current_lsb = max_current_a / INA_CAL_CURRENT_DIVISOR;
 	float calibration_value = INA_COMPUTE_CALIBRATION_VALUE(current_lsb, r_shunt_ohm);
 
-	if (calibration_value > 65534.0f) {
+	if (calibration_value < 2.0f || calibration_value > 65534.0f) {
 		return HAL_ERROR;
 	}
 

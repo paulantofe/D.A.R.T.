@@ -103,7 +103,7 @@ HAL_StatusTypeDef INA_Init(INA_Handle_t *hina, I2C_HandleTypeDef *hi2c, uint8_t 
 
 /**
  * @brief Calibrate the INA219.
- * @param[in] hina           pointer to INA handle structure.
+ * @param[in,out] hina       pointer to INA handle structure.
  * @param[in] r_shunt_ohm    value of INA shunt resistor in ohms.
  * @param[in] max_current_a  expected max current in amperes.
  * @return HAL_OK    Operation Successful.
