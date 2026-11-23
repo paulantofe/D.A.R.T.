@@ -1,5 +1,12 @@
 /**
- * @file ina219_driver.h
+ * @file    ina219_driver.h
+ * @brief   Public API, register definitions, and data structures for the INA219 sensor driver.
+ * @details Provides the hardware-independent interface for initializing, calibrating, and
+ *          reading bus voltage, shunt voltage, current, and power measurements from the
+ *          Texas Instruments INA219 high-side current/power monitor over I2C using STM32 HAL.
+ *
+ * @note    The I2C communication is using the blocking APIs. The given INA APIs are therefore
+ *          expected to be called from non-ISR context.
  */
 
 #ifndef INA219_DRIVER_INA219_DRIVER_H_
@@ -10,6 +17,7 @@
 
 /* ------------------ General Macros Definition ------------------ */
 
+// Handle structure for INA sensor.
 typedef struct {
 	I2C_HandleTypeDef *hi2c;
 	uint8_t i2c_addr;

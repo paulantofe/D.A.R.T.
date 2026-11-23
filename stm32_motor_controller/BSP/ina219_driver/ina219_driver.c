@@ -1,3 +1,11 @@
+/**
+ * @file    ina219_driver.c
+ * @brief   Implementation of the INA219 current and power monitor driver.
+ * @details Implements blocking I2C register read/write operations (including Big-Endian to
+ *          Little-Endian byte swapping), device initialization, calibration register scaling,
+ *          and raw-to-physical unit conversions for STM32F4 using STM32 HAL.
+ */
+
 #include "ina219_driver.h"
 #include <stdbool.h>
 
