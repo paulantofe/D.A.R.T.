@@ -13,6 +13,7 @@
 #define INA_SLAVE_TRIES          3U
 #define INA_PAYLOAD_LENGTH       2        // bytes
 #define INA_SHUNT_VOLTAGE_LSB    0.01f
+#define INA_VOLTAGE_LSB          0.004f
 #define INA_CAL_CURRENT_DIVISOR  32767.0f // used to calculate current_lsb
 #define INA_CAL_POWER_MULTIPLIER 20.0f    // used to calculate power_lsb
 #define INA_COMPUTE_CALIBRATION_VALUE(c, r) \
@@ -136,6 +137,23 @@ HAL_StatusTypeDef INA_ReadShuntVoltage_mV(INA_Handle_t *hina, float *shunt_mv) {
     *shunt_mv = (float)((int16_t)shunt_voltage_raw) * INA_SHUNT_VOLTAGE_LSB;
 
     return HAL_OK;
+}
+
+HAL_StatusTypeDef INA_ReadBusVoltage_V(INA_Handle_t *hina, float *voltage) {
+	if (hina == (void*)0 || hina->hi2c == (void*)0 || voltage == (void*)0) {
+		return HAL_ERROR;
+	}
+
+	uint16_t voltage_raw = 0U;
+
+	HAL_StatusTypeDef status = INA_ReadReg(hina, INA_BUS_VOLTAGE_REG_ADDR, &voltage_raw);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	*voltage = (float)(voltage_raw >> INA_BVR_BD_POS) * INA_VOLTAGE_LSB;
+
+	return HAL_OK;
 }
 
 /* ---------------------------------------------------------------- */
