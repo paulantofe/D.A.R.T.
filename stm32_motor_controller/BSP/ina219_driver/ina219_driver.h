@@ -56,31 +56,31 @@ typedef struct {
  * @{
  */
 // Configuration Register Bits
-#define INA_CFGR_RST                 15U
-#define INA_CFGR_BRNG                13U
-#define INA_CFGR_PG1                 12U
-#define INA_CFGR_PG0                 11U
-#define INA_CFGR_BADC4               10U
-#define INA_CFGR_BADC3               9U
-#define INA_CFGR_BADC2               8U
-#define INA_CFGR_BADC1               7U
-#define INA_CFGR_SADC4               6U
-#define INA_CFGR_SADC3               5U
-#define INA_CFGR_SADC2               4U
-#define INA_CFGR_SADC1               3U
-#define INA_CFGR_MODE3               2U
-#define INA_CFGR_MODE2               1U
-#define INA_CFGR_MODE1               0U
+#define INA_CFGR_RST                 (1U << 15U)
+#define INA_CFGR_BRNG                (1U << 13U)
+#define INA_CFGR_PG1                 (1U << 12U)
+#define INA_CFGR_PG0                 (1U << 11U)
+#define INA_CFGR_BADC4               (1U << 10U)
+#define INA_CFGR_BADC3               (1U << 9U)
+#define INA_CFGR_BADC2               (1U << 8U)
+#define INA_CFGR_BADC1               (1U << 7U)
+#define INA_CFGR_SADC4               (1U << 6U)
+#define INA_CFGR_SADC3               (1U << 5U)
+#define INA_CFGR_SADC2               (1U << 4U)
+#define INA_CFGR_SADC1               (1U << 3U)
+#define INA_CFGR_MODE3               (1U << 2U)
+#define INA_CFGR_MODE2               (1U << 1U)
+#define INA_CFGR_MODE1               (1U << 0U)
 
 // Bus Voltage Register Bits
 #define INA_BVR_BD_POS               3U
-#define INA_BVR_CNVR                 1U
-#define INA_BVR_OVF                  0U
+#define INA_BVR_CNVR                 (1U << 1U)
+#define INA_BVR_OVF                  (1U << 0U)
 
 // Bus Voltage Register Masks
 #define INA_BVR_BD_MASK              0xFFF8U
-#define INA_BVR_CNVR_MASK            (1U << INA_BVR_CNVR)
-#define INA_BVR_OVF_MASK             (1U << INA_BVR_OVF)
+#define INA_BVR_CNVR_MASK            INA_BVR_CNVR
+#define INA_BVR_OVF_MASK             INA_BVR_OVF
 
 // Calibration Register Bits
 #define INA_CAL_FS0_MASK             0xFFFEU

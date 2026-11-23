@@ -85,7 +85,7 @@ HAL_StatusTypeDef INA_Init(INA_Handle_t *hina, I2C_HandleTypeDef *hi2c, uint8_t 
 		return status;
 	}
 
-	status = INA_WriteReg(hina, INA_CONFIGURATION_REG_ADDR, (1U << INA_CFGR_RST));
+	status = INA_WriteReg(hina, INA_CONFIGURATION_REG_ADDR, INA_CFGR_RST);
 	if (status != HAL_OK) {
 		return status;
 	}
