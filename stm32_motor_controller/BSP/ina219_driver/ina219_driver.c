@@ -156,4 +156,40 @@ HAL_StatusTypeDef INA_ReadBusVoltage_V(INA_Handle_t *hina, float *voltage) {
 	return HAL_OK;
 }
 
+HAL_StatusTypeDef INA_ReadCurrent_A(INA_Handle_t *hina, float *current) {
+	if (hina == (void*)0 || hina->hi2c == (void*)0 ||
+		current == (void*)0 || hina->cal_value == 0U) {
+		return HAL_ERROR;
+	}
+
+	uint16_t current_raw = 0U;
+
+	HAL_StatusTypeDef status = INA_ReadReg(hina, INA_CURRENT_REG_ADDR, &current_raw);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	*current = (float)((int16_t)current_raw) * hina->current_lsb;
+
+	return HAL_OK;
+}
+
+HAL_StatusTypeDef INA_ReadPower_W(INA_Handle_t *hina, float *power) {
+	if (hina == (void*)0 || hina->hi2c == (void*)0 ||
+		power == (void*)0 || hina->cal_value == 0U) {
+		return HAL_ERROR;
+	}
+
+	uint16_t power_raw = 0U;
+
+	HAL_StatusTypeDef status = INA_ReadReg(hina, INA_POWER_REG_ADDR, &power_raw);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	*power = (float)power_raw * hina->power_lsb;
+
+	return HAL_OK;
+}
+
 /* ---------------------------------------------------------------- */
