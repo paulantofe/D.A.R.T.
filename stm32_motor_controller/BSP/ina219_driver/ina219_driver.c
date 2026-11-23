@@ -126,14 +126,14 @@ HAL_StatusTypeDef INA_ReadShuntVoltage_mV(INA_Handle_t *hina, float *shunt_mv) {
 		return HAL_ERROR;
 	}
 
-	int16_t shunt_voltage_raw = 0;
+	uint16_t shunt_voltage_raw = 0U;
 
 	HAL_StatusTypeDef status = INA_ReadReg(hina, INA_SHUNT_VOLTAGE_REG_ADDR, &shunt_voltage_raw);
 	if (status != HAL_OK) {
 		return status;
 	}
 
-    *shunt_mv = shunt_voltage_raw * INA_SHUNT_VOLTAGE_LSB;
+    *shunt_mv = (float)((int16_t)shunt_voltage_raw) * INA_SHUNT_VOLTAGE_LSB;
 
     return HAL_OK;
 }
