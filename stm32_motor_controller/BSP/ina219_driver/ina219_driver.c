@@ -12,6 +12,7 @@
 #define INA_I2C_TIMEOUT_MS       10U
 #define INA_SLAVE_TRIES          3U
 #define INA_PAYLOAD_LENGTH       2        // bytes
+#define INA_SHUNT_VOLTAGE_LSB    0.01f
 #define INA_CAL_CURRENT_DIVISOR  32767.0f // used to calculate current_lsb
 #define INA_CAL_POWER_MULTIPLIER 20.0f    // used to calculate power_lsb
 #define INA_COMPUTE_CALIBRATION_VALUE(c, r) \
@@ -118,6 +119,23 @@ HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max
 	hina->cal_value   = cal_reg_value;
 
 	return HAL_OK;
+}
+
+HAL_StatusTypeDef INA_ReadShuntVoltage_mV(INA_Handle_t *hina, float *shunt_mv) {
+	if (hina == (void*)0 || hina->hi2c == (void*)0 || shunt_mv == (void*)0) {
+		return HAL_ERROR;
+	}
+
+	int16_t shunt_voltage_raw = 0;
+
+	HAL_StatusTypeDef status = INA_ReadReg(hina, INA_SHUNT_VOLTAGE_REG_ADDR, &shunt_voltage_raw);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+    *shunt_mv = shunt_voltage_raw * INA_SHUNT_VOLTAGE_LSB;
+
+    return HAL_OK;
 }
 
 /* ---------------------------------------------------------------- */
