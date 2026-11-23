@@ -88,6 +88,8 @@ typedef struct {
  * @param[in,out] hina  pointer to INA handle structure.
  * @param[in]     hi2c  pointer to I2C handle structure.
  * @param[in]     addr  address of the INA slave.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_Init(INA_Handle_t *hina, I2C_HandleTypeDef *hi2c, uint8_t addr);
 
@@ -96,6 +98,8 @@ HAL_StatusTypeDef INA_Init(INA_Handle_t *hina, I2C_HandleTypeDef *hi2c, uint8_t 
  * @param[in] hina           pointer to INA handle structure.
  * @param[in] r_shunt_ohm    value of INA shunt resistor in ohms.
  * @param[in] max_current_a  expected max current in amperes.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max_current_a);
 
@@ -103,6 +107,8 @@ HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max
  * @brief Read the shunt voltage.
  * @param[in]  hina      pointer to INA handle structure.
  * @param[out] shunt_mv  shunt voltage drop over the shunt resistor in millivolts.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_ReadShuntVoltage_mV(INA_Handle_t *hina, float *shunt_mv);
 
@@ -110,6 +116,8 @@ HAL_StatusTypeDef INA_ReadShuntVoltage_mV(INA_Handle_t *hina, float *shunt_mv);
  * @brief Read the bus voltage.
  * @param[in]  hina     pointer to INA handle structure.
  * @param[out] voltage  voltage read by INA.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_ReadBusVoltage_V(INA_Handle_t *hina, float *voltage);
 
@@ -117,6 +125,8 @@ HAL_StatusTypeDef INA_ReadBusVoltage_V(INA_Handle_t *hina, float *voltage);
  * @brief Read the current flowing through INA.
  * @param[in]  hina     pointer to INA handle structure.
  * @param[out] current  current read by INA.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_ReadCurrent_A(INA_Handle_t *hina, float *current);
 
@@ -124,6 +134,8 @@ HAL_StatusTypeDef INA_ReadCurrent_A(INA_Handle_t *hina, float *current);
  * @brief Read the power flowing through INA.
  * @param[in]  hina   pointer to INA handle structure.
  * @param[out] power  power read by INA.
+ * @return HAL_OK    Operation Successful.
+ *         HAL_ERROR Something went wrong.
  */
 HAL_StatusTypeDef INA_ReadPower_W(INA_Handle_t *hina, float *power);
 
