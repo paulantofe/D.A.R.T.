@@ -4,14 +4,14 @@
  *        controlling and configuring DC motors and encoders.
  */
 
-#include <rmc_motor_driver/rmc_motor_driver.h>
+#include "rmc_motor_driver/rmc_motor_driver.h"
 
 /* ------------------ Static Helper Functions ------------------ */
 
 static inline HAL_StatusTypeDef RMC_CheckPointers(const RMC_Handle_t *hrmc) {
-	if (hrmc == NULL || hrmc->config.htim_enc == NULL ||
-		hrmc->config.in1_port == NULL || hrmc->config.in2_port == NULL ||
-		hrmc->config.htim_pwm == NULL) {
+	if (hrmc == (void*)0 || hrmc->config.htim_enc == (void*)0 ||
+		hrmc->config.in1_port == (void*)0 || hrmc->config.in2_port == (void*)0 ||
+		hrmc->config.htim_pwm == (void*)0) {
 		return HAL_ERROR;
 	}
 	return HAL_OK;
