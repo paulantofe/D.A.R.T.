@@ -22,6 +22,7 @@ TIM_HandleTypeDef htim5;
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma1;
 I2C_HandleTypeDef hi2c2;
+INA_Handle_t hina;
 
 /* ---------------------------------------------------------- */
 
@@ -71,6 +72,25 @@ void LED_Config(void) {
 	led.Pin = GREEN_LED | ORANGE_LED | RED_LED | BLUE_LED;
 
 	HAL_GPIO_Init(GPIOD, &led);
+}
+
+void INA_Config(void) {
+	I2C_Config();
+
+	INA_Handle_t hina = { 0 };
+	hina.config.hi2c          = &hi2c2;
+	hina.config.i2c_addr      = INA_ADDR_GND_GND;
+	hina.config.r_shunt_ohm   = 0.1f;
+	hina.config.max_current_a = 0.5f;
+	hina.config.bus_range     = INA_BRNG_16V;
+	hina.config.pga_gain      = INA_PGA_80MV;
+	hina.config.bus_adc       = INA_BADC_16S;
+	hina.config.shunt_adc     = INA_SADC_16S;
+	hina.config.mode          = INA_MODE_SHUNT_BUS_CONT;
+
+	if (INA_Init(&hina) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 void L298N_INPins_Config(void) {

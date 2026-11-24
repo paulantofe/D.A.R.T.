@@ -10,6 +10,7 @@
 #include "stm32f4xx_hal_hardware_config.h"
 #include "rmc_motor_controller.h"
 #include "ws2812_driver/ws2812.h"
+#include "ina219_driver/ina219_driver.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <rdt_protocol.h>
@@ -28,6 +29,8 @@ void STM_Boot(void) {
 	HAL_Init();
 
 	SystemClock_Config();
+
+	INA_Config();
 
 	WS_Init();
 

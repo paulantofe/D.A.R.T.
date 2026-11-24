@@ -12,7 +12,7 @@
 #ifndef INA219_DRIVER_INA219_DRIVER_H_
 #define INA219_DRIVER_INA219_DRIVER_H_
 
-#include "stm32f4xx_hal_hardware_config.h"
+#include "stm32f4xx_hal.h"
 #include <stdint.h>
 
 /* ------------------ General Macros Definition ------------------ */

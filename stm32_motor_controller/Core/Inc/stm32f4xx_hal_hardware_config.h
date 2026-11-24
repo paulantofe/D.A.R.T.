@@ -9,6 +9,7 @@
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
+#include "ina219_driver/ina219_driver.h"
 #include "app.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
@@ -24,6 +25,7 @@ extern TIM_HandleTypeDef htim5;
 extern DMA_HandleTypeDef hdma1;
 extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c2;
+extern INA_Handle_t hina;
 
 /* ---------------------------------------------------------- */
 
@@ -69,6 +71,11 @@ void SystemClock_Config(void);
  *          Instance: GPIOD | PD12 (Green) | PD13 (Orange) | PD14 (Red) | PD15 (Blue)
  */
 void LED_Config(void);
+
+/**
+ * @brief   Configure INA219 sensor.
+ */
+void INA_Config(void);
 
 /**
  * @brief   Configure the GPIO pins for L298N's IN pins.
