@@ -174,4 +174,16 @@ HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed) {
 	return HAL_OK;
 }
 
+HAL_StatusTypeDef RMC_GetLinearSpeed(const RMC_Handle_t *hrmc1, const RMC_Handle_t *hrmc2, float *speed) {
+	if (hrmc1 == (void*)0  || !hrmc1->is_initialized ||
+		hrmc2 == (void*)0  || !hrmc2->is_initialized ||
+		speed == (void*)0) {
+		return HAL_ERROR;
+	}
+
+	*speed = ((hrmc1->speed_mm_s + hrmc2->speed_mm_s) / 2.0f);
+
+	return HAL_OK;
+}
+
 /* ---------------------------------------------------------------- */

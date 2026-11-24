@@ -145,6 +145,16 @@ HAL_StatusTypeDef RMC_Stop(RMC_Handle_t *hrmc, const uint8_t hard_brake);
  */
 HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed);
 
+/**
+ * @brief Get the linear speed produced by two motors.
+ * @param[in] hrmc1     pointer to motor1 RMC handle.
+ * @param[in] hrmc2     pointer to motor2 RMC handle.
+ * @param[out] speed    current linear speed.
+ * @retval HAL_OK       Current linear speed provided.
+ * @retval HAL_ERROR    Invalid pointers or handle not initialized.
+ */
+HAL_StatusTypeDef RMC_GetLinearSpeed(const RMC_Handle_t *hrmc1, const RMC_Handle_t *hrmc2, float *speed);
+
 /* ------------------------------------------------- */
 
 #endif /* RMC_MOTOR_DRIVER_H */
