@@ -74,4 +74,14 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc) {
 	return HAL_OK;
 }
 
+HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed) {
+	if (hrmc == (void*)0 || speed == (void*)0 || !hrmc->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	*speed = hrmc->speed_mm_s;
+
+	return HAL_OK;
+}
+
 /* ---------------------------------------------------------------- */

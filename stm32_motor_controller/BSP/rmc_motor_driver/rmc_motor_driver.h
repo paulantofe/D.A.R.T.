@@ -96,6 +96,15 @@ typedef struct {
  */
 HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc);
 
+/**
+ * @brief Get the current motor speed.
+ * @param[in] hrmc       pointer to RMC handle.
+ * @param[out] speed    current speed of the motor.
+ * @retval HAL_OK       Current speed provided.
+ * @retval HAL_ERROR    Invalid pointers or handle not initialized.
+ */
+HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed);
+
 /* ------------------------------------------------- */
 
 #endif /* RMC_MOTOR_DRIVER_H */
