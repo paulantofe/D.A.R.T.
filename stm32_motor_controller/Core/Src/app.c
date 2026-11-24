@@ -6,7 +6,6 @@
 #include "app.h"
 #include "globals.h"
 #include "rdt_link.h"
-#include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
 #include "rmc_motor_driver/rmc_motor_driver.h"
 #include "ws2812_driver/ws2812.h"
@@ -30,6 +29,8 @@ void STM_Boot(void) {
 
 	SystemClock_Config();
 
+	Motors_Config();
+
 	INA_Config();
 
 	WS_Init();
@@ -38,10 +39,6 @@ void STM_Boot(void) {
 
 	UART_Config();
 
-	TIM6_Config();
-
-//	RMC_Motor_Init();
-
 	RDT_Link_Init();
 
 	WS_SetStatusColor(0, 0, 255);
@@ -49,6 +46,7 @@ void STM_Boot(void) {
 	HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_SET);
 
 	HAL_UART_Receive_IT(&huart1, &received_byte, 1);
+	HAL_TIM_Base_Start_IT(&htim6);
 }
 
 void Error_Handler(void) {
@@ -82,7 +80,8 @@ void Failsafe_Enter(void) {
 
 	if (link_state == LINK_OFFLINE) { return; }
 
-//	RMC_Motor_Stop();
+	RMC_Stop(&hleft_motor, RMC_HARD_BRAKE_ENABLE);
+	RMC_Stop(&hright_motor, RMC_HARD_BRAKE_ENABLE);
 
 	link_state = LINK_OFFLINE;
 
@@ -143,7 +142,10 @@ void Process_UART_Tx(void) {
 
 	if (HAL_GetTick() - last_status_sent >= RDT_STM_STATUS_PERIOD_MS) {
 		float current_speed = 0.0f;
-		float current_battery = 0.0f; // later will implement a battery getter
+		RMC_GetLinearSpeed(&hleft_motor, &hright_motor, &current_speed);
+
+		float current_battery = 0.0f;
+		INA_ReadBusVoltage_V(&hina, &current_battery);
 
 		uint8_t tx_payload[RDT_STATUS_LENGTH] = "";
 		RDT_Result_t result =

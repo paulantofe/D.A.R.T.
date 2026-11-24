@@ -10,6 +10,7 @@
 
 #include "stm32f4xx_hal.h"
 #include "ina219_driver/ina219_driver.h"
+#include "rmc_motor_driver/rmc_motor_driver.h"
 #include "app.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
@@ -26,6 +27,8 @@ extern DMA_HandleTypeDef hdma1;
 extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c2;
 extern INA_Handle_t hina;
+extern RMC_Handle_t hleft_motor;
+extern RMC_Handle_t hright_motor;
 
 /* ---------------------------------------------------------- */
 
@@ -76,6 +79,11 @@ void LED_Config(void);
  * @brief   Configure INA219 sensor.
  */
 void INA_Config(void);
+
+/**
+ * @brief   Configure the right and left motors.
+ */
+void Motors_Config(void);
 
 /**
  * @brief   Configure the GPIO pins for L298N's IN pins.
