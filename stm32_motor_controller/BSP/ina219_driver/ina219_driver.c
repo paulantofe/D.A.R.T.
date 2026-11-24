@@ -64,45 +64,15 @@ static HAL_StatusTypeDef INA_ReadReg(INA_Handle_t *hina, uint8_t reg, uint16_t *
 	return status;
 }
 
-/* ------------------------------------------------------------- */
-
-
-/* ------------------ Public APIs Implementation ------------------ */
-
-HAL_StatusTypeDef INA_Init(INA_Handle_t *hina, I2C_HandleTypeDef *hi2c, uint8_t addr) {
-	if (hina == (void*)0 || hi2c == (void*)0 ||
-			!is_valid_addr(addr)) {
+static HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina) {
+	if (hina == (void*)0 || hina->config.hi2c == (void*)0 ||
+		hina->config.r_shunt_ohm <= 0.0f ||
+		hina->config.max_current_a <= 0.0f) {
 		return HAL_ERROR;
 	}
 
-	hina->hi2c = hi2c;
-	hina->i2c_addr = addr;
-	hina->cal_value = 0U;
-	hina->current_lsb = 0.0f;
-	hina->power_lsb = 0.0f;
-
-	HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(hina->hi2c, hina->i2c_addr,
-			INA_SLAVE_TRIES, INA_I2C_TIMEOUT_MS);
-	if (status != HAL_OK) {
-		return status;
-	}
-
-	status = INA_WriteReg(hina, INA_CONFIGURATION_REG_ADDR, INA_CFGR_RST);
-	if (status != HAL_OK) {
-		return status;
-	}
-
-	return HAL_OK;
-}
-
-HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max_current_a) {
-	if (hina == (void*)0 || hina->hi2c == (void*)0 ||
-		r_shunt_ohm <= 0.0f || max_current_a <= 0.0f) {
-		return HAL_ERROR;
-	}
-
-	float current_lsb = max_current_a / INA_CAL_CURRENT_DIVISOR;
-	float calibration_value = INA_COMPUTE_CALIBRATION_VALUE(current_lsb, r_shunt_ohm);
+	float current_lsb = hina->config.max_current_a / INA_CAL_CURRENT_DIVISOR;
+	float calibration_value = INA_COMPUTE_CALIBRATION_VALUE(current_lsb, hina->config.r_shunt_ohm);
 
 	if (calibration_value < 2.0f || calibration_value > 65534.0f) {
 		return HAL_ERROR;
@@ -118,6 +88,68 @@ HAL_StatusTypeDef INA_Calibrate(INA_Handle_t *hina, float r_shunt_ohm, float max
 	hina->current_lsb = current_lsb;
 	hina->power_lsb   = INA_CAL_POWER_MULTIPLIER * current_lsb;
 	hina->cal_value   = cal_reg_value;
+
+	return HAL_OK;
+}
+
+static HAL_StatusTypeDef INA_Reset(const INA_Handle_t *hina) {
+	if (hina == (void*)0 || hina->config.hi2c == (void*)0 ||
+		!is_valid_addr(hina->config.i2c_addr)) {
+		return HAL_ERROR;
+	}
+
+	HAL_StatusTypeDef status = INA_WriteReg(hina, INA_CONFIGURATION_REG_ADDR, INA_CFGR_RST);
+
+	return status;
+}
+
+/* ------------------------------------------------------------- */
+
+
+/* ------------------ Public APIs Implementation ------------------ */
+
+HAL_StatusTypeDef INA_Init(INA_Handle_t *hina) {
+	if (hina == (void*)0 || hina->config.hi2c == (void*)0 ||
+		!is_valid_addr(hina->config.i2c_addr)) {
+		return HAL_ERROR;
+	}
+
+	hina->cal_value = 0U;
+	hina->current_lsb = 0.0f;
+	hina->power_lsb = 0.0f;
+
+	HAL_StatusTypeDef status =
+			HAL_I2C_IsDeviceReady(
+					   hina->config.hi2c,
+					   hina->config.i2c_addr,
+					   INA_SLAVE_TRIES,
+					   INA_I2C_TIMEOUT_MS
+					);
+
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	status = INA_Reset(hina);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	uint16_t cfg_reg = hina->config.bus_range |
+			           hina->config.pga_gain  |
+			           hina->config.bus_adc   |
+			           hina->config.shunt_adc |
+			           hina->config.mode;
+
+	status = INA_WriteReg(hina, INA_CONFIGURATION_REG_ADDR, cfg_reg);
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	status = INA_Calibrate(hina);
+	if (status != HAL_OK) {
+		return status;
+	}
 
 	return HAL_OK;
 }
