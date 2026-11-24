@@ -55,6 +55,7 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc) {
 
 	hrmc->speed_mm_s = 0.0f;
 	hrmc->target_speed_mm_s = 0.0f;
+	hrmc->direction = RMC_DIR_COAST;
 	hrmc->pid_integral = 0.0f;
 	hrmc->pid_prev_error = 0.0f;
 	hrmc->prev_enc_cnt = 0U;
@@ -87,6 +88,80 @@ HAL_StatusTypeDef RMC_SetRawPWM(RMC_Handle_t *hrmc, float duty_percent) {
 	__HAL_TIM_SET_COMPARE(hrmc->config.htim_pwm, hrmc->config.pwm_channel, ccr);
 
 	return HAL_OK;
+}
+
+HAL_StatusTypeDef RMC_SetDirection(RMC_Handle_t *hrmc, const RMC_Dir_t direction) {
+	if (hrmc == (void*)0 || !hrmc->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (direction == hrmc->direction) {
+		return HAL_OK;
+	}
+
+	RMC_Dir_t phys_dir = direction;
+	if (hrmc->config.invert_dir == RMC_INVERT_DIR_ENABLE) {
+		if (direction == RMC_DIR_FORWARD) {
+			phys_dir = RMC_DIR_REVERSE;
+		} else if (direction == RMC_DIR_REVERSE) {
+			phys_dir = RMC_DIR_FORWARD;
+		}
+	}
+
+	switch (phys_dir) {
+	    case RMC_DIR_COAST:
+	    	    HAL_GPIO_WritePin(hrmc->config.in1_port, hrmc->config.in1_pin, GPIO_PIN_RESET);
+	    	    HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_RESET);
+	    	    break;
+
+	    case RMC_DIR_FORWARD:
+	    	    HAL_GPIO_WritePin(hrmc->config.in1_port, hrmc->config.in1_pin, GPIO_PIN_SET);
+	    		HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_RESET);
+	    		break;
+
+	    case RMC_DIR_REVERSE:
+	    	    HAL_GPIO_WritePin(hrmc->config.in1_port, hrmc->config.in1_pin, GPIO_PIN_RESET);
+	    	    HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_SET);
+	    	    break;
+
+	    case RMC_DIR_FORWARD:
+	    	    	HAL_GPIO_WritePin(hrmc->config.in1_port, hrmc->config.in1_pin, GPIO_PIN_SET);
+	    	    HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_SET);
+	    	    	break;
+
+	    default:
+	    	    return HAL_ERROR;
+	}
+
+    hrmc->direction = direction;
+
+	return HAL_OK;
+}
+
+HAL_StatusTypeDef RMC_Stop(RMC_Handle_t *hrmc, const uint8_t hard_brake) {
+	if (hrmc == (void*)0 || !hrmc->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (hard_brake != RMC_HARD_BRAKE_ENABLE && hard_brake != RMC_HARD_BRAKE_DISABLE) {
+		return HAL_ERROR;
+	}
+
+	hrmc->target_speed_mm_s = 0.0f;
+	hrmc->pid_integral = 0.0f;
+	hrmc->pid_prev_error = 0.0f;
+
+	if (hard_brake == RMC_HARD_BRAKE_ENABLE) {
+		if (RMC_SetDirection(hrmc, RMC_DIR_BRAKE) != HAL_OK) {
+			return HAL_ERROR;
+		}
+		return RMC_SetRawPWM(hrmc, 100.0f);
+	}
+
+	if (RMC_SetDirection(hrmc, RMC_DIR_COAST) != HAL_OK) {
+		return HAL_ERROR;
+	}
+	return RMC_SetRawPWM(hrmc, 0.0f);
 }
 
 HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed) {

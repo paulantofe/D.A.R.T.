@@ -25,6 +25,14 @@
 #define RMC_INVERT_DIR_ENABLE        1U
 /** @} */
 
+/**
+ * @defgroup RMC_HARD_BRAKE          Hard Brake
+ * @{
+ */
+#define RMC_HARD_BRAKE_DISABLE       0U      // active braking
+#define RMC_HARD_BRAKE_ENABLE        1U      // coasting
+/** @} */
+
 /* --------------------------------------------------------------- */
 
 
@@ -77,6 +85,7 @@ typedef struct {
 	uint32_t prev_enc_cnt;    /**< Previous encoder timer counter value */
 	float speed_mm_s;         /**< Measured linear speed [mm/s] */
 	float target_speed_mm_s;  /**< Target linear speed [mm/s] */
+	RMC_Dir_t direction;      /**< Direction of the motor rotation */
 	float pid_integral;       /**< Accumulated integral term */
 	float pid_prev_error;     /**< Previous error for derivative term */
 	bool is_initialized;      /**< Initialization guard flag */
@@ -105,7 +114,27 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc);
  * @note Invalid percents are clamped to [0, 100] (e.g. 120 -> 100,
  *       -120 -> 0)
  */
-HAL_StatusTypeDef RMC_SetRawPWM(const RMC_Handle_t *hrmc, float duty_percent);
+HAL_StatusTypeDef RMC_SetRawPWM(RMC_Handle_t *hrmc, float duty_percent);
+
+/**
+ * @brief Set the motor rotation direction.
+ * @param[in] hrmc      pointer to RMC handle.
+ * @param[in] direction rotation direction.
+ * @retval HAL_OK       Provided rotation set.
+ * @retval HAL_ERROR    Invalid pointers or handle not initialized.
+ */
+HAL_StatusTypeDef RMC_SetDirection(RMC_Handle_t *hrmc, const RMC_Dir_t direction);
+
+/**
+ * @brief Stop the motor.
+ * @param[in] hrmc       pointer to RMC handle.
+ * @param[in] hard_brake RMC_HARD_BRAKE_DISABLE / _ENABLE.
+ * @retval HAL_OK    Motor stopped.
+ * @retval HAL_ERROR Invalid pointers or handle not initialized.
+ * @note Hard brake enable means active braking.
+ *       Hard brake disable means coasting.
+ */
+HAL_StatusTypeDef RMC_Stop(RMC_Handle_t *hrmc, const uint8_t hard_brake);
 
 /**
  * @brief Get the current motor speed.
