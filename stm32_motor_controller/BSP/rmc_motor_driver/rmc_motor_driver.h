@@ -97,6 +97,17 @@ typedef struct {
 HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc);
 
 /**
+ * @brief Set the motor output PWM.
+ * @param[in] hrmc            pointer to RMC handle.
+ * @param[in] duty_percent    duty cycle percent [0, 100].
+ * @retval HAL_OK       Provided PWM set.
+ * @retval HAL_ERROR    Invalid pointers or handle not initialized.
+ * @note Invalid percents are clamped to [0, 100] (e.g. 120 -> 100,
+ *       -120 -> 0)
+ */
+HAL_StatusTypeDef RMC_SetRawPWM(const RMC_Handle_t *hrmc, float duty_percent);
+
+/**
  * @brief Get the current motor speed.
  * @param[in] hrmc       pointer to RMC handle.
  * @param[out] speed    current speed of the motor.

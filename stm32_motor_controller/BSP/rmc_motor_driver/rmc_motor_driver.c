@@ -74,6 +74,21 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc) {
 	return HAL_OK;
 }
 
+HAL_StatusTypeDef RMC_SetRawPWM(RMC_Handle_t *hrmc, float duty_percent) {
+	if (hrmc == (void*)0 || !hrmc->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (duty_percent > 100.0f)    { duty_percent = 100.0f; }
+	else if (duty_percent < 0.0f) { duty_percent = 0.0f;   }
+
+	uint32_t ccr = (uint32_t)((duty_percent / 100.0f) * (float)hrmc->pwm_max_duty);
+
+	__HAL_TIM_SET_COMPARE(hrmc->config.htim_pwm, hrmc->config.pwm_channel, ccr);
+
+	return HAL_OK;
+}
+
 HAL_StatusTypeDef RMC_GetSpeed(const RMC_Handle_t *hrmc, float *speed) {
 	if (hrmc == (void*)0 || speed == (void*)0 || !hrmc->is_initialized) {
 		return HAL_ERROR;
