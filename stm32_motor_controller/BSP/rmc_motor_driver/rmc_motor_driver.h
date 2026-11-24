@@ -84,4 +84,18 @@ typedef struct {
 
 /* ---------------------------------------------------------------------------- */
 
+
+/* ------------------ Public APIs ------------------ */
+
+/**
+ * @brief Initialize the rover motors.
+ * @param[in,out] rmc   pointer to RMC handle structure with
+ *                      desired configuration.
+ * @retval HAL_OK       Initialization and configuration succeeded.
+ * @retval HAL_ERROR    Invalid configuration parameter.
+ */
+HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc);
+
+/* ------------------------------------------------- */
+
 #endif /* RMC_MOTOR_DRIVER_H */
