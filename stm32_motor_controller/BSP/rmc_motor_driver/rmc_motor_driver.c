@@ -124,7 +124,7 @@ HAL_StatusTypeDef RMC_SetDirection(RMC_Handle_t *hrmc, const RMC_Dir_t direction
 	    	    HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_SET);
 	    	    break;
 
-	    case RMC_DIR_FORWARD:
+	    case RMC_DIR_BRAKE:
 	    	    	HAL_GPIO_WritePin(hrmc->config.in1_port, hrmc->config.in1_pin, GPIO_PIN_SET);
 	    	    HAL_GPIO_WritePin(hrmc->config.in2_port, hrmc->config.in2_pin, GPIO_PIN_SET);
 	    	    	break;
