@@ -23,6 +23,7 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
 extern DMA_HandleTypeDef hdma1;
 extern ADC_HandleTypeDef hadc1;
+extern I2C_HandleTypeDef hi2c2;
 
 /* ---------------------------------------------------------- */
 
@@ -81,6 +82,14 @@ void L298N_INPins_Config(void);
  *          Instance: USART1 | TX: PB6 | RX: PB7 | Baud: 115200.
  */
 void UART_Config(void);
+
+/**
+ * @brief   Configure the I2C2 Peripheral.
+ * @details The I2C protocol is used to communicate with the
+ *          INA219 sensor to read voltage and current.
+ *          Instance: I2C2 | SDA: PB11 | SCL: PB10
+ */
+void I2C_Config(void);
 
 /**
  * @brief   Configure the DMA1 Peripheral.

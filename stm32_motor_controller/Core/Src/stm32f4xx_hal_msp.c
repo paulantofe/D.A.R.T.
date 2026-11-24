@@ -119,3 +119,20 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
 		HAL_GPIO_Init(GPIOA, &adc_ch);
 	}
 }
+
+void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c) {
+	if (hi2c->Instance == I2C2) {
+		__HAL_RCC_I2C2_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+
+		GPIO_InitTypeDef i2c_pin = { 0 };
+
+		i2c_pin.Mode = GPIO_MODE_AF_OD;
+		i2c_pin.Alternate = GPIO_AF4_I2C1;
+		i2c_pin.Pull = GPIO_PULLUP;
+		i2c_pin.Speed = GPIO_SPEED_FREQ_HIGH;
+		i2c_pin.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+
+		HAL_GPIO_Init(GPIOB, &i2c_pin);
+	}
+}
