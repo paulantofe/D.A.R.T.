@@ -8,7 +8,7 @@
 #include "rdt_link.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hardware_config.h"
-#include "rmc_motor_controller.h"
+#include "rmc_motor_driver/rmc_motor_driver.h"
 #include "ws2812_driver/ws2812.h"
 #include "ina219_driver/ina219_driver.h"
 #include <stdbool.h>
@@ -40,7 +40,7 @@ void STM_Boot(void) {
 
 	TIM6_Config();
 
-	RMC_Motor_Init();
+//	RMC_Motor_Init();
 
 	RDT_Link_Init();
 
@@ -82,7 +82,7 @@ void Failsafe_Enter(void) {
 
 	if (link_state == LINK_OFFLINE) { return; }
 
-	RMC_Motor_Stop();
+//	RMC_Motor_Stop();
 
 	link_state = LINK_OFFLINE;
 
@@ -142,7 +142,7 @@ void Process_UART_Tx(void) {
 	}
 
 	if (HAL_GetTick() - last_status_sent >= RDT_STM_STATUS_PERIOD_MS) {
-		float current_speed = RMC_Motor_GetSpeed();
+		float current_speed = 0.0f;
 		float current_battery = 0.0f; // later will implement a battery getter
 
 		uint8_t tx_payload[RDT_STATUS_LENGTH] = "";

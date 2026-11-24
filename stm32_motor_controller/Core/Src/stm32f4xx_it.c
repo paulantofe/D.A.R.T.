@@ -7,7 +7,7 @@
 
 #include "stm32f4xx_it.h"
 #include "stm32f4xx_hal_hardware_config.h"
-#include "rmc_motor_controller.h"
+#include "rmc_motor_driver/rmc_motor_driver.h"
 
 void SysTick_Handler(void) {
 	HAL_IncTick();
@@ -20,7 +20,7 @@ void USART1_IRQHandler(void) {
 void TIM6_DAC_IRQHandler(void) {
 	HAL_TIM_IRQHandler(&htim6);
 
-	RMC_Motor_SpeedUpdate();
+//	RMC_Motor_SpeedUpdate();
 }
 
 void DMA1_Stream7_IRQHandler(void) {

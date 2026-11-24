@@ -8,7 +8,7 @@
 #include "stm32f4xx_hal_hardware_config.h"
 #include "globals.h"
 #include "rdt_link.h"
-#include "rmc_motor_controller.h"
+#include "rmc_motor_driver/rmc_motor_driver.h"
 
 
 /* -------------- Peripheral Handle Structures -------------- */
