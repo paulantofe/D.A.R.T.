@@ -59,6 +59,7 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc) {
 	hrmc->pid_integral = 0.0f;
 	hrmc->pid_prev_error = 0.0f;
 	hrmc->prev_enc_cnt = 0U;
+	hrmc->update_pending = false;
 	__HAL_TIM_SET_COUNTER(hrmc->config.htim_enc, 0U);
 
 	status = HAL_TIM_PWM_Start(hrmc->config.htim_pwm, hrmc->config.pwm_channel);
@@ -73,6 +74,81 @@ HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc) {
 
 	hrmc->is_initialized = true;
 	return HAL_OK;
+}
+
+HAL_StatusTypeDef RMC_Update(RMC_Handle_t *hrmc) {
+	if (hrmc == (void*)0 || !hrmc->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (!hrmc->update_pending) { return HAL_OK; }
+
+	hrmc->update_pending = false;
+
+	uint32_t current_enc_cnt = __HAL_TIM_GET_COUNTER(hrmc->config.htim_enc);
+	int32_t delta_ticks      = (int32_t)(current_enc_cnt - hrmc->prev_enc_cnt);
+	hrmc->prev_enc_cnt       = current_enc_cnt;
+
+	float distance_mm = (float)delta_ticks * hrmc->mm_per_tick;
+	hrmc->speed_mm_s  = distance_mm / hrmc->dt_sec;
+
+	if (hrmc->target_speed_mm_s == 0.0f) {
+		hrmc->pid_integral   = 0.0f;
+		hrmc->pid_prev_error = 0.0f;
+		RMC_SetDirection(hrmc, RMC_DIR_COAST);
+		return RMC_SetRawPWM(hrmc, 0.0f);
+	}
+
+	float error = hrmc->target_speed_mm_s - hrmc->speed_mm_s;
+
+    float P = hrmc->config.kp * error;
+
+    hrmc->pid_integral += hrmc->config.ki * error * hrmc->dt_sec;
+    if (hrmc->pid_integral > 100.0f)       { hrmc->pid_integral =  100.0f; }
+    else if (hrmc->pid_integral < -100.0f) { hrmc->pid_integral = -100.0f; }
+
+    float D = hrmc->config.kd * ((error - hrmc->pid_prev_error) / hrmc->dt_sec);
+    hrmc->pid_prev_error = error;
+
+	float output = P + hrmc->pid_integral + D;
+	if (output > 100.0f)       { output =  100.0f; }
+	else if (output < -100.0f) { output = -100.0f; }
+
+	if (hrmc->target_speed_mm_s > 0.0f) {
+		if (output > 0.0f) {
+			RMC_SetDirection(hrmc, RMC_DIR_FORWARD);
+			return RMC_SetRawPWM(hrmc, output);
+		} else {
+			RMC_SetDirection(hrmc, RMC_DIR_COAST);
+			return RMC_SetRawPWM(hrmc, 0.0f);
+		}
+	} else {
+		if (output < 0.0f) {
+			RMC_SetDirection(hrmc, RMC_DIR_REVERSE);
+			return RMC_SetRawPWM(hrmc, -output);
+		} else {
+			RMC_SetDirection(hrmc, RMC_DIR_COAST);
+			return RMC_SetRawPWM(hrmc, 0.0f);
+		}
+	}
+
+	return HAL_OK;
+}
+
+void RMC_TriggerUpdate(RMC_Handle_t *hrmc) {
+	if (hrmc != (void*)0 && hrmc->is_initialized) {
+		hrmc->update_pending = true;
+	}
+}
+
+HAL_StatusTypeDef RMC_SetTargetSpeed(RMC_Handle_t *hrmc, const float target_speed) {
+	if (hrmc != (void*)0 && hrmc->is_initialized) {
+		hrmc->target_speed_mm_s = target_speed;
+
+		return HAL_OK;
+	}
+
+	return HAL_ERROR;
 }
 
 HAL_StatusTypeDef RMC_SetRawPWM(RMC_Handle_t *hrmc, float duty_percent) {

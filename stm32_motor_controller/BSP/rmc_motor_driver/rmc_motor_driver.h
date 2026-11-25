@@ -89,6 +89,7 @@ typedef struct {
 	float pid_integral;       /**< Accumulated integral term */
 	float pid_prev_error;     /**< Previous error for derivative term */
 	bool is_initialized;      /**< Initialization guard flag */
+	volatile bool update_pending; /**< Speed and PID update flag */
 } RMC_Handle_t;
 
 /* ---------------------------------------------------------------------------- */
@@ -104,6 +105,34 @@ typedef struct {
  * @retval HAL_ERROR    Invalid configuration parameter.
  */
 HAL_StatusTypeDef RMC_Init(RMC_Handle_t *hrmc);
+
+/**
+ * @brief   Process the RMC_Handle_t update_pending flag.
+ * @param[in] hrmc   pointer to RMC handle.
+ * @details Calculate the current speed, PID gain and
+ *          reset the update_pending flag.
+ * @retval HAL_OK    update_flag is handled.
+ * @retval HAL_ERROR Invalid pointers or handle not initialized.
+ */
+HAL_StatusTypeDef RMC_Update(RMC_Handle_t *hrmc);
+
+/**
+ * @brief   Trigger a speed and PID update.
+ * @param[in] hrmc  pointer to RMC handle.
+ * @details Set the RMC_Handle_t update_pending flag.
+ * @note    Main thread is expected to act upon the set flag
+ *          with the RMC_Update API.
+ */
+void RMC_TriggerUpdate(RMC_Handle_t *hrmc);
+
+/**
+ * @brief Set the motor target speed.
+ * @param[in] hrmc         pointer to RMC handle.
+ * @param[in] target_speed target speed of the motor.
+ * @retval HAL_OK       Provided target speed set.
+ * @retval HAL_ERROR    Invalid pointers or handle not initialized.
+ */
+HAL_StatusTypeDef RMC_SetTargetSpeed(RMC_Handle_t *hrmc, const float target_speed);
 
 /**
  * @brief Set the motor output PWM.
