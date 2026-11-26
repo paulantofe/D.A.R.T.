@@ -9,15 +9,84 @@
 
 /* ------------------ Static Helper Functions, Variables and Macros ------------------ */
 
-#define WS_BYTES_PER_LED       3U
-
 #define WS_MAX_LEDS            256U
 #define WS_MAX_RESET_SLOTS     64U
 #define WS_MAX_PIXEL_DATA_LEN  (WS_MAX_LEDS * WS_BYTES_PER_LED)
 #define WS_MAX_PWM_DATA_LEN    ((WS_MAX_LEDS * WS_BITS_PER_LED) + WS_MAX_RESET_SLOTS)
 
-static uint8_t pixel_data[WS_MAX_PIXEL_DATA_LEN]; /**< Internal LED color buffer */
-static uint16_t pwm_data[WS_MAX_PWM_DATA_LEN];    /**< Internal timer/DMA buffer */
+static WS_Color_t pixel_data[WS_MAX_LEDS];     /**< Internal LED color buffer */
+static uint16_t pwm_data[WS_MAX_PWM_DATA_LEN]; /**< Internal timer/DMA buffer */
+
+static DMA_HandleTypeDef *WS_GetDmaHandle(const WS_Config_t *config) {
+	if (config == NULL || config->htim_pwm == NULL) {
+		return NULL;
+	}
+
+	switch (config->pwm_channel) {
+	case TIM_CHANNEL_1:
+		return config->htim_pwm->hdma[TIM_DMA_ID_CC1];
+	case TIM_CHANNEL_2:
+		return config->htim_pwm->hdma[TIM_DMA_ID_CC2];
+	case TIM_CHANNEL_3:
+		return config->htim_pwm->hdma[TIM_DMA_ID_CC3];
+	case TIM_CHANNEL_4:
+		return config->htim_pwm->hdma[TIM_DMA_ID_CC4];
+	default:
+		return NULL;
+	}
+}
+
+static uint8_t WS_ApplyBrightness(uint8_t value, uint8_t brightness) {
+	return (uint8_t)(((uint16_t)value * brightness + 127U) / 255U);
+}
+
+static void WS_EncodePixelData(const WS_Handle_t *hws) {
+	uint32_t pwm_index = 0U;
+
+	for (uint16_t led = 0U; led < hws->config.led_count; ++led) {
+		const WS_Color_t *color = &pixel_data[led];
+		uint8_t channels[WS_BYTES_PER_LED];
+
+		switch (hws->config.color_order) {
+		case WS_COLOR_ORDER_RGB:
+			channels[0] = color->red;
+			channels[1] = color->green;
+			channels[2] = color->blue;
+			break;
+		case WS_COLOR_ORDER_GRB:
+			channels[0] = color->green;
+			channels[1] = color->red;
+			channels[2] = color->blue;
+			break;
+		case WS_COLOR_ORDER_BGR:
+			channels[0] = color->blue;
+			channels[1] = color->green;
+			channels[2] = color->red;
+			break;
+		default:
+			channels[0] = 0U;
+			channels[1] = 0U;
+			channels[2] = 0U;
+			break;
+		}
+
+		for (uint32_t channel = 0U; channel < WS_BYTES_PER_LED; ++channel) {
+			uint8_t value =
+				WS_ApplyBrightness(channels[channel], hws->config.brightness);
+
+			for (uint8_t bit = 0U; bit < 8U; ++bit) {
+				pwm_data[pwm_index++] =
+					(value & (uint8_t)(1U << (7U - bit))) ?
+						hws->config.bit_1_duty :
+						hws->config.bit_0_duty;
+			}
+		}
+	}
+
+	for (uint16_t slot = 0U; slot < hws->config.reset_slots; ++slot) {
+		pwm_data[pwm_index++] = 0U;
+	}
+}
 
 /* ---------------------------------------------------------------------------------- */
 
@@ -48,6 +117,93 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 	hws->is_initialized = true;
 
 	return HAL_OK;
+}
+
+HAL_StatusTypeDef WS_FillRange(WS_Handle_t *hws, uint16_t start_index,
+		uint16_t count, WS_Color_t color) {
+	if (hws == NULL || !hws->is_initialized) {
+	    return HAL_ERROR;
+	}
+
+	if (hws->transfer_active) {
+	    return HAL_BUSY;
+	}
+
+	if (count == 0U ||
+	    start_index >= hws->config.led_count ||
+	    count > (hws->config.led_count - start_index)) {
+	    return HAL_ERROR;
+	}
+
+	for (uint16_t i = 0U; i < count; ++i) {
+	    pixel_data[start_index + i] = color;
+	}
+
+	return HAL_OK;
+}
+
+HAL_StatusTypeDef WS_Clear(WS_Handle_t *hws) {
+	if (hws == NULL || !hws->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (hws->transfer_active) {
+		return HAL_BUSY;
+	}
+
+	hws->transfer_active = true;
+
+	WS_Color_t color = { 0, 0, 0 };
+	HAL_StatusTypeDef status = WS_FillRange(hws, 0, hws->config.led_count, color);
+
+	if (status != HAL_OK) {
+		return status;
+	}
+
+	return WS_SetColorData(hws);
+}
+
+HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
+	if (hws == NULL || !hws->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (hws->transfer_active) {
+		return HAL_BUSY;
+	}
+
+	DMA_HandleTypeDef *hdma = WS_GetDmaHandle(&hws->config);
+	if (hdma == NULL || hws->pwm_data_len > UINT16_MAX) {
+		return HAL_ERROR;
+	}
+
+	hws->transfer_active = true;
+	WS_EncodePixelData(hws);
+
+	HAL_StatusTypeDef status =
+		HAL_TIM_PWM_Start_DMA(
+			hws->config.htim_pwm,
+			hws->config.pwm_channel,
+			(const uint32_t *)pwm_data,
+			(uint16_t)hws->pwm_data_len
+		);
+
+	if (status == HAL_OK) {
+		status = HAL_DMA_PollForTransfer(
+			hdma,
+			HAL_DMA_FULL_TRANSFER,
+			HAL_MAX_DELAY
+		);
+
+		(void)HAL_TIM_PWM_Stop_DMA(
+			hws->config.htim_pwm,
+			hws->config.pwm_channel
+		);
+	}
+
+	hws->transfer_active = false;
+
+	return status;
 }
 
 /* ---------------------------------------------------------------- */

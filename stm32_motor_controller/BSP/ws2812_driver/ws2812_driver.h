@@ -22,15 +22,20 @@
  * @{
  */
 #define WS_BITS_PER_LED 24U /**< Number of transmitted bits per WS2812 LED */
+#define WS_BYTES_PER_LED 3U  /**< Number of color bytes stored per LED */
 /** @} */
-
-#define WS_BYTES_PER_LED       3U
-#define WS_BITS_PER_LED        24U
 
 /* ---------------------------------------------------------------- */
 
 
 /* ------------------ WS2812 Structures Definition ------------------ */
+
+/* Pixel Color structure */
+typedef struct {
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+} WS_Color_t;
 
 /* Color byte order used by the LED strip */
 typedef enum {
@@ -74,6 +79,41 @@ typedef struct {
  * @note  The PWM timer and DMA must be configured before calling this API.
  */
 HAL_StatusTypeDef WS_Init(WS_Handle_t *hws);
+
+/**
+ * @brief Fill a range of pixels with the specified color.
+ * @param[in,out] hws          pointer to an initialized WS2812 handle.
+ * @param[in]     start_index  zero-based index of the first pixel.
+ * @param[in]     count        number of consecutive pixels to fill.
+ * @param[in]     color        color to assign to each selected pixel.
+ * @retval HAL_OK      Pixel range filled successfully.
+ * @retval HAL_BUSY    A PWM/DMA transfer is currently in progress.
+ * @retval HAL_ERROR   NULL pointer, uninitialized handle, empty or invalid range.
+ */
+HAL_StatusTypeDef WS_FillRange(WS_Handle_t *hws, uint16_t start_index,
+		uint16_t count, WS_Color_t color);
+
+/**
+ * @brief Clear all pixels by setting them to black.
+ * @param[in,out] hws  pointer to an initialized WS2812 handle.
+ * @retval HAL_OK      All pixels cleared successfully.
+ * @retval HAL_BUSY    A PWM/DMA transfer is currently in progress.
+ * @retval HAL_ERROR   NULL pointer or uninitialized handle.
+ */
+HAL_StatusTypeDef WS_Clear(WS_Handle_t *hws);
+
+/**
+ * @brief Transmit the current pixel data and wait for completion.
+ * @param[in,out] hws  pointer to an initialized WS2812 handle.
+ * @retval HAL_OK      Pixel data transmitted successfully.
+ * @retval HAL_BUSY    A PWM/DMA transfer is already in progress.
+ * @retval HAL_ERROR   NULL pointer, uninitialized handle, invalid DMA
+ *                     configuration, or DMA transfer error.
+ * @note  This API polls the DMA hardware and does not require interrupts.
+ *        It is suitable for use from an error handler, but must not be
+ *        called from an interrupt service routine.
+ */
+HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws);
 
 /* ------------------------------------------------- */
 
