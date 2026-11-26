@@ -145,3 +145,5 @@ HAL_StatusTypeDef SS_Process(SS_Handle_t *hss) {
 
 	return HAL_OK;
 }
+
+/* ---------------------------------------------------------------- */
