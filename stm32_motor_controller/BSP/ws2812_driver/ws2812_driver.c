@@ -114,6 +114,7 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 	hws->pwm_data_len = ((uint32_t) hws->config.led_count * WS_BITS_PER_LED)
 			+ hws->config.reset_slots;
 
+	hws->request_pending = false;
 	hws->is_initialized = true;
 
 	return HAL_OK;
@@ -202,6 +203,16 @@ HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
 	hws->transfer_active = false;
 
 	return status;
+}
+
+HAL_StatusTypeDef WS_RequestTransmit(WS_Handle_t *hws) {
+	if (hws == NULL || !hws->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	hws->request_pending = true;
+
+	return HAL_OK;
 }
 
 /* ---------------------------------------------------------------- */

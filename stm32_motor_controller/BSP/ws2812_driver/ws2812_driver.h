@@ -63,6 +63,7 @@ typedef struct {
     uint32_t pwm_data_len;         /**< number of entries in the PWM waveform */
     bool is_initialized;           /**< true after successful driver initialization */
     volatile bool transfer_active; /**< true while a PWM/DMA transfer is in progress */
+    volatile bool request_pending; /**< true when a transmit request is pending */
 } WS_Handle_t;
 
 /* ------------------------------------------------------------------ */
@@ -116,6 +117,8 @@ HAL_StatusTypeDef WS_ClearRange(WS_Handle_t *hws, uint16_t start_index, uint16_t
  *        called from an interrupt service routine.
  */
 HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws);
+
+HAL_StatusTypeDef WS_RequestTransmit(WS_Handle_t *hws);
 
 /* ------------------------------------------------- */
 
