@@ -142,7 +142,8 @@ HAL_StatusTypeDef WS_FillRange(WS_Handle_t *hws, uint16_t start_index,
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef WS_Clear(WS_Handle_t *hws) {
+HAL_StatusTypeDef WS_ClearRange(WS_Handle_t *hws, uint16_t start_index,
+		uint16_t count) {
 	if (hws == NULL || !hws->is_initialized) {
 		return HAL_ERROR;
 	}
@@ -151,16 +152,13 @@ HAL_StatusTypeDef WS_Clear(WS_Handle_t *hws) {
 		return HAL_BUSY;
 	}
 
-	hws->transfer_active = true;
-
-	WS_Color_t color = { 0, 0, 0 };
-	HAL_StatusTypeDef status = WS_FillRange(hws, 0, hws->config.led_count, color);
-
-	if (status != HAL_OK) {
-		return status;
+	if (count == 0U || start_index >= hws->config.led_count
+			|| count > (hws->config.led_count - start_index)) {
+		return HAL_ERROR;
 	}
 
-	return WS_SetColorData(hws);
+	WS_Color_t black = { 0, 0, 0 };
+	return WS_FillRange(hws, start_index, count, black);
 }
 
 HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {

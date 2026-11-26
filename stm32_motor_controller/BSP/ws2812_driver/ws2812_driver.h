@@ -94,13 +94,15 @@ HAL_StatusTypeDef WS_FillRange(WS_Handle_t *hws, uint16_t start_index,
 		uint16_t count, WS_Color_t color);
 
 /**
- * @brief Clear all pixels by setting them to black.
- * @param[in,out] hws  pointer to an initialized WS2812 handle.
- * @retval HAL_OK      All pixels cleared successfully.
+ * @brief Clear a range of pixels by setting them to black.
+ * @param[in,out] hws          pointer to an initialized WS2812 handle.
+ * @param[in]     start_index  zero-based index of the first pixel.
+ * @param[in]     count        number of consecutive pixels to clear.
+ * @retval HAL_OK      Pixel range cleared successfully.
  * @retval HAL_BUSY    A PWM/DMA transfer is currently in progress.
- * @retval HAL_ERROR   NULL pointer or uninitialized handle.
+ * @retval HAL_ERROR   NULL pointer, uninitialized handle, empty or invalid range.
  */
-HAL_StatusTypeDef WS_Clear(WS_Handle_t *hws);
+HAL_StatusTypeDef WS_ClearRange(WS_Handle_t *hws, uint16_t start_index, uint16_t count);
 
 /**
  * @brief Transmit the current pixel data and wait for completion.
