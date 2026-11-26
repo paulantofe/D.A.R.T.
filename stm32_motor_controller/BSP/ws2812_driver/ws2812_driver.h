@@ -6,7 +6,7 @@
  *
  * @note    The timer, PWM channel, GPIO, and DMA must be configured before
  *          initializing the driver.
- * @note    The driver support only one instance, hence only one strip of WS2812 LEDs.
+ * @note    The driver supports only one instance, hence only one strip of WS2812 LEDs.
  */
 
 #ifndef WS2812_DRIVER_H
