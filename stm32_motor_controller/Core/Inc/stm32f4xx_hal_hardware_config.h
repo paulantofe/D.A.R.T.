@@ -2,21 +2,22 @@
  * @file     stm32f4xx_hal_hardware_config.h
  * @brief    Hardware Configuration header file.
  *
- * @details  This file declares the high-level peripheral configuration APIs.
+ * @details  This file declares the high-level peripheral and driver configuration APIs.
  */
 
 #ifndef INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
-#include "ina219_driver/ina219_driver.h"
-#include "rmc_motor_driver/rmc_motor_driver.h"
-#include "app.h"
+#include "ina219_driver.h"
+#include "rmc_motor_driver.h"
+#include "ws2812_driver.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
 // Note: Any file including this header file will have access to the
-//       handle structures (needed for HAL APIs).
+//       handle structures.
 
+/* board peripheral handles */
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim6;
@@ -24,11 +25,13 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
 extern DMA_HandleTypeDef hdma1;
-extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c2;
+
+/* driver handles */
 extern INA_Handle_t hina;
 extern RMC_Handle_t hleft_motor;
 extern RMC_Handle_t hright_motor;
+extern WS_Handle_t hws;
 
 /* ---------------------------------------------------------- */
 
@@ -41,17 +44,6 @@ extern RMC_Handle_t hright_motor;
 #define BLUE_LED        GPIO_PIN_15
 
 /* --------------------------------------------------- */
-
-
-/**
- * @defgroup FS_Trigger        Failsafe state trigger event
- * @{
- */
-typedef enum {
-	ESP_Sent_F,
-	ESP_Link_Lost
-} FS_Trigger_t;
-/** @} */
 
 
 /* -------------- Hardware Configuration APIs -------------- */
@@ -74,16 +66,6 @@ void SystemClock_Config(void);
  *          Instance: GPIOD | PD12 (Green) | PD13 (Orange) | PD14 (Red) | PD15 (Blue)
  */
 void LED_Config(void);
-
-/**
- * @brief   Configure INA219 sensor.
- */
-void INA_Config(void);
-
-/**
- * @brief   Configure the right and left motors.
- */
-void Motors_Config(void);
 
 /**
  * @brief   Configure the GPIO pins for L298N's IN pins.
@@ -153,12 +135,26 @@ void TIM2_Config(void);
  */
 void TIM5_Config(void);
 
-/**
- * @brief   Configure the ADC1 Peripheral.
- * @details Configure ADC1 for battery-voltage sampling.
- *          Instance: ADC1 | CH3: PA3 */
-void ADC1_Config(void);
-
 /* --------------------------------------------------------- */
 
-#endif
+
+/* -------------- Driver Configuration APIs -------------- */
+
+/**
+ * @brief   Configure INA219 sensor.
+ */
+void INA_Config(void);
+
+/**
+ * @brief   Configure the WS2812 LED Strip.
+ */
+void WS_Config(void);
+
+/**
+ * @brief   Configure the right and left motors.
+ */
+void Motors_Config(void);
+
+/* ------------------------------------------------------- */
+
+#endif /* INC_STM32F4XX_HAL_HARDWARE_CONFIG_H */

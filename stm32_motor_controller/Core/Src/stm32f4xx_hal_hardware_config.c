@@ -2,29 +2,28 @@
  * @file     stm32f4xx_hal_hardware_config.c
  * @brief    Hardware Configuration source file.
  *
- * @details  This file implements the high-level peripheral configuration.
+ * @details  This file implements the high-level peripheral and driver configuration.
  */
 
 #include "stm32f4xx_hal_hardware_config.h"
-#include "globals.h"
-#include "rdt_link.h"
-#include "rmc_motor_driver/rmc_motor_driver.h"
-
 
 /* -------------- Peripheral Handle Structures -------------- */
 
+/* board peripheral handles */
 UART_HandleTypeDef huart1;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
-ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma1;
 I2C_HandleTypeDef hi2c2;
+
+/* driver handles */
 INA_Handle_t hina;
 RMC_Handle_t hleft_motor;
 RMC_Handle_t hright_motor;
+WS_Handle_t hws;
 
 /* ---------------------------------------------------------- */
 
@@ -74,77 +73,6 @@ void LED_Config(void) {
 	led.Pin = GREEN_LED | ORANGE_LED | RED_LED | BLUE_LED;
 
 	HAL_GPIO_Init(GPIOD, &led);
-}
-
-void INA_Config(void) {
-	I2C_Config();
-
-	INA_Handle_t hina = { 0 };
-	hina.config.hi2c          = &hi2c2;
-	hina.config.i2c_addr      = INA_ADDR_GND_GND;
-	hina.config.r_shunt_ohm   = 0.1f;
-	hina.config.max_current_a = 0.5f;
-	hina.config.bus_range     = INA_BRNG_16V;
-	hina.config.pga_gain      = INA_PGA_80MV;
-	hina.config.bus_adc       = INA_BADC_16S;
-	hina.config.shunt_adc     = INA_SADC_16S;
-	hina.config.mode          = INA_MODE_SHUNT_BUS_CONT;
-
-	if (INA_Init(&hina) != HAL_OK) {
-		Error_Handler();
-	}
-}
-
-void Motors_Config(void) {
-	L298N_INPins_Config();
-
-	// 10ms time base
-	TIM6_Config();
-
-	// Encoders
-	TIM2_Config();
-	TIM5_Config();
-
-	// PWM
-	TIM3_Config();
-
-	hleft_motor.config.motor_rpm = 90U;
-	hleft_motor.config.htim_pwm = &htim3;
-	hleft_motor.config.pwm_channel = TIM_CHANNEL_1;
-	hleft_motor.config.invert_dir = RMC_INVERT_DIR_DISABLE;
-	hleft_motor.config.htim_enc = &htim2;
-	hleft_motor.config.wheel_circum_mm = 204U;
-	hleft_motor.config.ticks_per_wheel_rev = 2475U;
-	hleft_motor.config.delta_t_ms = 10U;
-	hleft_motor.config.in1_port = GPIOD;
-	hleft_motor.config.in1_pin = GPIO_PIN_0;
-	hleft_motor.config.in2_port = GPIOD;
-	hleft_motor.config.in2_pin = GPIO_PIN_1;
-	hleft_motor.config.kp = 0.0f;
-	hleft_motor.config.ki = 0.0f;
-	hleft_motor.config.kd = 0.0f;
-	if (RMC_Init(&hleft_motor) != HAL_OK) {
-		Error_Handler();
-	}
-
-	hright_motor.config.motor_rpm = 90U;
-	hright_motor.config.htim_pwm = &htim3;
-	hright_motor.config.pwm_channel = TIM_CHANNEL_2;
-	hright_motor.config.invert_dir = RMC_INVERT_DIR_DISABLE;
-	hright_motor.config.htim_enc = &htim5;
-	hright_motor.config.wheel_circum_mm = 204U;
-	hright_motor.config.ticks_per_wheel_rev = 2475U;
-	hright_motor.config.delta_t_ms = 10U;
-	hright_motor.config.in1_port = GPIOD;
-	hright_motor.config.in1_pin = GPIO_PIN_2;
-	hright_motor.config.in2_port = GPIOD;
-	hright_motor.config.in2_pin = GPIO_PIN_3;
-	hright_motor.config.kp = 0.0f;
-	hright_motor.config.ki = 0.0f;
-	hright_motor.config.kd = 0.0f;
-	if (RMC_Init(&hright_motor) != HAL_OK) {
-		Error_Handler();
-	}
 }
 
 void L298N_INPins_Config(void) {
@@ -319,34 +247,97 @@ void TIM5_Config(void) {
 	}
 }
 
-void ADC1_Config(void) {
-	ADC_ChannelConfTypeDef sConfig = { 0 };
+/* --------------------------------------------------------- */
 
-	hadc1.Instance = ADC1;
-	hadc1.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
-	hadc1.Init.Resolution = ADC_RESOLUTION12b;
-	hadc1.Init.ScanConvMode = DISABLE;
-	hadc1.Init.ContinuousConvMode = DISABLE;
-	hadc1.Init.DiscontinuousConvMode = DISABLE;
-	hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-	hadc1.Init.NbrOfConversion = 1;
-	hadc1.Init.DMAContinuousRequests = DISABLE;
-	hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 
-	if (HAL_ADC_Init(&hadc1) != HAL_OK) {
+/* -------------- Driver Configuration APIs -------------- */
+
+void INA_Config(void) {
+	I2C_Config();
+
+	hina.config.hi2c          = &hi2c2;
+	hina.config.i2c_addr      = INA_ADDR_GND_GND;
+	hina.config.r_shunt_ohm   = 0.1f;
+	hina.config.max_current_a = 0.5f;
+	hina.config.bus_range     = INA_BRNG_16V;
+	hina.config.pga_gain      = INA_PGA_80MV;
+	hina.config.bus_adc       = INA_BADC_16S;
+	hina.config.shunt_adc     = INA_SADC_16S;
+	hina.config.mode          = INA_MODE_SHUNT_BUS_CONT;
+
+	if (INA_Init(&hina) != HAL_OK) {
 		Error_Handler();
 	}
-
-	sConfig.Channel = ADC_CHANNEL_3;
-	sConfig.Rank = 1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
-
-	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
-		Error_Handler();
-	}
-
 }
 
-/* --------------------------------------------------------- */
+void Motors_Config(void) {
+	L298N_INPins_Config();
+
+	// 10ms time base
+	TIM6_Config();
+
+	// Encoders
+	TIM2_Config();
+	TIM5_Config();
+
+	// PWM
+	TIM3_Config();
+
+	hleft_motor.config.motor_rpm = 90U;
+	hleft_motor.config.htim_pwm = &htim3;
+	hleft_motor.config.pwm_channel = TIM_CHANNEL_1;
+	hleft_motor.config.invert_dir = RMC_INVERT_DIR_DISABLE;
+	hleft_motor.config.htim_enc = &htim2;
+	hleft_motor.config.wheel_circum_mm = 204U;
+	hleft_motor.config.ticks_per_wheel_rev = 2475U;
+	hleft_motor.config.delta_t_ms = 10U;
+	hleft_motor.config.in1_port = GPIOD;
+	hleft_motor.config.in1_pin = GPIO_PIN_0;
+	hleft_motor.config.in2_port = GPIOD;
+	hleft_motor.config.in2_pin = GPIO_PIN_1;
+	hleft_motor.config.kp = 0.0f;
+	hleft_motor.config.ki = 0.0f;
+	hleft_motor.config.kd = 0.0f;
+	if (RMC_Init(&hleft_motor) != HAL_OK) {
+		Error_Handler();
+	}
+
+	hright_motor.config.motor_rpm = 90U;
+	hright_motor.config.htim_pwm = &htim3;
+	hright_motor.config.pwm_channel = TIM_CHANNEL_2;
+	hright_motor.config.invert_dir = RMC_INVERT_DIR_DISABLE;
+	hright_motor.config.htim_enc = &htim5;
+	hright_motor.config.wheel_circum_mm = 204U;
+	hright_motor.config.ticks_per_wheel_rev = 2475U;
+	hright_motor.config.delta_t_ms = 10U;
+	hright_motor.config.in1_port = GPIOD;
+	hright_motor.config.in1_pin = GPIO_PIN_2;
+	hright_motor.config.in2_port = GPIOD;
+	hright_motor.config.in2_pin = GPIO_PIN_3;
+	hright_motor.config.kp = 0.0f;
+	hright_motor.config.ki = 0.0f;
+	hright_motor.config.kd = 0.0f;
+	if (RMC_Init(&hright_motor) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void WS_Config(void) {
+	TIM4_Config();
+	DMA1_Config();
+
+	hws.config.bit_0_duty = 29;
+	hws.config.bit_1_duty = 59;
+	hws.config.brightness = 200;
+	hws.config.color_order = WS_COLOR_ORDER_GRB;
+	hws.config.htim_pwm = &htim4;
+	hws.config.led_count = 19;
+	hws.config.pwm_channel = TIM_CHANNEL_3;
+	hws.config.reset_slots = 50;
+
+	if (WS_Init(&hws) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+/* ------------------------------------------------------- */
