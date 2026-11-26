@@ -116,6 +116,21 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 			+ hws->config.reset_slots;
 
 	hws->request_pending = false;
+
+	hws->is_initialized = true;
+
+	HAL_StatusTypeDef status = WS_ClearRange(hws, 0, hws->config.led_count);
+	if (status != HAL_OK) {
+		hws->is_initialized = false;
+		return status;
+	}
+
+	status = WS_TransmitBlocking(hws);
+	if (status != HAL_OK) {
+		hws->is_initialized = false;
+		return status;
+	}
+
 	hws->is_initialized = true;
 
 	return HAL_OK;
