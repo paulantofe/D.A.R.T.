@@ -100,6 +100,7 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 
 	hws->is_initialized = false;
 	hws->transfer_active = false;
+	hws->request_pending = false;
 
 	if (hws->config.htim_pwm == NULL || hws->config.led_count == 0U
 			|| hws->config.led_count > WS_MAX_LEDS
@@ -213,6 +214,57 @@ HAL_StatusTypeDef WS_RequestTransmit(WS_Handle_t *hws) {
 	hws->request_pending = true;
 
 	return HAL_OK;
+}
+
+HAL_StatusTypeDef WS_Process(WS_Handle_t *hws) {
+	if (hws == NULL || !hws->is_initialized) {
+		return HAL_ERROR;
+	}
+
+	if (hws->transfer_active) {
+		return HAL_BUSY;
+	}
+
+	if (!hws->request_pending) {
+		return HAL_OK;
+	}
+
+	uint32_t primask = __get_PRIMASK();
+	__disable_irq();
+
+	hws->transfer_active = true;
+	hws->request_pending = false;
+
+	__set_PRIMASK(primask);
+
+	WS_EncodePixelData(hws);
+
+	HAL_StatusTypeDef status = HAL_TIM_PWM_Start_DMA(
+		hws->config.htim_pwm,
+		hws->config.pwm_channel,
+		(const uint32_t *)pwm_data,
+		(uint16_t)hws->pwm_data_len
+	);
+
+	if (status != HAL_OK) {
+		hws->transfer_active = false;
+		hws->request_pending = true;
+	}
+
+	return status;
+}
+
+void WS_OnDmaComplete(WS_Handle_t *hws) {
+	if (hws == NULL) {
+		return;
+	}
+
+	(void)HAL_TIM_PWM_Stop_DMA(
+		hws->config.htim_pwm,
+		hws->config.pwm_channel
+	);
+
+	hws->transfer_active = false;
 }
 
 /* ---------------------------------------------------------------- */

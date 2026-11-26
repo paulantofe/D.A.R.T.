@@ -118,7 +118,33 @@ HAL_StatusTypeDef WS_ClearRange(WS_Handle_t *hws, uint16_t start_index, uint16_t
  */
 HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws);
 
+/**
+ * @brief Request a non-blocking pixel-data transmission.
+ * @param[in,out] hws  pointer to an initialized WS2812 handle.
+ * @retval HAL_OK      Transmission request recorded.
+ * @retval HAL_ERROR   NULL pointer or uninitialized handle.
+ * @note  This API is safe to call from an ISR. It does not access HAL
+ *        peripherals or start a DMA transfer. Requests may be coalesced.
+ */
 HAL_StatusTypeDef WS_RequestTransmit(WS_Handle_t *hws);
+
+/**
+ * @brief Process a pending non-blocking transmission request.
+ * @param[in,out] hws  pointer to an initialized WS2812 handle.
+ * @retval HAL_OK      No request was pending or DMA started successfully.
+ * @retval HAL_BUSY    A PWM/DMA transfer is already in progress.
+ * @retval HAL_ERROR   NULL pointer, uninitialized handle, or DMA start failure.
+ * @note  Call this API repeatedly from the main thread. It never waits for
+ *        DMA completion.
+ */
+HAL_StatusTypeDef WS_Process(WS_Handle_t *hws);
+
+/**
+ * @brief Complete and close a non-blocking DMA transmission.
+ * @param[in,out] hws  pointer to the WS2812 handle associated with the DMA transfer.
+ * @note  Call this API from the timer PWM pulse-finished callback.
+ */
+void WS_OnDmaComplete(WS_Handle_t *hws);
 
 /* ------------------------------------------------- */
 
