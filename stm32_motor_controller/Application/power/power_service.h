@@ -68,8 +68,9 @@ HAL_StatusTypeDef P_ReadPower_W(float *power);
 
 /**
  * @brief Check the battery voltage against the configured safety threshold.
- * @details The check is rate-limited internally. When the measured voltage is
- *          at or below the threshold, a system-fault state is requested.
+ * @details The check is rate-limited internally. When the measured voltage
+ *          remains at or below the threshold for the configured debounce
+ *          interval, a system-fault state is requested.
  * @retval HAL_OK       Voltage is acceptable or the check interval has not elapsed.
  * @retval HAL_ERROR    Service is uninitialized or the state request failed.
  * @retval HAL_BUSY     I2C peripheral is currently busy.

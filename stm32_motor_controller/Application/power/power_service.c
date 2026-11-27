@@ -13,17 +13,20 @@
 
 /* ------------------ Static Service Instances ------------------ */
 
-#define P_LI_ION_THRESHOLD_V   6.0f
-#define P_LI_ION_FULL_V        8.4f
-#define P_CHECK_PERIOD_MS      1000U
-#define P_PERCENT_FILTER_ALPHA_UP   0.20f
-#define P_PERCENT_FILTER_ALPHA_DOWN 0.05f
+#define P_LI_ION_THRESHOLD_V          6.0f
+#define P_LI_ION_FULL_V               8.4f
+#define P_CHECK_PERIOD_MS             500U
+#define P_MAX_TIME_UNDER_THRESHOLD_MS 2000U
+#define P_PERCENT_FILTER_ALPHA_UP     0.20f
+#define P_PERCENT_FILTER_ALPHA_DOWN   0.05f
 
 static INA_Handle_t hina;
 static bool is_initialized = false;
 static uint32_t last_battery_check = 0U;
 static bool filter_active = false;
 static float previous_filtered_value = 0.0f;
+static bool under_threshold_active = false;
+static uint32_t time_under_threshold = 0U;
 
 /* ---------------------------------------------------------------- */
 
@@ -52,6 +55,8 @@ HAL_StatusTypeDef P_Init(void) {
 	last_battery_check = 0U;
 	filter_active = false;
 	previous_filtered_value = 0.0f;
+	time_under_threshold = 0U;
+	under_threshold_active = false;
 
 	status = INA_Init(&hina);
 	if (status != HAL_OK) {
@@ -121,7 +126,15 @@ HAL_StatusTypeDef P_CheckBatteryVoltage(void) {
 	}
 
 	if (voltage_reading <= P_LI_ION_THRESHOLD_V) {
-		return SS_RequestState(SS_State_Systemfault);
+		if (!under_threshold_active) {
+			under_threshold_active = true;
+			time_under_threshold = now;
+		} else if (now - time_under_threshold >= P_MAX_TIME_UNDER_THRESHOLD_MS) {
+			return SS_RequestState(SS_State_Systemfault);
+		}
+	} else {
+		under_threshold_active = false;
+		time_under_threshold = 0U;
 	}
 
 	return HAL_OK;
