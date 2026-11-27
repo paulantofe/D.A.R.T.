@@ -4,7 +4,7 @@
  *        controlling and configuring DC motors and encoders.
  */
 
-#include "rmc_motor_driver/rmc_motor_driver.h"
+#include "rmc_motor_driver.h"
 
 /* ------------------ Static Helper Functions ------------------ */
 
