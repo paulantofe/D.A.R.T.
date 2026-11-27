@@ -23,7 +23,6 @@ I2C_HandleTypeDef hi2c2;
 INA_Handle_t hina;
 RMC_Handle_t hleft_motor;
 RMC_Handle_t hright_motor;
-WS_Handle_t hws;
 
 /* service handlers */
 SS_Handle_t hss;
@@ -126,7 +125,7 @@ void I2C_Config(void) {
 	}
 }
 
-void DMA1_Config(void) {
+HAL_StatusTypeDef DMA1_Config(void) {
 	__HAL_RCC_DMA1_CLK_ENABLE();
 
 	HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
@@ -145,12 +144,15 @@ void DMA1_Config(void) {
 
 	if (HAL_DMA_Init(&hdma1) != HAL_OK) {
 		SS_RequestState(&hss, SS_State_Systemfault);
+		return HAL_ERROR;
 	}
 
 	__HAL_LINKDMA(&htim4, hdma[TIM_DMA_ID_CC3], hdma1);
+
+	return HAL_OK;
 }
 
-void TIM4_Config(void) {
+HAL_StatusTypeDef TIM4_Config(void) {
 	TIM_OC_InitTypeDef sConfig = { 0 };
 
 	htim4.Instance = TIM4;
@@ -160,6 +162,7 @@ void TIM4_Config(void) {
 	htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htim4) != HAL_OK) {
 		SS_RequestState(&hss, SS_State_Systemfault);
+		return HAL_ERROR;
 	}
 
 	sConfig.OCMode = TIM_OCMODE_PWM1;
@@ -167,7 +170,10 @@ void TIM4_Config(void) {
 	sConfig.Pulse = 0;
 	if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfig, TIM_CHANNEL_3) != HAL_OK) {
 		SS_RequestState(&hss, SS_State_Systemfault);
+		return HAL_ERROR;
 	}
+
+	return HAL_OK;
 }
 
 void TIM6_Config(void) {
@@ -326,22 +332,5 @@ void Motors_Config(void) {
 	}
 }
 
-void WS_Config(void) {
-	TIM4_Config();
-	DMA1_Config();
-
-	hws.config.bit_0_duty = 29;
-	hws.config.bit_1_duty = 59;
-	hws.config.brightness = 200;
-	hws.config.color_order = WS_COLOR_ORDER_GRB;
-	hws.config.htim_pwm = &htim4;
-	hws.config.led_count = 19;
-	hws.config.pwm_channel = TIM_CHANNEL_3;
-	hws.config.reset_slots = 50;
-
-	if (WS_Init(&hws) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
-	}
-}
 
 /* ------------------------------------------------------- */

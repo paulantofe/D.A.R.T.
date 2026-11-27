@@ -65,6 +65,7 @@ typedef struct {
     bool is_initialized;           /**< true after successful driver initialization */
     volatile bool transfer_active; /**< true while a PWM/DMA transfer is in progress */
     volatile bool request_pending; /**< true when a transmit request is pending */
+    volatile bool bypass_callback; /**< true while callback cleanup is bypassed */
 } WS_Handle_t;
 
 /* ------------------------------------------------------------------ */

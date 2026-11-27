@@ -11,7 +11,6 @@
 #include "stm32f4xx_hal.h"
 #include "ina219_driver.h"
 #include "rmc_motor_driver.h"
-#include "ws2812_driver.h"
 #include "system_state_service.h"
 #include "fault_service.h"
 
@@ -33,7 +32,6 @@ extern I2C_HandleTypeDef hi2c2;
 extern INA_Handle_t hina;
 extern RMC_Handle_t hleft_motor;
 extern RMC_Handle_t hright_motor;
-extern WS_Handle_t hws;
 
 /* service handlers */
 extern SS_Handle_t hss;
@@ -100,7 +98,7 @@ void I2C_Config(void);
  *          CCR register with values which conform the
  *          ws2812 HIGH/LOW/RESET logic.
  */
-void DMA1_Config(void);
+HAL_StatusTypeDef DMA1_Config(void);
 
 /**
  * @brief   Configure the TIM4 Peripheral.
@@ -108,7 +106,7 @@ void DMA1_Config(void);
  *          used to control WS2812 LEDs.
  *          Instance: TIM4 | CH3: PB8
  */
-void TIM4_Config(void);
+HAL_StatusTypeDef TIM4_Config(void);
 
 /**
  * @brief   Configure the TIM6 Peripheral.
@@ -150,11 +148,6 @@ void TIM5_Config(void);
  * @brief   Configure INA219 sensor.
  */
 void INA_Config(void);
-
-/**
- * @brief   Configure the WS2812 LED Strip.
- */
-void WS_Config(void);
 
 /**
  * @brief   Configure the right and left motors.

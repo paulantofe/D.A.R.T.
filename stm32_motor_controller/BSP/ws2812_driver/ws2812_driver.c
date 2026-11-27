@@ -117,6 +117,8 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 
 	hws->request_pending = false;
 
+	hws->bypass_callback = false;
+
 	hws->is_initialized = true;
 
 	HAL_StatusTypeDef status = WS_ClearRange(hws, 0, hws->config.led_count);
@@ -192,6 +194,7 @@ HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
 		return HAL_ERROR;
 	}
 
+	hws->bypass_callback = true;
 	hws->transfer_active = true;
 	WS_EncodePixelData(hws);
 
@@ -214,9 +217,15 @@ HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
 			hws->config.htim_pwm,
 			hws->config.pwm_channel
 		);
+	} else {
+		(void)HAL_TIM_PWM_Stop_DMA(
+			hws->config.htim_pwm,
+			hws->config.pwm_channel
+		);
 	}
 
 	hws->transfer_active = false;
+	hws->bypass_callback = false;
 
 	return status;
 }
@@ -236,16 +245,18 @@ HAL_StatusTypeDef WS_Process(WS_Handle_t *hws) {
 		return HAL_ERROR;
 	}
 
+	uint32_t primask = __get_PRIMASK();
+	__disable_irq();
+
 	if (hws->transfer_active) {
+		__set_PRIMASK(primask);
 		return HAL_BUSY;
 	}
 
 	if (!hws->request_pending) {
+		__set_PRIMASK(primask);
 		return HAL_OK;
 	}
-
-	uint32_t primask = __get_PRIMASK();
-	__disable_irq();
 
 	hws->transfer_active = true;
 	hws->request_pending = false;
@@ -262,6 +273,10 @@ HAL_StatusTypeDef WS_Process(WS_Handle_t *hws) {
 	);
 
 	if (status != HAL_OK) {
+		(void)HAL_TIM_PWM_Stop_DMA(
+			hws->config.htim_pwm,
+			hws->config.pwm_channel
+		);
 		hws->transfer_active = false;
 		hws->request_pending = true;
 	}
@@ -270,7 +285,7 @@ HAL_StatusTypeDef WS_Process(WS_Handle_t *hws) {
 }
 
 void WS_OnDmaComplete(WS_Handle_t *hws) {
-	if (hws == NULL) {
+	if (hws == NULL || hws->bypass_callback) {
 		return;
 	}
 
