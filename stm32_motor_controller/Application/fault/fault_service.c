@@ -1,35 +1,44 @@
 #include "fault_service.h"
-#include "stm32f4xx_hal_hardware_config.h"
 
-HAL_StatusTypeDef F_Init(F_Handle_t *hf) {
-	if (hf == NULL) {
-		return HAL_ERROR;
-	}
+/* ------------------ Static Service Instance ------------------ */
 
-	hf->fault_state = F_State_Normal;
+typedef enum {
+	F_State_Normal = 0,
+	F_State_Failsafe,
+	F_State_Systemfault
+} F_State_t;
+
+typedef struct {
+	F_State_t fault_state;
+} F_Handle_t;
+
+static F_Handle_t fault_service;
+
+/* ------------------------------------------------------------- */
+
+HAL_StatusTypeDef F_Init(void) {
+	fault_service.fault_state = F_State_Normal;
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef F_EnterFailsafe(F_Handle_t *hf) {
-	if (hf == NULL || hf->fault_state == F_State_Systemfault) {
+HAL_StatusTypeDef F_EnterFailsafe(void) {
+	if (fault_service.fault_state == F_State_Systemfault) {
 		return HAL_ERROR;
 	}
 
-	hf->fault_state = F_State_Failsafe;
+	fault_service.fault_state = F_State_Failsafe;
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef F_ExitFailsafe(F_Handle_t *hf) {
-	if (hf == NULL || hf->fault_state == F_State_Systemfault) {
+HAL_StatusTypeDef F_ExitFailsafe(void) {
+	if (fault_service.fault_state == F_State_Systemfault) {
 		return HAL_ERROR;
 	}
 
-	hf->fault_state = F_State_Normal;
+	fault_service.fault_state = F_State_Normal;
 	return HAL_OK;
 }
 
-void F_EnterSystemfault(F_Handle_t *hf) {
-	if (hf != NULL) {
-		hf->fault_state = F_State_Systemfault;
-	}
+void F_EnterSystemfault(void) {
+	fault_service.fault_state = F_State_Systemfault;
 }

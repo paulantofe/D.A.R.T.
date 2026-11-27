@@ -32,7 +32,7 @@ HAL_StatusTypeDef LS_Init(void) {
 	LED_Config();
 
 	if (TIM4_Config() != HAL_OK || DMA1_Config() != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 		return HAL_ERROR;
 	}
 
@@ -46,7 +46,7 @@ HAL_StatusTypeDef LS_Init(void) {
 	hws.config.reset_slots = 50;
 
 	if (WS_Init(&hws) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 		return HAL_ERROR;
 	}
 

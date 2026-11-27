@@ -11,8 +11,6 @@
 #include "stm32f4xx_hal.h"
 #include "ina219_driver.h"
 #include "rmc_motor_driver.h"
-#include "system_state_service.h"
-#include "fault_service.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
 // Note: Any file including this header file will have access to the
@@ -32,10 +30,6 @@ extern I2C_HandleTypeDef hi2c2;
 extern INA_Handle_t hina;
 extern RMC_Handle_t hleft_motor;
 extern RMC_Handle_t hright_motor;
-
-/* service handlers */
-extern SS_Handle_t hss;
-extern F_Handle_t hf;
 
 /* ---------------------------------------------------------- */
 

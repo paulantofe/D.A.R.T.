@@ -25,59 +25,40 @@ typedef enum {
 /* ----------------------------------------------------------- */
 
 
-/* ------------------ Structures Definition ------------------ */
-
-/* Runtime handle for the system-state service */
-typedef struct {
-	SS_State_t system_state;             /**< Currently applied system state. */
-	bool is_initialized;                 /**< True after successful service initialization. */
-	volatile bool request_ss_change;     /**< True when a state request is pending. */
-	volatile SS_State_t requested_state; /**< State requested by the producer. */
-	volatile bool was_in_failsafe;       /**< True until the failsafe state is exited. */
-	volatile bool sysfault_requested;    /**< Latched system-fault request. */
-} SS_Handle_t;
-
-/* ----------------------------------------------------------- */
-
 /* ------------------ Public APIs ------------------ */
 
 /**
  * @brief Initialize the system-state service.
- * @param[in,out] hss Pointer to the service handle.
  * @retval HAL_OK Service initialized in the boot state.
- * @retval HAL_ERROR NULL handle.
  */
-HAL_StatusTypeDef SS_Init(SS_Handle_t *hss);
+HAL_StatusTypeDef SS_Init(void);
 
 /**
  * @brief Request a transition to a new system state.
- * @param[in,out] hss Pointer to an initialized service handle.
  * @param[in] state State to be applied by SS_Process().
  * @retval HAL_OK Request recorded successfully.
  * @retval HAL_ERROR NULL or uninitialized handle, or invalid state.
  * @note This API protects the state request and pending flag as one
  *       critical operation and may be called from interrupt context.
  */
-HAL_StatusTypeDef SS_RequestState(SS_Handle_t *hss, const SS_State_t state);
+HAL_StatusTypeDef SS_RequestState(const SS_State_t state);
 
 /**
  * @brief Read the currently applied system state.
- * @param[in] hss Pointer to an initialized service handle.
  * @param[out] state Destination for the current state.
  * @retval HAL_OK State returned successfully.
- * @retval HAL_ERROR NULL handle, uninitialized handle, or NULL state pointer.
+ * @retval HAL_ERROR NULL state pointer or uninitialized service.
  */
-HAL_StatusTypeDef SS_GetState(SS_Handle_t *hss, SS_State_t *state);
+HAL_StatusTypeDef SS_GetState(SS_State_t *state);
 
 /**
  * @brief Apply one pending state request.
- * @param[in,out] hss Pointer to an initialized service handle.
  * @retval HAL_OK No request was pending or the request was applied.
- * @retval HAL_ERROR NULL or uninitialized handle, or invalid transition.
+ * @retval HAL_ERROR Uninitialized service or invalid transition.
  * @note Call this API from the application super loop. State transitions and
  *       fault-service actions execute outside the request critical section.
  */
-HAL_StatusTypeDef SS_Process(SS_Handle_t *hss);
+HAL_StatusTypeDef SS_Process(void);
 
 /* ------------------------------------------------- */
 

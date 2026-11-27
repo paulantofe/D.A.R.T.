@@ -6,6 +6,7 @@
  */
 
 #include "stm32f4xx_hal_hardware_config.h"
+#include "system_state_service.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
 
@@ -23,10 +24,6 @@ I2C_HandleTypeDef hi2c2;
 INA_Handle_t hina;
 RMC_Handle_t hleft_motor;
 RMC_Handle_t hright_motor;
-
-/* service handlers */
-SS_Handle_t hss;
-F_Handle_t hf;
 
 /* ---------------------------------------------------------- */
 
@@ -52,7 +49,7 @@ void SystemClock_Config(void) {
 	osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 	osc_init.PLL.PLLQ = 7;
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
@@ -61,7 +58,7 @@ void SystemClock_Config(void) {
 	clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
 	clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 	if (HAL_RCC_ClockConfig(&clk_init, FLASH_LATENCY_5) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -105,7 +102,7 @@ void UART_Config(void) {
 	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
 
 	if (HAL_UART_Init(&huart1) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -121,7 +118,7 @@ void I2C_Config(void) {
 	hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
 	if (HAL_I2C_Init(&hi2c2) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -143,7 +140,7 @@ HAL_StatusTypeDef DMA1_Config(void) {
 	hdma1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 
 	if (HAL_DMA_Init(&hdma1) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 		return HAL_ERROR;
 	}
 
@@ -161,7 +158,7 @@ HAL_StatusTypeDef TIM4_Config(void) {
 	htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htim4) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 		return HAL_ERROR;
 	}
 
@@ -169,7 +166,7 @@ HAL_StatusTypeDef TIM4_Config(void) {
 	sConfig.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfig.Pulse = 0;
 	if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfig, TIM_CHANNEL_3) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 		return HAL_ERROR;
 	}
 
@@ -184,7 +181,7 @@ void TIM6_Config(void) {
 	htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
 	if (HAL_TIM_Base_Init(&htim6) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -197,17 +194,17 @@ void TIM3_Config(void) {
 	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htim3) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 
 	sConfig.OCMode = TIM_OCMODE_PWM1;
 	sConfig.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfig.Pulse = 0;
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfig, TIM_CHANNEL_1) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfig, TIM_CHANNEL_2) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -230,7 +227,7 @@ void TIM2_Config(void) {
 	sConfig.IC2Filter = 10;
 
 	if (HAL_TIM_Encoder_Init(&htim2, &sConfig) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -253,7 +250,7 @@ void TIM5_Config(void) {
 	sConfig.IC2Filter = 10;
 
 	if (HAL_TIM_Encoder_Init(&htim5, &sConfig) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -276,7 +273,7 @@ void INA_Config(void) {
 	hina.config.mode          = INA_MODE_SHUNT_BUS_CONT;
 
 	if (INA_Init(&hina) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
@@ -309,7 +306,7 @@ void Motors_Config(void) {
 	hleft_motor.config.ki = 0.0f;
 	hleft_motor.config.kd = 0.0f;
 	if (RMC_Init(&hleft_motor) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 
 	hright_motor.config.motor_rpm = 90U;
@@ -328,7 +325,7 @@ void Motors_Config(void) {
 	hright_motor.config.ki = 0.0f;
 	hright_motor.config.kd = 0.0f;
 	if (RMC_Init(&hright_motor) != HAL_OK) {
-		SS_RequestState(&hss, SS_State_Systemfault);
+		SS_RequestState(SS_State_Systemfault);
 	}
 }
 
