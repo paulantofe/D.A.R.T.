@@ -16,7 +16,7 @@
 static const WS_Color_t headlight_color = { 255U, 250U, 244U };
 static const WS_Color_t boot_color = { 0U, 0U, 255U };
 static const WS_Color_t sysfault_color = { 255U, 0U, 0U };
-static const WS_Color_t failsafe_color = { 255U, 50U, 0U };
+static const WS_Color_t failsafe_color = { 255U, 165U, 0U };
 static const WS_Color_t online_color = { 0U, 255U, 0U };
 
 static WS_Handle_t hws;             /**< Internal WS2812 driver instance. */
