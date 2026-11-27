@@ -1,25 +1,37 @@
 #ifndef FAULT_FAULT_SERVICE_H_
 #define FAULT_FAULT_SERVICE_H_
 
-/* ------------------ General Macros Definitions ------------------ */
+#include "stm32f4xx_hal.h"
+
+/* ------------------ General Definitions ------------------ */
+
+typedef enum {
+	F_State_Normal = 0,
+	F_State_Failsafe,
+	F_State_Systemfault
+} F_State_t;
+
 /* ---------------------------------------------------------------- */
 
 
 /* ------------------ Structures Definition ------------------ */
+
+typedef struct {
+	F_State_t fault_state;
+} F_Handle_t;
+
 /* ----------------------------------------------------------- */
 
 
 /* ------------------ Public APIs ------------------ */
 
-/* just a test prototype for system_state_service */
-void F_EnterFailsafe(void);
+HAL_StatusTypeDef F_Init(F_Handle_t *hf);
 
-/* just a test prototype for system_state_service */
-void F_ExitFailsafe(void);
+HAL_StatusTypeDef F_EnterFailsafe(F_Handle_t *hf);
 
-/* just a test prototype for system_state_service */
-void F_EnterSystemFault(void);
+HAL_StatusTypeDef F_ExitFailsafe(F_Handle_t *hf);
 
+void F_EnterSystemfault(F_Handle_t *hf);
 
 /* ------------------------------------------------- */
 

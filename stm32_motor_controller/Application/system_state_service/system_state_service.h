@@ -15,10 +15,10 @@
 
 /* Application-level states handled by the system-state service */
 typedef enum {
-	SS_State_Boot = 0, /**< System startup and initialization state. */
-	SS_State_Idle, /**< System initialized and not moving. */
-	SS_State_Moving, /**< Rover motion is enabled. */
-	SS_State_Failsafe, /**< Safety response to a recoverable fault condition. */
+	SS_State_Boot = 0,   /**< System startup and initialization state. */
+	SS_State_Idle,       /**< System initialized and not moving. */
+	SS_State_Moving,     /**< Rover motion is enabled. */
+	SS_State_Failsafe,   /**< Safety response to a recoverable fault condition. */
 	SS_State_Systemfault /**< Fatal or latched system fault state. */
 } SS_State_t;
 
@@ -34,6 +34,7 @@ typedef struct {
 	volatile bool request_ss_change;     /**< True when a state request is pending. */
 	volatile SS_State_t requested_state; /**< State requested by the producer. */
 	volatile bool was_in_failsafe;       /**< True until the failsafe state is exited. */
+	volatile bool sysfault_requested;    /**< Latched system-fault request. */
 } SS_Handle_t;
 
 /* ----------------------------------------------------------- */

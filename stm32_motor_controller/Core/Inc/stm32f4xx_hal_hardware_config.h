@@ -12,6 +12,8 @@
 #include "ina219_driver.h"
 #include "rmc_motor_driver.h"
 #include "ws2812_driver.h"
+#include "system_state_service.h"
+#include "fault_service.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
 // Note: Any file including this header file will have access to the
@@ -32,6 +34,10 @@ extern INA_Handle_t hina;
 extern RMC_Handle_t hleft_motor;
 extern RMC_Handle_t hright_motor;
 extern WS_Handle_t hws;
+
+/* service handlers */
+extern SS_Handle_t hss;
+extern F_Handle_t hf;
 
 /* ---------------------------------------------------------- */
 

@@ -7,6 +7,7 @@
 
 #include "system_state_service.h"
 #include "fault_service.h"
+#include "stm32f4xx_hal_hardware_config.h"
 
 /* ------------------ Static Helper Functions ------------------ */
 
@@ -41,6 +42,7 @@ HAL_StatusTypeDef SS_Init(SS_Handle_t *hss) {
 
 	hss->system_state = SS_State_Boot;
 	hss->requested_state = SS_State_Boot;
+	hss->sysfault_requested = false;
 	hss->request_ss_change = false;
 	hss->was_in_failsafe = false;
 	hss->is_initialized = true;
@@ -56,8 +58,18 @@ HAL_StatusTypeDef SS_RequestState(SS_Handle_t *hss, const SS_State_t state) {
 	uint32_t primask = __get_PRIMASK();
 	__disable_irq();
 
+	if (state != SS_State_Systemfault
+			&& (hss->sysfault_requested
+					|| hss->system_state == SS_State_Systemfault)) {
+		__set_PRIMASK(primask);
+		return HAL_ERROR;
+	}
+
 	hss->requested_state = state;
 	hss->request_ss_change = true;
+	if (state == SS_State_Systemfault) {
+		hss->sysfault_requested = true;
+	}
 
 	__set_PRIMASK(primask);
 
@@ -82,15 +94,30 @@ HAL_StatusTypeDef SS_Process(SS_Handle_t *hss) {
 	uint32_t primask = __get_PRIMASK();
 	__disable_irq();
 
-	if (!hss->request_ss_change) {
+	bool fault_requested = hss->sysfault_requested;
+	bool request_pending = hss->request_ss_change;
+	SS_State_t requested_state = hss->requested_state;
+	hss->request_ss_change = false;
+
+	if (!fault_requested && !request_pending) {
 		__set_PRIMASK(primask);
 		return HAL_OK;
 	}
 
-	SS_State_t requested_state = hss->requested_state;
-	hss->request_ss_change = false;
-
 	__set_PRIMASK(primask);
+
+	if (fault_requested || requested_state == SS_State_Systemfault) {
+		if (hss->system_state != SS_State_Systemfault) {
+			F_EnterSystemfault(&hf);
+			hss->system_state = SS_State_Systemfault;
+			hss->was_in_failsafe = false;
+		}
+		return HAL_OK;
+	}
+
+	if (hss->system_state == SS_State_Systemfault) {
+		return HAL_ERROR;
+	}
 
 	switch (requested_state) {
 	case SS_State_Boot:
@@ -98,12 +125,10 @@ HAL_StatusTypeDef SS_Process(SS_Handle_t *hss) {
 		break;
 
 	case SS_State_Failsafe:
-		if (hss->system_state == SS_State_Systemfault) {
-			return HAL_ERROR;
-		}
-
 		if (hss->system_state != SS_State_Failsafe) {
-			F_EnterFailsafe();
+			if (F_EnterFailsafe(&hf) != HAL_OK) {
+				return HAL_ERROR;
+			}
 		}
 
 		hss->system_state = SS_State_Failsafe;
@@ -111,21 +136,18 @@ HAL_StatusTypeDef SS_Process(SS_Handle_t *hss) {
 		break;
 
 	case SS_State_Idle:
-		if (hss->system_state == SS_State_Systemfault) {
-			return HAL_ERROR;
-		}
-
 		if (hss->was_in_failsafe) {
+			if (F_ExitFailsafe(&hf) != HAL_OK) {
+				return HAL_ERROR;
+			}
 			hss->was_in_failsafe = false;
-			F_ExitFailsafe();
 		}
 
 		hss->system_state = SS_State_Idle;
 		break;
 
 	case SS_State_Moving:
-		if (hss->system_state == SS_State_Systemfault
-				|| hss->was_in_failsafe) {
+		if (hss->was_in_failsafe) {
 			return HAL_ERROR;
 		}
 
@@ -133,11 +155,7 @@ HAL_StatusTypeDef SS_Process(SS_Handle_t *hss) {
 		break;
 
 	case SS_State_Systemfault:
-		if (hss->system_state != SS_State_Systemfault) {
-			hss->system_state = SS_State_Systemfault;
-			F_EnterSystemFault();
-		}
-		break;
+		return HAL_ERROR;
 
 	default:
 		return HAL_ERROR;
