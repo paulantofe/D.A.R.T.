@@ -13,22 +13,23 @@
 
 /* ------------------ Static Service Instances ------------------ */
 
-#define P_LI_ION_THRESHOLD_V          6.0f
-#define P_LI_ION_FULL_V               8.4f
-#define P_CHECK_PERIOD_MS             500U
-#define P_MAX_TIME_UNDER_THRESHOLD_MS 2000U
-#define P_PERCENT_FILTER_ALPHA_UP     0.20f
-#define P_PERCENT_FILTER_ALPHA_DOWN   0.05f
+#define P_LI_ION_THRESHOLD_V          6.0f       /**< Battery minimum voltage threshold */
+#define P_LI_ION_FULL_V               8.4f       /**< Battery voltage when fully charged */
+#define P_CHECK_PERIOD_MS             500U       /**< Period of voltage sampling */
+#define P_MAX_TIME_UNDER_THRESHOLD_MS 2000U      /**< Maximum allowed time for voltage to be under threshold */
+#define P_PERCENT_FILTER_ALPHA_UP     0.20f      /**< EMA alpha for rising voltage */
+#define P_PERCENT_FILTER_ALPHA_DOWN   0.05f      /**< EMA alpha for falling voltage */
 
-static INA_Handle_t hina;
-static bool is_initialized = false;
-static uint32_t last_battery_check = 0U;
-static bool filter_active = false;
-static float previous_filtered_value = 0.0f;
-static bool under_threshold_active = false;
-static uint32_t time_under_threshold = 0U;
+static INA_Handle_t hina;                        /**< Internal INA219 driver instance */
+static bool is_initialized = false;              /**< True after successful initialization */
+static uint32_t last_battery_check = 0U;         /**< Time stamp of last voltage sample*/
+static bool filter_active = false;               /**< True after filter is activated */
+static float previous_filtered_value = 0.0f;     /**< Last filtered voltage */
+static bool under_threshold_active = false;      /**< True when voltage sample is under threshold */
+static uint32_t time_under_threshold = 0U;       /**< Time with voltage under threshold */
 
 /* ---------------------------------------------------------------- */
+
 
 /* ------------------ Public APIs Implementation ------------------ */
 
