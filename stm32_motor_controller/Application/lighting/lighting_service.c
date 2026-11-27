@@ -30,6 +30,11 @@ static bool is_initialized = false; /**< True after successful initialization. *
 HAL_StatusTypeDef LS_Init(void) {
 	is_initialized = false;
 	LED_Config();
+	HAL_GPIO_WritePin(
+		GPIOD,
+		GREEN_LED | ORANGE_LED | RED_LED | BLUE_LED,
+		GPIO_PIN_RESET
+	);
 
 	if (TIM4_Config() != HAL_OK || DMA1_Config() != HAL_OK) {
 		SS_RequestState(SS_State_Systemfault);
@@ -51,11 +56,11 @@ HAL_StatusTypeDef LS_Init(void) {
 	}
 
 	is_initialized = true;
-	HAL_StatusTypeDef status = LS_SetStateColor(SS_State_Boot);
 
-	if (status != HAL_OK) {
+	if (WS_TransmitBlocking(&hws) != HAL_OK) {
 		is_initialized = false;
-		return status;
+		SS_RequestState(SS_State_Systemfault);
+		return HAL_ERROR;
 	}
 
 	return HAL_OK;
@@ -96,9 +101,9 @@ HAL_StatusTypeDef LS_SetStateColor(SS_State_t state) {
 
 	switch (state) {
 	case SS_State_Systemfault: {
-		HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(
+		GPIOD,
+		GREEN_LED | ORANGE_LED | BLUE_LED, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, RED_LED, GPIO_PIN_SET);
 
 		HAL_StatusTypeDef status = WS_FillRange(&hws, LS_STATUS_LED_START,
@@ -112,9 +117,9 @@ HAL_StatusTypeDef LS_SetStateColor(SS_State_t state) {
 	}
 
 	case SS_State_Boot: {
-		HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, RED_LED, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(
+		GPIOD,
+		GREEN_LED | ORANGE_LED | RED_LED, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_SET);
 
 		HAL_StatusTypeDef status = WS_FillRange(&hws, LS_STATUS_LED_START,
@@ -128,9 +133,9 @@ HAL_StatusTypeDef LS_SetStateColor(SS_State_t state) {
 	}
 
 	case SS_State_Failsafe: {
-		HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, RED_LED, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(
+		GPIOD,
+		GREEN_LED | RED_LED | BLUE_LED, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_SET);
 
 		HAL_StatusTypeDef status = WS_FillRange(&hws, LS_STATUS_LED_START,
@@ -145,9 +150,9 @@ HAL_StatusTypeDef LS_SetStateColor(SS_State_t state) {
 
 	case SS_State_Idle:
 	case SS_State_Moving: {
-		HAL_GPIO_WritePin(GPIOD, ORANGE_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, BLUE_LED, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, RED_LED, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(
+		GPIOD,
+		ORANGE_LED | RED_LED | BLUE_LED, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GREEN_LED, GPIO_PIN_SET);
 
 		HAL_StatusTypeDef status = WS_FillRange(&hws, LS_STATUS_LED_START,
