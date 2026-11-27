@@ -6,6 +6,8 @@
  */
 
 #include "ws2812_driver.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_hardware_config.h"
 
 /* ------------------ Static Helper Functions, Variables and Macros ------------------ */
 
@@ -13,10 +15,10 @@
 #define WS_MAX_RESET_SLOTS     64U
 #define WS_MAX_PIXEL_DATA_LEN  (WS_MAX_LEDS * WS_BYTES_PER_LED)
 #define WS_MAX_PWM_DATA_LEN    ((WS_MAX_LEDS * WS_BITS_PER_LED) + WS_MAX_RESET_SLOTS)
+#define WS_TRANSMIT_TIMEOUT_MS 100U
 
 static WS_Color_t pixel_data[WS_MAX_LEDS];     /**< Internal LED color buffer */
 static uint16_t pwm_data[WS_MAX_PWM_DATA_LEN]; /**< Internal timer/DMA buffer */
-
 static DMA_HandleTypeDef *WS_GetDmaHandle(const WS_Config_t *config) {
 	if (config == NULL || config->htim_pwm == NULL) {
 		return NULL;
@@ -121,16 +123,9 @@ HAL_StatusTypeDef WS_Init(WS_Handle_t *hws) {
 
 	hws->is_initialized = true;
 
-	HAL_StatusTypeDef status = WS_ClearRange(hws, 0, hws->config.led_count);
-	if (status != HAL_OK) {
+	if (WS_ClearRange(hws, 0, hws->config.led_count) != HAL_OK) {
 		hws->is_initialized = false;
-		return status;
-	}
-
-	status = WS_TransmitBlocking(hws);
-	if (status != HAL_OK) {
-		hws->is_initialized = false;
-		return status;
+		return HAL_ERROR;
 	}
 
 	hws->is_initialized = true;
@@ -197,9 +192,12 @@ HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
 	hws->bypass_callback = true;
 	hws->transfer_active = true;
 	WS_EncodePixelData(hws);
+	__HAL_TIM_SET_COUNTER(hws->config.htim_pwm, 0U);
 
-	HAL_StatusTypeDef status =
-		HAL_TIM_PWM_Start_DMA(
+	uint32_t primask = __get_PRIMASK();
+	__disable_irq();
+
+	HAL_StatusTypeDef status = HAL_TIM_PWM_Start_DMA(
 			hws->config.htim_pwm,
 			hws->config.pwm_channel,
 			(const uint32_t *)pwm_data,
@@ -207,22 +205,26 @@ HAL_StatusTypeDef WS_TransmitBlocking(WS_Handle_t *hws) {
 		);
 
 	if (status == HAL_OK) {
+		__HAL_DMA_DISABLE_IT(
+			hdma,
+			DMA_IT_TC | DMA_IT_HT | DMA_IT_TE
+		);
+	}
+
+	__set_PRIMASK(primask);
+
+	if (status == HAL_OK) {
 		status = HAL_DMA_PollForTransfer(
 			hdma,
 			HAL_DMA_FULL_TRANSFER,
-			HAL_MAX_DELAY
-		);
-
-		(void)HAL_TIM_PWM_Stop_DMA(
-			hws->config.htim_pwm,
-			hws->config.pwm_channel
-		);
-	} else {
-		(void)HAL_TIM_PWM_Stop_DMA(
-			hws->config.htim_pwm,
-			hws->config.pwm_channel
+			WS_TRANSMIT_TIMEOUT_MS
 		);
 	}
+
+	(void)HAL_TIM_PWM_Stop_DMA(
+		hws->config.htim_pwm,
+		hws->config.pwm_channel
+	);
 
 	hws->transfer_active = false;
 	hws->bypass_callback = false;
@@ -264,12 +266,13 @@ HAL_StatusTypeDef WS_Process(WS_Handle_t *hws) {
 	__set_PRIMASK(primask);
 
 	WS_EncodePixelData(hws);
+	__HAL_TIM_SET_COUNTER(hws->config.htim_pwm, 0U);
 
 	HAL_StatusTypeDef status = HAL_TIM_PWM_Start_DMA(
-		hws->config.htim_pwm,
-		hws->config.pwm_channel,
-		(const uint32_t *)pwm_data,
-		(uint16_t)hws->pwm_data_len
+			hws->config.htim_pwm,
+			hws->config.pwm_channel,
+			(const uint32_t *)pwm_data,
+			(uint16_t)hws->pwm_data_len
 	);
 
 	if (status != HAL_OK) {
