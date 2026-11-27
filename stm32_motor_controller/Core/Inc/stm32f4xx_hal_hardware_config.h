@@ -9,7 +9,6 @@
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
-#include "ina219_driver.h"
 #include "rmc_motor_driver.h"
 
 /* -------------- Peripheral Handle Structures -------------- */
@@ -27,7 +26,6 @@ extern DMA_HandleTypeDef hdma1;
 extern I2C_HandleTypeDef hi2c2;
 
 /* driver handles */
-extern INA_Handle_t hina;
 extern RMC_Handle_t hleft_motor;
 extern RMC_Handle_t hright_motor;
 
@@ -84,7 +82,7 @@ void UART_Config(void);
  *          INA219 sensor to read voltage and current.
  *          Instance: I2C2 | SDA: PB11 | SCL: PB10
  */
-void I2C_Config(void);
+HAL_StatusTypeDef I2C_Config(void);
 
 /**
  * @brief   Configure the DMA1 Peripheral.
@@ -138,10 +136,6 @@ void TIM5_Config(void);
 
 /* -------------- Driver Configuration APIs -------------- */
 
-/**
- * @brief   Configure INA219 sensor.
- */
-void INA_Config(void);
 
 /**
  * @brief   Configure the right and left motors.
