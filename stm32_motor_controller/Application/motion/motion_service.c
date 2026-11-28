@@ -8,6 +8,7 @@
 #include "motion_service.h"
 #include "system_state_service.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "board_peripherals.h"
 #include "rmc_motor_driver.h"
 #include <stdbool.h>
 

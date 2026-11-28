@@ -1,5 +1,4 @@
 #include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_hardware_config.h"
 #include "lighting_service.h"
 #include "motion_service.h"
 

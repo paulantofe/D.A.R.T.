@@ -7,7 +7,7 @@
 
 #include "ws2812_driver.h"
 #include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_hardware_config.h"
+#include "board_peripherals.h"
 
 /* ------------------ Static Helper Functions, Variables and Macros ------------------ */
 

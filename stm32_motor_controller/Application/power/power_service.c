@@ -7,6 +7,7 @@
 
 #include "power_service.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "board_peripherals.h"
 #include "ina219_driver.h"
 #include "system_state_service.h"
 #include <stdbool.h>

@@ -8,6 +8,7 @@
 #include "lighting_service.h"
 #include "ws2812_driver.h"
 #include "stm32f4xx_hal_hardware_config.h"
+#include "board_peripherals.h"
 #include <stdbool.h>
 
 /* ------------------ Static Service Instances ------------------ */

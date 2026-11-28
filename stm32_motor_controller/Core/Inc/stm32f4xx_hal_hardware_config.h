@@ -9,23 +9,6 @@
 #define INC_STM32F4XX_HAL_HARDWARE_CONFIG_H_
 
 #include "stm32f4xx_hal.h"
-#include "rmc_motor_driver.h"
-
-/* -------------- Peripheral Handle Structures -------------- */
-// Note: Any file including this header file will have access to the
-//       handle structures.
-
-/* board peripheral handles */
-extern UART_HandleTypeDef huart1;
-extern TIM_HandleTypeDef htim4;
-extern TIM_HandleTypeDef htim6;
-extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim5;
-extern DMA_HandleTypeDef hdma1;
-extern I2C_HandleTypeDef hi2c2;
-
-/* ---------------------------------------------------------- */
 
 
 /* -------------- Pin Definition Macros -------------- */
