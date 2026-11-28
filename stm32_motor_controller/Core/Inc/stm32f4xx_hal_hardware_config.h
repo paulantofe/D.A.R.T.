@@ -25,10 +25,6 @@ extern TIM_HandleTypeDef htim5;
 extern DMA_HandleTypeDef hdma1;
 extern I2C_HandleTypeDef hi2c2;
 
-/* driver handles */
-extern RMC_Handle_t hleft_motor;
-extern RMC_Handle_t hright_motor;
-
 /* ---------------------------------------------------------- */
 
 
@@ -67,7 +63,7 @@ void LED_Config(void);
  * @brief   Configure the GPIO pins for L298N's IN pins.
  * @details Instance: GPIOD | PD0 (IN1) | PD1 (IN2) | PD2 (IN3) | PD3 (IN4)
  */
-void L298N_INPins_Config(void);
+HAL_StatusTypeDef L298N_INPins_Config(void);
 
 /**
  * @brief   Configure the USART1 Peripheral.
@@ -105,7 +101,7 @@ HAL_StatusTypeDef TIM4_Config(void);
  * @details Configure a 10ms (100Hz) time base intended for the PID control loop.
  *          Instance: TIM6.
  */
-void TIM6_Config(void);
+HAL_StatusTypeDef TIM6_Config(void);
 
 /**
  * @brief   Configure the TIM3 Peripheral.
@@ -113,7 +109,7 @@ void TIM6_Config(void);
  *          Channel 1 (Left Motor) and Channel 2 (Right Motor).
  *          Instance: TIM3 | CH1: PA6 | CH2: PA7
  */
-void TIM3_Config(void);
+HAL_StatusTypeDef TIM3_Config(void);
 
 /**
  * @brief   Configure the TIM2 Peripheral.
@@ -121,7 +117,7 @@ void TIM3_Config(void);
  *          for the Left Motor position and speed feedback.
  *          Instance: TIM2 | CH1: PA15 | CH2: PB3
  */
-void TIM2_Config(void);
+HAL_StatusTypeDef TIM2_Config(void);
 
 /**
  * @brief   Configure the TIM5 Peripheral.
@@ -129,19 +125,8 @@ void TIM2_Config(void);
  *          for the Right Motor position and speed feedback.
  *          Instance: TIM5 | CH1: PA0 | CH2: PA1
  */
-void TIM5_Config(void);
+HAL_StatusTypeDef TIM5_Config(void);
 
 /* --------------------------------------------------------- */
-
-
-/* -------------- Driver Configuration APIs -------------- */
-
-
-/**
- * @brief   Configure the right and left motors.
- */
-void Motors_Config(void);
-
-/* ------------------------------------------------------- */
 
 #endif /* INC_STM32F4XX_HAL_HARDWARE_CONFIG_H */
